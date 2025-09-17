@@ -5,7 +5,7 @@ import CadBanner from "../../components/CadastroBanners/CadastroBanner";
 import ListaBanner from "../../components/ListaBanner/ListaBanner";
 import CadastroCupom from "../../components/CadastroCupom/CadastroCupom";
 import ListaCupom from "../../components/ListaCupom/ListaCupom";  
-import "./Admin.css";
+import "./admin.css";
 
 function Admin({ usuario, handleLogout }) {
 
