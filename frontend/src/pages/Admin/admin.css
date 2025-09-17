@@ -1,0 +1,65 @@
+/******** variaveis da pagina principal *********/
+  :root {
+    /******** cores do body *********/
+    --cor-preto: rgb(0 0 0);
+    --cor-verde_cana: rgb(99 248 0);
+    --cor-cinza: rgb(167 167 167);
+    --cor-branca: rgb(255 241 241);
+    --cor-cinza-escuro: rgb(83 83 83);
+
+    /******** fonte do header *********/
+    --fonte-principal: "Abel", sans-serif;
+    --fonte-secundaria: "League Spartan", sans-serif;
+  }
+* {
+  margin: 0;
+  padding: 0;
+  font-family: var(--fonte-principal);
+}
+
+/******** estilo da barra de rolagem *********/
+  ::-webkit-scrollbar-track {
+    background-color: #464646;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #000000;
+  }
+.admin{
+  min-height:100vh;
+  min-width: 100vw;
+  display: grid;
+  grid-template-areas: "h h"
+                       "atualizaValor atualizaValor"
+                       "bannerCadastro bannerCadastrado" 
+                       "cupomCadastro cupomCadastrado"               
+  ;
+  grid-template-rows: 5rem 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  background-color: var(--cor-preto);
+
+}
+ 
+@media (max-width: 768px){
+.admin{
+  min-height:100vh;
+  min-width: 100vw;
+  display: grid;
+  grid-template-areas: "h"
+                       "atualizaValor"
+                       "bannerCadastro"
+                       "bannerCadastrado" 
+                       "cupomCadastro"
+                       "cupomCadastrado"               
+  ;
+  grid-template-rows: 5rem 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr;
+  background-color: var(--cor-preto);
+
+}
+
+}

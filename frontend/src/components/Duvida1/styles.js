@@ -1,0 +1,38 @@
+import styled from "styled-components";
+
+export const Duvida1Container = styled.div`
+  height: 13rem;
+  width: 17rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  gap: 1rem;
+  text-align: start;
+  border-radius: 10px;
+  background: linear-gradient(135deg,  #333 0%, #111 100%);
+`;
+export const Duvida1H3 = styled.h3`
+  color: var(--cor-branca);
+  font-family: var(--fonte-secundaria);
+  font-weight: 400;
+  font-style: normal;
+  font-size: medium;
+  margin-left: 20px;
+`;
+export const Duvida1H4 = styled.h4`
+  color: var(--cor-cinza);
+  font-family: var(--fonte-principal);
+  font-weight: 400;
+  font-style: normal;
+  font-size: small;
+  margin-left: 20px;
+`;
+export const NumeroPergunta1 = styled.h2`
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: var(--cor-verde_cana);
+  font-family: var(--fonte-secundaria);
+`;

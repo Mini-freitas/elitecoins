@@ -1,0 +1,91 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+/******** variaveis da pagina principal *********/
+  :root {
+    /******** cores do body *********/
+    --cor-preto: rgb(0, 0, 0);
+    --cor-verde_cana: rgb(99, 248, 0);
+    --cor-cinza: rgb(167, 167, 167);
+    --cor-branca: rgb(255, 241, 241);
+    --cor-cinza-escuro: rgb(83, 83, 83);
+
+    /******** fonte do header *********/
+    --fonte-principal: "Abel", sans-serif;
+    --fonte-secundaria: "League Spartan", sans-serif;
+  }
+
+  .cadastro{
+    background-color: var(--cor-preto);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+  }
+  .imgcadastro{
+    width: 4rem;
+    height: 4rem;
+  }
+.h2cadastro{
+  color: var(--cor-branca);
+  font-family: var(--fonte-secundaria);
+  font-size: 1.5rem;
+  text-align: center;
+}
+  .buttoncadastro{
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--cor-verde_cana);
+    color:var(--cor-preto);
+    font-weight: bold;
+    cursor: pointer;
+    font-family: var(--fonte-secundaria);
+}
+.formcadastro{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 300px;
+    padding: 2rem;
+    border: 1px solid rgb(255, 255, 255);
+    border-radius: 5px;
+
+    .inputcadastro{
+        outline: none;
+        height: 2rem;
+        padding-left: 1rem;
+    }
+}
+.regras-senha {
+  list-style: none;
+  text-decoration: none;
+  padding: 0;
+  margin: 10px 0;
+  font-size: 14px;
+  font-family: var(--fonte-principal);
+}
+
+.regras-senha li {
+  margin: 2px 0;
+    font-family: var(--fonte-principal);
+}
+
+.regras-senha .ok {
+  color: green;
+}
+
+.regras-senha .erro {
+  color: red;
+}
+
+.inputcadastro.senha-fraca {
+  border: 2px solid red;
+}
+
+.inputcadastro.senha-forte {
+  border: 2px solid green;
+}

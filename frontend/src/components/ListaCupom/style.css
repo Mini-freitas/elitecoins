@@ -1,0 +1,65 @@
+.containerListaCupom{
+    grid-area: cupomCadastrado;
+    display:flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+.h1admin{
+    font-size: medium;
+    color:white
+}
+
+.listaCupons{
+  width: 70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid white;
+  border-radius: 2px;
+  margin-bottom: 2rem;
+  padding: 2rem;
+}
+.alinhaboxcupons1{
+  height: 50%;
+  width:100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+.alinhaboxcupons2{
+  max-height: 8.5rem;
+  width:100%;
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  overflow-y: auto; 
+}
+.bi-card-checklist{
+  width: 1.5rem;
+}
+.paragravosCupons{
+  width: 80%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cupomItem{
+  position: relative;
+  padding: .5rem 1rem;
+  text-align: start;
+  border-bottom: 1px solid white;
+  color:white;
+}
+.lixeiracupom{
+  position: absolute;
+  right: 4rem;
+  bottom:.6rem;
+}
+.lixeiracupom:hover{
+color: red;
+}

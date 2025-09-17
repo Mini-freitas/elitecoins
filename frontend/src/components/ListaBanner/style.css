@@ -1,0 +1,73 @@
+.containerListaBanner{
+    grid-area: bannerCadastrado;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap:.5rem;
+}
+
+.listaBanner{
+    height: 10rem;
+    width: 21.5rem;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    border: 1px solid white;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    gap: 10px;
+}
+.listaBanner::-webkit-scrollbar-track {
+    background-color: #464646;
+  }
+
+  .listaBanner::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .listaBanner::-webkit-scrollbar-thumb {
+    background: #000000;
+  }
+
+  .bannerItem {
+  height: 100%;
+  width: auto;
+  position: relative;
+  display: inline-block;
+  margin: 0 10px;
+}
+
+.deleteButton {
+  position: absolute;
+  top: 10px;
+  right: 5px;
+  background-color:var(--cor-preto);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: auto;
+  height: auto;
+  cursor: pointer;
+  padding: .5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  svg{
+    height: 15px;
+    width: 15px;
+    color:var(--cor-branca);
+  }
+}
+.deleteButton:hover{
+background-color: red;
+
+}
+.imgcadastradas{
+    height: 100%;
+    width: 20rem;
+    flex-shrink: 0;
+}

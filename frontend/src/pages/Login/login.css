@@ -1,0 +1,80 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+/******** variaveis da pagina principal *********/
+  :root {
+    /******** cores do body *********/
+    --cor-preto: rgb(0, 0, 0);
+    --cor-verde_cana: rgb(99, 248, 0);
+    --cor-cinza: rgb(167, 167, 167);
+    --cor-branca: rgb(255, 241, 241);
+    --cor-cinza-escuro: rgb(83, 83, 83);
+
+    /******** fonte do header *********/
+    --fonte-principal: "Abel", sans-serif;
+    --fonte-secundaria: "League Spartan", sans-serif;
+  }
+.login{
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2rem;
+    align-items: center;
+    background-color: var(--cor-preto);
+
+}
+.imglogin{
+    width: 4rem;
+    height: 4rem;
+}
+.h2login{
+    color: var(--cor-branca);
+    font-family: var(--fonte-secundaria);
+    font-size: 1.5rem;
+    text-align: center;
+}
+.formlogin{
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 300px;
+    padding: 2rem;
+    border: 1px solid rgb(255, 255, 255);
+    border-radius: 5px;
+
+    .inputlogin{
+        outline: none;
+        height: 2rem;
+        padding-left: 1rem;
+    }
+}
+.buttonlogin{
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--cor-verde_cana);
+    color:var(--cor-preto);
+    font-weight: bold;
+    cursor: pointer;
+    font-family: var(--fonte-secundaria);
+}
+.loginp{
+    color: var(--cor-branca);
+    font-family: var(--fonte-secundaria);
+    text-align: center;
+
+    .link{
+        text-decoration: none;
+        color: var(--cor-verde_cana);
+        font-family: var(--fonte-secundaria);
+    }
+
+
+}
+.erro{
+    font-family: var(--fonte-secundaria);
+    color: white;
+}

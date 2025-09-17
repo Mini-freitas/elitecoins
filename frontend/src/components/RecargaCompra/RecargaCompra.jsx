@@ -1,0 +1,80 @@
+import React, { useEffect, useState } from "react";
+import { RecargaContainer, Alinhatelaid, RecargaContainerH1,RecargaContainerH2, ContainerCartasRecarga, Carta1, Carta2, Carta3 } from './styles';
+import axios from "axios";
+
+const Recarga = ({ setCartaSelecionada }) => {
+
+// Estado para armazenar os valores das moedas
+  const [valores, setValores] = useState({ play: 0, xbox: 0, pc: 0 });
+
+  useEffect(() => {
+  const fetchValores = async () => {
+    try {
+      const res = await axios.get("http://localhost:3000/moedas");
+      // res.data já vai ter { play, xbox, pc }
+      setValores({
+        play: res.data.play || 0,
+        xbox: res.data.xbox || 0,
+        pc: res.data.pc || 0
+      });
+    } catch (err) {
+      console.error("Erro ao buscar valores das moedas:", err);
+    }
+  };
+
+  fetchValores();
+}, []);
+
+const handleCartaClick = (carta) => {
+    setCartaSelecionada(carta);
+
+    // Rola até a calculadora
+    document.getElementById("titulo_calculadora")?.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  };
+
+    return (
+        <RecargaContainer>
+            <RecargaContainerH1>
+                SELECIONE A <b>CARTA</b> COM A OPÇÃO DE RECARGA DESEJADA
+            </RecargaContainerH1>
+
+            <RecargaContainerH2>
+                Selecione a carta que deseja comprar, caso selecione e deseje mudar basta clicar novamente em outra carta e a <br />
+                seleção antiga será deletada.
+            </RecargaContainerH2>
+
+            <ContainerCartasRecarga>
+                <Alinhatelaid id="titulo_recarga"></Alinhatelaid>
+                <Carta1 data-carta="carta1" onClick={() => handleCartaClick("xbox")}>
+                    <div style={{ position: "absolute", bottom: "4rem", left: "2.9rem",fontSize:"15px", color: "#fff" }}>
+                    {valores.xbox},00
+                    </div>
+                    <div style={{ position: "absolute", bottom: "4rem", right: "2.9rem",fontSize:"15px", color: "#fff" }}>
+                    1000k
+                    </div>
+                </Carta1>
+                <Carta2 data-carta="carta2"  onClick={() => handleCartaClick("play")}>
+                    <div style={{ position: "absolute", bottom: "4rem", left: "2.9rem",fontSize:"15px", color: "#fff" }}>
+                    {valores.play},00
+                    </div>
+                    <div style={{ position: "absolute", bottom: "4rem", right: "2.9rem",fontSize:"15px", color: "#fff" }}>
+                    1000k
+                    </div>
+                </Carta2>
+                <Carta3 data-carta="carta3" onClick={() => handleCartaClick("pc")}>
+                    <div style={{ position: "absolute", bottom: "4rem", left: "2.9rem",fontSize:"15px", color: "#fff" }}>
+                    {valores.pc},00
+                    </div>
+                    <div style={{ position: "absolute", bottom: "4rem", right: "2.9rem",fontSize:"15px", color: "#fff" }}>
+                    1000k
+                    </div>
+                </Carta3>
+            </ContainerCartasRecarga >
+        </RecargaContainer>
+    );
+};
+
+export default Recarga;

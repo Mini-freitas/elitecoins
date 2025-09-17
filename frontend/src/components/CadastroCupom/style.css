@@ -1,0 +1,38 @@
+.containerCadastroCupom{
+    grid-area: cupomCadastro;
+    display:flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+.boxCupomParcerias{
+  width:70%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: .5rem;
+  border: 1px solid white;
+  border-radius: 2px;
+  padding: 2rem;
+}
+.h1admin{
+    font-size: medium;
+}
+.inputadnim{
+    outline: none;
+    height: 2rem;
+    width: 85%;
+    padding-left: 1rem;
+    }
+
+.buttonadmin{
+    width: 90%;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--cor-verde_cana);
+    color:var(--cor-preto);
+    font-weight: bold;
+    cursor: pointer;
+    font-family: var(--fonte-secundaria);
+}

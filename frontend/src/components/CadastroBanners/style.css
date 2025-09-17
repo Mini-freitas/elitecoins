@@ -1,0 +1,66 @@
+.containerCadastroBanner{
+    grid-area: bannerCadastro;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.boxAtualizarMoedas{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    gap: .5rem;
+    border: 1px solid white;
+    border-radius: 5px;
+}
+.buttonadmin{
+    width: 90%;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--cor-verde_cana);
+    color:var(--cor-preto);
+    font-weight: bold;
+    cursor: pointer;
+    font-family: var(--fonte-secundaria);
+}
+.imgadmin{
+    height: 100%;
+    width: 100%;
+}
+.uploadsvg{
+    height: 2rem;
+    width: 2rem;
+}
+
+.imgSpan{
+    width: 90%;
+    height: 50%;
+    border: 2px dashed var(--cor-verde_cana);
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: #fff;
+    overflow: hidden;
+}
+.padmin{
+    font-size: smaller;
+    color: var(--cor-branca);
+    font-family: var(--fonte-secundaria);
+    text-align: center;
+}
+
+.h1admin{
+    font-size: medium;
+}
+.inputadnim{
+    outline: none;
+    height: 2rem;
+    width: 85%;
+    padding-left: 1rem;
+    }

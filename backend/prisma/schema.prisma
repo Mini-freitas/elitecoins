@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  nome       String
+  email      String       @unique
+  senha      String
+  tipo       TipoUsuario  @default(COMUM)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  credenciais Credencial[]
+}
+
+model Credencial {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderID   String   @unique
+  user      String
+  pass      String
+  platform  String
+  ba        String
+  limit     Int?
+  sortMode  String?
+  persona   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  usuarioId String   @db.ObjectId
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+}
+
+enum TipoUsuario {
+  ADMIN
+  COMUM
+}
+model Banner {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  caminho  String
+  url      String?  
+  criadoEm DateTime @default(now())
+}
+
+model MoedaPreco {
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  play   Int
+  xbox   Int
+  pc     Int
+}
+model Cupom {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  parceiro   String   // Nome do parceiro
+  codigo     String   @unique // Código único do cupom
+  desconto   Float    // Porcentagem de desconto (ex: 10.5 = 10,5%)
+  createdAt  DateTime @default(now()) // Data de criação
+  updatedAt  DateTime @updatedAt      // Atualizado automaticamente
+}
+
+
+

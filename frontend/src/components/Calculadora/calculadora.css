@@ -1,0 +1,30 @@
+:root {
+    /******** cores do body *********/
+    --cor-preto: rgb(0, 0, 0);
+    --cor-verde_cana: rgb(99, 248, 0);
+    --cor-cinza: rgb(167, 167, 167);
+    --cor-branca: rgb(255, 241, 241);
+    --cor-cinza-escuro: rgb(83, 83, 83);
+
+    /******** fonte do header *********/
+    --fonte-principal: "Abel", sans-serif;
+    --fonte-secundaria: "League Spartan", sans-serif;
+  }
+
+
+.cartaSelecionadaCalculadora{
+    height: 20rem;
+    width: 20rem;
+}
+.boxCartacalculadora{
+    position: absolute;
+    left: 1.8rem;
+    bottom: 2.4rem;
+    font-family: var(--fonte-principal);
+}
+.boxquantmoedas{
+    position: absolute;
+    right: 2.2rem;
+    bottom: 2.4rem;
+    font-family: var(--fonte-principal);
+}
