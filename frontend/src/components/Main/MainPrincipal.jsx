@@ -6,7 +6,7 @@ import Tutorial from '../Tutorial/Tutorial';
 import Recarga from '../Recarga/Recarga';
 import Sobre from '../Sobre/Sobre';
 import Contatos from '../Contatos/Contatos';
-import NavegaLateral from '../navegaLateral/NavegaLateral';
+import NavegaLateral from '../NavegaLateral/NavegaLateral';
 import Whattsapp from '../Whattsapp/Whattsapp';
 
 const MainPrincipal = () => {
