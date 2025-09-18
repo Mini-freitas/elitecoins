@@ -14,6 +14,8 @@ import { fileURLToPath } from "url";
 
 
 dotenv.config();
+console.log("🔑 API_KEY:", process.env.API_KEY ? "OK" : "NÃO ENCONTRADA");
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
