@@ -35,7 +35,7 @@ function Cadastro({ handleLogin }) {
 
     try {
       // Cadastra usuário
-      await axios.post("http://localhost:3000/api/registrar", {
+      await axios.post("/api/registrar", {
         nome,
         email,
         senha,
@@ -43,10 +43,7 @@ function Cadastro({ handleLogin }) {
       });
 
       // Faz login automático
-      const loginRes = await axios.post("http://localhost:3000/api/login", {
-        email,
-        senha,
-      });
+      const loginRes = await axios.post("/api/login", {email,senha});
       handleLogin(loginRes.data.usuario);
 
       sessionStorage.setItem("mensagemCadastro", "✅ Usuário criado com sucesso!");

@@ -18,7 +18,7 @@ function ListaCupom({ novoCupom }) {
   // Buscar cupons do backend
   const fetchCupons = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/cupons");
+      const response = await axios.get("/api/cupons");
       // opcional: console.log("GET /api/cupons =>", response.data);
       setCupons(response.data || []);
     } catch (err) {
@@ -48,7 +48,7 @@ function ListaCupom({ novoCupom }) {
 
     try {
       // opcional: console.log("Chamando DELETE /api/cupons/:id com id =", id);
-      await axios.delete(`http://localhost:3000/api/cupons/${id}`);
+      await axios.delete(`/api/cupons/${id}`);
       // remove localmente
       setCupons((prev) => prev.filter((c) => extractId(c) !== id));
     } catch (err) {

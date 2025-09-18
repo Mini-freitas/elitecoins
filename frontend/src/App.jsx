@@ -8,7 +8,6 @@ import Login from "./pages/Login/Login";
 import Cadastro from "./pages/Cadastro/Cadastro";
 import Admin from "./pages/Admin/Admin";
 import Compra from "./pages/Compra/Compra";
-import PaginaCid from "./pages/PgCid/PagCid";
 
 
 function App() {
@@ -49,10 +48,7 @@ function App() {
           path="/cadastro" 
           element={<Cadastro handleLogin={handleLogin} />} 
         />
-        <Route 
-          path="/cid" 
-          element={<PaginaCid handleLogin={handleLogin} />} 
-        />
+        
         <Route 
           path="/admin" 
           element={

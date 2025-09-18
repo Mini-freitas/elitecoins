@@ -12,7 +12,7 @@ function Login({ handleLogin }) {
   const login = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:3000/api/login", { email, senha });
+    const res = await axios.post("/api/login", { email, senha });
 
       handleLogin(res.data.usuario);
 

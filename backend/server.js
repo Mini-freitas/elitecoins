@@ -19,7 +19,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const prisma = new PrismaClient();
 
-app.use(cors());
+app.use(cors({
+  origin: ["https://elitecoinsfc.com.br"], 
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 app.use(express.json());
 
 // 🔑 credenciais da API externa
@@ -290,7 +294,7 @@ app.post("/api/upload-banner", upload.single("file"), async (req, res) => {
     }
 
     const { url } = req.body; // pega a URL do form
-    const filePath = `/images/propaganda/${req.file.filename}`;
+    const filePath = `https://elitecoinsfc.com.br/images/propaganda/${req.file.filename}`;
 
     const novoBanner = await prisma.banner.create({
       data: {

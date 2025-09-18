@@ -27,7 +27,7 @@ function CadBanner({ onBannerSalvo }) {
     formData.append("url", bannerUrl);
 
     try {
-      await axios.post("http://localhost:3000/api/upload-banner", formData, {
+      await axios.post("/api/upload-banner", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

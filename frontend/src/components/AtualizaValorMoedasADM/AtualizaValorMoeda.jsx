@@ -24,7 +24,7 @@ function ValorMoedas(){
 
   const atualizarPrecos = async () => {
     try {
-      await axios.put("http://localhost:3000/moedas", {
+      await axios.put("/moedas", {
         play: playXbox !== "" ? Number(playXbox) : precos.play,
         xbox: playXbox !== "" ? Number(playXbox) : precos.xbox,
         pc: pc !== "" ? Number(pc) : precos.pc,

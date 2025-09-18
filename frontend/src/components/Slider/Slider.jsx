@@ -17,7 +17,7 @@ const Slider = () => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/banners");
+        const res = await axios.get("/api/banners");
         setBanners(res.data);
       } catch (err) {
         console.error("Erro ao buscar banners:", err);

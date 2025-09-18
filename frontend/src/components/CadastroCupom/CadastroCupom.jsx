@@ -14,7 +14,7 @@ function CadastroCupom({ onCupomCadastrado }) {
     }
 
     try {
-      const res = await axios.post("http://localhost:3000/api/cupons", {
+      const res = await axios.post("/api/cupons", {
         parceiro,
         codigo,
         desconto,
