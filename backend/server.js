@@ -51,63 +51,6 @@ function verificarToken(req, res, next) {
 
 // ======================= AUTENTICAÇÃO =======================
 
-// Criar usuário (apenas teste, depois você pode remover)
-app.post("/api/registrar", async (req, res) => {
-  try {
-    const { nome, email, senha, tipo } = req.body;
-
-    if (!nome || !email || !senha || !tipo) {
-      return res.status(400).json({ error: "Preencha todos os campos" });
-    }
-
-    const usuarioExistente = await prisma.usuario.findUnique({
-      where: { email },
-    });
-    if (usuarioExistente) {
-      return res.status(400).json({ error: "Email já cadastrado" });
-    }
-
-    const senhaHash = await bcrypt.hash(senha, 10);
-
-    const novoUsuario = await prisma.usuario.create({
-      data: { nome, email, senha: senhaHash, tipo },
-    });
-
-    res.json({ message: "Usuário criado com sucesso", usuario: novoUsuario });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao registrar usuário" });
-  }
-});
-
-// Login
-app.post("/api/login", async (req, res) => {
-  try {
-    const { email, senha } = req.body;
-
-    const usuario = await prisma.usuario.findUnique({ where: { email } });
-    if (!usuario) {
-      return res.status(400).json({ error: "Usuário não encontrado" });
-    }
-
-    const senhaValida = await bcrypt.compare(senha, usuario.senha);
-    if (!senhaValida) {
-      return res.status(400).json({ error: "Senha incorreta" });
-    }
-
-    const token = jwt.sign(
-      { id: usuario.id, email: usuario.email, tipo: usuario.tipo },
-      process.env.JWT_SECRET,
-      { expiresIn: "2h" }
-    );
-
-    res.json({ message: "Login realizado com sucesso", token, usuario });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao realizar login" });
-  }
-});
-
 // Rota protegida (apenas admin)
 app.get("/api/admin", verificarToken, (req, res) => {
   if (req.usuario.tipo !== "ADMIN") {
