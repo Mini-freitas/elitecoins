@@ -46,7 +46,7 @@ const Calculadora = ({ cartaSelecionada, usuario }) => {
   useEffect(() => {
     const fetchPrecos = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/moedas");
+        const res = await axios.get("/moedas");
         setPrecos({
           play: res.data.play || 0,
           xbox: res.data.xbox || 0,

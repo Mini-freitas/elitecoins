@@ -10,7 +10,7 @@ const Recarga = ({ setCartaSelecionada }) => {
   useEffect(() => {
   const fetchValores = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/moedas");
+      const res = await axios.get("/moedas");
       // res.data já vai ter { play, xbox, pc }
       setValores({
         play: res.data.play || 0,
