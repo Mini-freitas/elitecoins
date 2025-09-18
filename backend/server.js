@@ -236,7 +236,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Rota de upload
-app.post("/api/upload-banner", upload.single("file"), async (req, res) => {
+app.post("www.elitecoinsfc.com.br:3000/api/upload-banner", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "Nenhum arquivo enviado" });
