@@ -31,7 +31,11 @@ app.use(express.json());
 // 🔑 credenciais da API externa
 const apiUser = process.env.EMAIL;
 const apiKey = process.env.API_KEY;
-const apiKeyMd5 = crypto.createHash("md5").update(apiKey).digest("hex");
+if (!apiKey) {
+  console.error("⚠️ API_KEY está indefinida! Verifique o .env");
+}
+const apiKeyMd5 = crypto.createHash("md5").update(apiKey || "").digest("hex");
+console.log("🔑 API_KEY MD5:", apiKeyMd5);
 
 // 📌 Middleware para verificar token JWT
 function verificarToken(req, res, next) {
