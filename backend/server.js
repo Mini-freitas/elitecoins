@@ -14,8 +14,6 @@ import { fileURLToPath } from "url";
 
 
 dotenv.config();
-console.log("🔑 API_KEY:", process.env.API_KEY ? "OK" : "NÃO ENCONTRADA");
-
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,10 +30,12 @@ app.use(express.json());
 const apiUser = process.env.EMAIL;
 const apiKey = process.env.API_KEY;
 if (!apiKey) {
-  console.error("⚠️ API_KEY está indefinida! Verifique o .env");
+  console.error("⚠️ API_KEY não definida! Verifique o .env");
+} else {
+  const apiKeyMd5 = crypto.createHash("md5").update(apiKey).digest("hex");
+  console.log("🔑 API_KEY MD5:", apiKeyMd5);
 }
-const apiKeyMd5 = crypto.createHash("md5").update(apiKey || "").digest("hex");
-console.log("🔑 API_KEY MD5:", apiKeyMd5);
+
 
 // 📌 Middleware para verificar token JWT
 function verificarToken(req, res, next) {
