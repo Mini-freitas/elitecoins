@@ -1,6 +1,7 @@
+// src/components/BtContinuaCompra/BtContinuaCompra.jsx
 import React, { useState } from "react";
-import axios from "axios";
-import { BotaoContinuar} from './styles';
+import api from "../../services/api"; // ← usa api.js padronizado
+import { BotaoContinuar } from './styles';
 
 const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,7 +16,7 @@ const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }
 
     try {
       // Envia os dados ao backend para criar a preferência
-      const res = await axios.post("http://localhost:3000/pagamento", {
+      const res = await api.post("/pagamento", {
         usuario: usuario.nome,
         carta: cartaSelecionada,
         valorTotal,
@@ -23,7 +24,7 @@ const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }
       });
 
       if (res.data.init_point) {
-        window.location.href = res.data.init_point;
+        window.location.href = res.data.init_point; // redireciona para checkout
       } else {
         console.error("Init point não recebido:", res.data);
       }
@@ -36,7 +37,7 @@ const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }
   };
 
   return (
-    <BotaoContinuar onClick={handleClick} disabled={isLoading} >
+    <BotaoContinuar onClick={handleClick} disabled={isLoading}>
       {isLoading ? "Processando..." : "Continuar Compra"}
     </BotaoContinuar>
   );

@@ -1,4 +1,6 @@
+// src/components/Calculadora/Calculadora.jsx
 import React, { useEffect, useState } from "react";
+import api from "../../services/api"; // usa api.js padronizado
 import './calculadora.css';
 import { 
   CalculadoraContainer,
@@ -22,7 +24,6 @@ import TituloCalculadora from '../TituloCalculadora/TituloCalculadora';
 import cartaPC from "../../images/cartas/cartaPC.svg";
 import cartaXBOX from "../../images/cartas/cartaXbox.svg";
 import cartaPLAYSTATION from "../../images/cartas/cartaPLAYSTATION.svg";
-import axios from "axios";
 import BtContinuaCompra from "../BtContinuaCompra/BtContinuaCompra";
 
 const Calculadora = ({ cartaSelecionada, usuario }) => {
@@ -31,22 +32,18 @@ const Calculadora = ({ cartaSelecionada, usuario }) => {
   const [valorTotal, setValorTotal] = useState(0);
   const [desconto, setDesconto] = useState(0);
 
-  // Resetar valores sempre que mudar a carta selecionada
   useEffect(() => {
     setQuantMoedas(0);
     setValorTotal(0);
     setDesconto(0);
-
-    // Resetar o input do range
     const thumb = document.querySelector('.thumb');
     if (thumb) thumb.style.left = "0%";
   }, [cartaSelecionada]);
 
-  // Buscar preços do backend
   useEffect(() => {
     const fetchPrecos = async () => {
       try {
-        const res = await axios.get("/moedas");
+        const res = await api.get("/moedas"); // padronizado para api.js
         setPrecos({
           play: res.data.play || 0,
           xbox: res.data.xbox || 0,
@@ -59,7 +56,6 @@ const Calculadora = ({ cartaSelecionada, usuario }) => {
     fetchPrecos();
   }, []);
 
-  // Calcular valores
   const calcularValores = (moedas) => {
     if (!cartaSelecionada) {
       setQuantMoedas(0);
@@ -68,11 +64,13 @@ const Calculadora = ({ cartaSelecionada, usuario }) => {
       return;
     }
 
-    let precoPor1000Moedas = cartaSelecionada === "xbox" ? precos.xbox
-                          : cartaSelecionada === "play" ? precos.play
-                          : precos.pc;
+    const precoPor1000Moedas =
+      cartaSelecionada === "xbox" ? precos.xbox
+      : cartaSelecionada === "play" ? precos.play
+      : precos.pc;
 
     const valorEmReal = (moedas / 1000000) * precoPor1000Moedas;
+
     let desc = 0;
     if (moedas >= 100000 && moedas < 500000) desc = 1;
     else if (moedas >= 500000 && moedas < 7000000) desc = 2;
@@ -85,7 +83,6 @@ const Calculadora = ({ cartaSelecionada, usuario }) => {
     setDesconto(desc);
   };
 
-  // Posicionar thumb e steps
   useEffect(() => {
     if (!cartaSelecionada) return;
 
@@ -116,17 +113,13 @@ const Calculadora = ({ cartaSelecionada, usuario }) => {
       });
     });
 
-    // Inicializa
     updateThumbPosition(0);
 
     return () => {
-      steps.forEach(step => {
-        step.replaceWith(step.cloneNode(true));
-      });
+      steps.forEach(step => step.replaceWith(step.cloneNode(true)));
     };
   }, [cartaSelecionada, precos.play, precos.xbox, precos.pc]);
 
-  // Formatar moedas
   const formatMoedas = (valor) => {
     if (valor >= 1000000) return (valor / 1000000).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) + "KK";
     if (valor >= 1000) return (valor / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 0 }) + "K";
@@ -141,20 +134,20 @@ const Calculadora = ({ cartaSelecionada, usuario }) => {
         <BoxCartaRange>
           <CartaSaidaValores>
             <CartaSelecionada>
-            {cartaSelecionada === "xbox" && <img src={cartaXBOX} alt="Carta Xbox" className="cartaSelecionadaCalculadora"/>}
-            {cartaSelecionada === "play" && <img src={cartaPLAYSTATION} alt="Carta PlayStation" className="cartaSelecionadaCalculadora" />}
-            {cartaSelecionada === "pc" && <img src={cartaPC} alt="Carta PC" className="cartaSelecionadaCalculadora" />}
+              {cartaSelecionada === "xbox" && <img src={cartaXBOX} alt="Carta Xbox" className="cartaSelecionadaCalculadora"/>}
+              {cartaSelecionada === "play" && <img src={cartaPLAYSTATION} alt="Carta PlayStation" className="cartaSelecionadaCalculadora" />}
+              {cartaSelecionada === "pc" && <img src={cartaPC} alt="Carta PC" className="cartaSelecionadaCalculadora" />}
 
-            {cartaSelecionada && (
-              <>
-                <div className="boxCartacalculadora">
-                  {valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </div>
-                <div className="boxquantmoedas">
-                  {formatMoedas(quantMoedas)}
-                </div>
-              </>
-            )}
+              {cartaSelecionada && (
+                <>
+                  <div className="boxCartacalculadora">
+                    {valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                  <div className="boxquantmoedas">
+                    {formatMoedas(quantMoedas)}
+                  </div>
+                </>
+              )}
             </CartaSelecionada>
           </CartaSaidaValores>
 

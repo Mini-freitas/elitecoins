@@ -1,6 +1,7 @@
+// src/components/Cadastro/Cadastro.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../services/api"; // ← usa api.js padronizado
 import "./cadastro.css";
 
 function Cadastro({ handleLogin }) {
@@ -19,10 +20,7 @@ function Cadastro({ handleLogin }) {
     especial: /[@$!%*?&.]/.test(senha),
   };
 
-  // Validação geral
-  const validarSenha = () => {
-    return Object.values(regras).every(Boolean);
-  };
+  const validarSenha = () => Object.values(regras).every(Boolean);
 
   const cadastrar = async (e) => {
     e.preventDefault();
@@ -35,15 +33,10 @@ function Cadastro({ handleLogin }) {
 
     try {
       // Cadastra usuário
-      await axios.post("/api/registrar", {
-        nome,
-        email,
-        senha,
-        tipo: "COMUM",
-      });
+      await api.post("/registrar", { nome, email, senha, tipo: "COMUM" });
 
       // Faz login automático
-      const loginRes = await axios.post("/api/login", {email,senha});
+      const loginRes = await api.post("/login", { email, senha });
       handleLogin(loginRes.data.usuario);
 
       sessionStorage.setItem("mensagemCadastro", "✅ Usuário criado com sucesso!");
@@ -87,7 +80,6 @@ function Cadastro({ handleLogin }) {
           required
         />
 
-        {/* Feedback das regras */}
         {senha && (
           <ul className="regras-senha">
             <li className={regras.tamanho ? "ok" : "erro"}>Mínimo 8 caracteres</li>

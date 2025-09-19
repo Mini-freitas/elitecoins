@@ -1,6 +1,7 @@
+// src/components/Login/Login.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import api from "../../services/api"; // ← usa api.js padronizado
 import "./login.css";
 
 function Login({ handleLogin }) {
@@ -12,7 +13,7 @@ function Login({ handleLogin }) {
   const login = async (e) => {
     e.preventDefault();
     try {
-    const res = await axios.post("/api/login", { email, senha });
+      const res = await api.post("/login", { email, senha }); // rota sem /api
 
       handleLogin(res.data.usuario);
 
@@ -33,16 +34,36 @@ function Login({ handleLogin }) {
       <a href="./">
         <img className="imglogin" src="../favicon.svg" alt="" />
       </a>
-      <h2 className="h2login">FAÇA SEU <b style={{ color: "var(--cor-verde_cana)" }}>LOGIN</b> <br></br> NA ELITE COINS</h2>
+      <h2 className="h2login">
+        FAÇA SEU <b style={{ color: "var(--cor-verde_cana)" }}>LOGIN</b> <br /> NA ELITE COINS
+      </h2>
       <form className="formlogin" onSubmit={login}>
-        <input className="inputlogin" type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <input className="inputlogin" type="password" placeholder="Senha" value={senha} onChange={(e) => setSenha(e.target.value)} required />
-        <button className="buttonlogin" type="submit">Entrar</button>
+        <input
+          className="inputlogin"
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          className="inputlogin"
+          type="password"
+          placeholder="Senha"
+          value={senha}
+          onChange={(e) => setSenha(e.target.value)}
+          required
+        />
+        <button className="buttonlogin" type="submit">
+          Entrar
+        </button>
       </form>
       {erro && <p className="erro">{erro}</p>}
       <p className="loginp">
         Não tem conta?{" "}
-        <Link to="/cadastro" className="link">Criar uma conta Elite Coins</Link>
+        <Link to="/cadastro" className="link">
+          Criar uma conta Elite Coins
+        </Link>
       </p>
     </div>
   );

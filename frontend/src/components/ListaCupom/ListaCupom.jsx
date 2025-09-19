@@ -1,6 +1,6 @@
 // src/components/ListaCupom/ListaCupom.jsx
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../services/api"; // ← usa o api.js padronizado
 import "./style.css";
 
 function ListaCupom({ novoCupom }) {
@@ -18,8 +18,7 @@ function ListaCupom({ novoCupom }) {
   // Buscar cupons do backend
   const fetchCupons = async () => {
     try {
-      const response = await axios.get("/api/cupons");
-      // opcional: console.log("GET /api/cupons =>", response.data);
+      const response = await api.get("/cupons"); // ← usando api.js
       setCupons(response.data || []);
     } catch (err) {
       console.error("Erro ao buscar cupons:", err);
@@ -39,7 +38,6 @@ function ListaCupom({ novoCupom }) {
 
   // Excluir cupom (aceita either id string ou objeto cupom)
   const excluirCupom = async (raw) => {
-    // raw pode ser id string ou objeto cupom
     const id = typeof raw === "string" ? raw : extractId(raw);
     if (!id) {
       console.error("ID inválido ao tentar excluir:", raw);
@@ -47,8 +45,7 @@ function ListaCupom({ novoCupom }) {
     }
 
     try {
-      // opcional: console.log("Chamando DELETE /api/cupons/:id com id =", id);
-      await axios.delete(`/api/cupons/${id}`);
+      await api.delete(`/cupons/${id}`); // ← usando api.js
       // remove localmente
       setCupons((prev) => prev.filter((c) => extractId(c) !== id));
     } catch (err) {

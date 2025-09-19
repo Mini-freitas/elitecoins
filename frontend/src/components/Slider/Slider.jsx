@@ -1,5 +1,6 @@
+// src/components/Slider/Slider.jsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../services/api"; // ← usa api.js padronizado
 import {
   SliderContainer,
   Slides,
@@ -17,7 +18,7 @@ const Slider = () => {
   useEffect(() => {
     const fetchBanners = async () => {
       try {
-        const res = await axios.get("/api/banners");
+        const res = await api.get("/banners"); // rota sem /api
         setBanners(res.data);
       } catch (err) {
         console.error("Erro ao buscar banners:", err);
@@ -38,9 +39,7 @@ const Slider = () => {
   if (banners.length === 0) {
     return (
       <SliderContainer>
-        <p style={{ color: "white" }}>
-          Nenhum banner cadastrado
-        </p>
+        <p style={{ color: "white" }}>Nenhum banner cadastrado</p>
       </SliderContainer>
     );
   }
@@ -49,7 +48,10 @@ const Slider = () => {
     <SliderContainer id="titulo_menu">
       <Slides>
         {banners.map((banner, index) => (
-          <Slide key={banner.id} style={{ display: activeSlide === index ? "block" : "none" }} >
+          <Slide
+            key={banner.id}
+            style={{ display: activeSlide === index ? "block" : "none" }}
+          >
             <a href={banner.url || "#"} target="_blank" rel="noopener noreferrer">
               <ImgSlider src={banner.caminho} />
             </a>
@@ -60,7 +62,13 @@ const Slider = () => {
       {banners.length > 1 && (
         <AutoNavigation>
           {banners.map((_, index) => (
-            <AutoButton key={index} onClick={() => setActiveSlide(index)} style={{ backgroundColor: activeSlide === index ? "#13df00ff" : "transparent",}} />
+            <AutoButton
+              key={index}
+              onClick={() => setActiveSlide(index)}
+              style={{
+                backgroundColor: activeSlide === index ? "#13df00ff" : "transparent",
+              }}
+            />
           ))}
         </AutoNavigation>
       )}

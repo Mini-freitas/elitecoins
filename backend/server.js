@@ -11,7 +11,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-
+import { MercadoPagoConfig } from "mercadopago";
 
 dotenv.config();
 
@@ -19,23 +19,25 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const prisma = new PrismaClient();
 
-app.use(cors({
-  origin: ["https://elitecoinsfc.com.br"], 
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: ["https://elitecoinsfc.com.br"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // 🔑 credenciais da API externa
 const apiUser = process.env.EMAIL;
 const apiKey = process.env.API_KEY;
+let apiKeyMd5 = "";
 if (!apiKey) {
   console.error("⚠️ API_KEY não definida! Verifique o .env");
 } else {
-  const apiKeyMd5 = crypto.createHash("md5").update(apiKey).digest("hex");
+  apiKeyMd5 = crypto.createHash("md5").update(apiKey).digest("hex");
   console.log("🔑 API_KEY MD5:", apiKeyMd5);
 }
-
 
 // 📌 Middleware para verificar token JWT
 function verificarToken(req, res, next) {
@@ -141,6 +143,7 @@ app.post("/api/order/status", async (req, res) => {
   }
 });
 
+// ======================= USUÁRIOS =======================
 
 // Registrar usuário
 app.post("/api/registrar", async (req, res) => {
@@ -236,19 +239,19 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Rota de upload
-app.post("www.elitecoinsfc.com.br:3000/api/upload-banner", upload.single("file"), async (req, res) => {
+app.post("/api/upload-banner", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "Nenhum arquivo enviado" });
     }
 
-    const { url } = req.body; // pega a URL do form
+    const { url } = req.body;
     const filePath = `https://elitecoinsfc.com.br/images/propaganda/${req.file.filename}`;
 
     const novoBanner = await prisma.banner.create({
       data: {
         caminho: filePath,
-        url: url && url.trim() !== "" ? url : null, // salva se tiver valor
+        url: url && url.trim() !== "" ? url : null,
       },
     });
 
@@ -265,13 +268,11 @@ app.use(
   express.static(path.join(__dirname, "images/propaganda"))
 );
 
-// ======================= MOSTRAR IMAGEM =======================
-
 // Rota para listar todos os banners
 app.get("/api/banners", async (req, res) => {
   try {
     const banners = await prisma.banner.findMany({
-      orderBy: { id: "desc" }, // mais recentes primeiro
+      orderBy: { id: "desc" },
     });
     res.json(banners);
   } catch (error) {
@@ -280,23 +281,20 @@ app.get("/api/banners", async (req, res) => {
   }
 });
 
-// ======================= APAGAR IMAGEM BANNER =======================
-
+// Apagar banner
 app.delete("/api/banners/:id", async (req, res) => {
-  const { id } = req.params; // já é string, compatível com ObjectId
+  const { id } = req.params;
 
   try {
     const banner = await prisma.banner.findUnique({ where: { id } });
 
     if (!banner) return res.status(404).json({ error: "Banner não encontrado" });
 
-    // Remove arquivo físico (assumindo que o caminho seja relativo a /public)
     const filePath = path.join(__dirname, "..", "public", banner.caminho);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
 
-    // Remove do banco
     await prisma.banner.delete({ where: { id } });
 
     res.json({ message: "Banner excluído com sucesso" });
@@ -305,10 +303,11 @@ app.delete("/api/banners/:id", async (req, res) => {
     res.status(500).json({ error: "Erro ao excluir banner" });
   }
 });
-// ======================= ATUALIZA PREÇO MOEDAS =======================
+
+// ======================= PREÇOS DAS MOEDAS =======================
 
 // Buscar preços
-app.get("/moedas", async (req, res) => {
+app.get("/api/moedas", async (req, res) => {
   try {
     const preco = await prisma.moedaPreco.findFirst();
     res.json(preco);
@@ -319,7 +318,7 @@ app.get("/moedas", async (req, res) => {
 });
 
 // Atualizar preços
-app.put("/moedas", async (req, res) => {
+app.put("/api/moedas", async (req, res) => {
   try {
     const { play, xbox, pc } = req.body;
 
@@ -343,18 +342,13 @@ app.put("/moedas", async (req, res) => {
   }
 });
 
-// ======================= API MERCADO PAGO =======================
-// SDK do Mercado Pago
-import { MercadoPagoConfig, Preference } from 'mercadopago';
+// ======================= PAGAMENTO MERCADO PAGO =======================
 
-// Inicializa o client do Mercado Pago
 const client = new MercadoPagoConfig({ accessToken: process.env.ACCESS_TOKEN });
 
-// Rota de pagamento
-app.post("/pagamento", async (req, res) => {
+app.post("/api/pagamento", async (req, res) => {
   const { usuario, carta, valorTotal, quantMoedas } = req.body;
-  
-  // validações
+
   if (!usuario || !valorTotal || !quantMoedas) {
     return res.status(400).json({ error: "Dados incompletos" });
   }
@@ -362,24 +356,27 @@ app.post("/pagamento", async (req, res) => {
   try {
     const preference = {
       items: [{ title: carta, quantity: 1, unit_price: valorTotal }],
-      payer: { email: `${usuario}@teste.com` }, // ou email real
+      payer: { email: `${usuario}@teste.com` },
       payment_methods: { default_payment_method_id: "pix" },
       back_urls: {
-        success: "https://www.seusite.com.br/success",
-        failure: "https://www.seusite.com.br/failure",
-        pending: "https://www.seusite.com.br/pending",
+        success: "https://elitecoinsfc.com.br/success",
+        failure: "https://elitecoinsfc.com.br/failure",
+        pending: "https://elitecoinsfc.com.br/pending",
       },
       auto_return: "approved",
     };
 
-    const response = await fetch("https://api.mercadopago.com/checkout/preferences", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(preference),
-    });
+    const response = await fetch(
+      "https://api.mercadopago.com/checkout/preferences",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(preference),
+      }
+    );
 
     const data = await response.json();
     return res.json({ init_point: data.init_point });
@@ -389,8 +386,8 @@ app.post("/pagamento", async (req, res) => {
   }
 });
 
-
 // ======================= CUPONS =======================
+
 app.post("/api/cupons", async (req, res) => {
   try {
     const { parceiro, codigo, desconto } = req.body;
@@ -403,7 +400,7 @@ app.post("/api/cupons", async (req, res) => {
       data: {
         parceiro,
         codigo,
-        desconto: parseFloat(desconto), // garante número
+        desconto: parseFloat(desconto),
       },
     });
 
@@ -414,7 +411,7 @@ app.post("/api/cupons", async (req, res) => {
   }
 });
 
-// Rota para listar cupons
+// Listar cupons
 app.get("/api/cupons", async (req, res) => {
   try {
     const cupons = await prisma.cupom.findMany({
@@ -427,13 +424,13 @@ app.get("/api/cupons", async (req, res) => {
   }
 });
 
-// ======================= EXCLUIR CUPOM =======================
+// Excluir cupom
 app.delete("/api/cupons/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
     const cupom = await prisma.cupom.delete({
-      where: { id: id }, // Prisma já aceita string como ObjectId
+      where: { id: id },
     });
 
     res.json({ success: true, message: "Cupom excluído com sucesso", cupom });
@@ -442,7 +439,6 @@ app.delete("/api/cupons/:id", async (req, res) => {
     res.status(500).json({ success: false, error: "Erro ao excluir cupom" });
   }
 });
-
 
 // ======================= INICIAR SERVIDOR =======================
 app.listen(PORT, () => {

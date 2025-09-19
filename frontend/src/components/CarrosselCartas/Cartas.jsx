@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {CartasContainer,CarrosselCartas,BaseCarrossel,Carta1Carrossel,Carta2Carrossel,Carta3Carrossel} from "./styles";
-import axios from "axios";
+import api from "../../services/api"; // ← usa api.js padronizado
 
 const Cartas = () => {
 
@@ -10,7 +10,7 @@ const Cartas = () => {
   useEffect(() => {
   const fetchValores = async () => {
     try {
-      const res = await axios.get("/moedas");
+      const res = await api.get("/moedas");
       // res.data já vai ter { play, xbox, pc }
       setValores({
         play: res.data.play || 0,

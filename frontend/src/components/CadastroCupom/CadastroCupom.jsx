@@ -1,5 +1,6 @@
+// src/components/CadastroCupom/CadastroCupom.jsx
 import { useState } from "react";
-import axios from "axios";
+import api from "../../services/api"; // ← usa api.js padronizado
 import './style.css'
 
 function CadastroCupom({ onCupomCadastrado }) {
@@ -14,7 +15,7 @@ function CadastroCupom({ onCupomCadastrado }) {
     }
 
     try {
-      const res = await axios.post("/api/cupons", {
+      const res = await api.post("/cupons", { // ← URL padronizada
         parceiro,
         codigo,
         desconto,
@@ -22,7 +23,6 @@ function CadastroCupom({ onCupomCadastrado }) {
 
       alert("Cupom cadastrado com sucesso!");
 
-      // avisa o Admin que tem cupom novo
       if (onCupomCadastrado) {
         onCupomCadastrado(res.data);
       }
@@ -31,8 +31,8 @@ function CadastroCupom({ onCupomCadastrado }) {
       setCodigo("");
       setDesconto("");
     } catch (err) {
-      console.error("Erro ao cadastrar cupom:", err);
-      alert("Erro ao cadastrar cupom");
+      console.error("Erro ao cadastrar cupom:", err.response?.data || err.message || err);
+      alert("Erro ao cadastrar cupom. Veja o console para detalhes.");
     }
   };
 
@@ -59,7 +59,7 @@ function CadastroCupom({ onCupomCadastrado }) {
         />
         <input
           type="text"
-          placeholder="porcentagem de desconto"
+          placeholder="Porcentagem de desconto"
           className="inputadnim"
           value={desconto}
           onChange={(e) => setDesconto(e.target.value)}
