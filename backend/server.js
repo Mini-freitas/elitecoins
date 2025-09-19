@@ -1,9 +1,6 @@
 import express from "express";
-import axios from "axios";
 import cors from "cors";
 import dotenv from "dotenv";
-import qs from "qs";
-import crypto from "crypto";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -11,7 +8,6 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import { MercadoPagoConfig } from "mercadopago";
 
 dotenv.config();
 
@@ -27,17 +23,6 @@ app.use(
   })
 );
 app.use(express.json());
-
-// 🔑 credenciais da API externa
-const apiUser = process.env.EMAIL;
-const apiKey = process.env.API_KEY;
-let apiKeyMd5 = "";
-if (!apiKey) {
-  console.error("⚠️ API_KEY não definida! Verifique o .env");
-} else {
-  apiKeyMd5 = crypto.createHash("md5").update(apiKey).digest("hex");
-  console.log("🔑 API_KEY MD5:", apiKeyMd5);
-}
 
 // 📌 Middleware para verificar token JWT
 function verificarToken(req, res, next) {
@@ -61,9 +46,6 @@ app.get("/api/admin", verificarToken, (req, res) => {
   res.json({ message: "Bem-vindo à área admin!" });
 });
 
-
-// ======================= USUÁRIOS =======================
-
 // Registrar usuário
 app.post("/api/registrar", async (req, res) => {
   try {
@@ -73,10 +55,8 @@ app.post("/api/registrar", async (req, res) => {
       return res.status(400).json({ error: "Preencha todos os campos" });
     }
 
-    // Normaliza email
     email = String(email).toLowerCase().trim();
 
-    // Validação de senha forte
     const senhaForteRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -87,16 +67,13 @@ app.post("/api/registrar", async (req, res) => {
       });
     }
 
-    // Verifica se já existe usuário
     const usuarioExistente = await prisma.usuario.findUnique({ where: { email } });
     if (usuarioExistente) {
       return res.status(400).json({ error: "Email já cadastrado" });
     }
 
-    // Hash da senha
     const senhaHash = await bcrypt.hash(senha, 10);
 
-    // Cria usuário
     const novoUsuario = await prisma.usuario.create({
       data: { nome, email, senha: senhaHash, tipo },
     });
@@ -112,8 +89,6 @@ app.post("/api/registrar", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   try {
     let { email, senha } = req.body;
-
-    // Normaliza email
     email = String(email).toLowerCase().trim();
 
     const usuario = await prisma.usuario.findUnique({ where: { email } });
@@ -140,38 +115,27 @@ app.post("/api/login", async (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Garante que a pasta existe
-const uploadDir = path.join(__dirname, "images/propaganda");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Garante que a pasta exista
+const uploadDir = path.join(__dirname, "images");
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 // Configuração do multer
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
 });
 const upload = multer({ storage });
 
-// Rota de upload
+// Upload banner
 app.post("/api/upload-banner", upload.single("file"), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "Nenhum arquivo enviado" });
-    }
+    if (!req.file) return res.status(400).json({ error: "Nenhum arquivo enviado" });
 
     const { url } = req.body;
-    const filePath = `https://elitecoinsfc.com.br/images/propaganda/${req.file.filename}`;
+    const filePath = `https://elitecoinsfc.com.br/images/${req.file.filename}`;
 
     const novoBanner = await prisma.banner.create({
-      data: {
-        caminho: filePath,
-        url: url && url.trim() !== "" ? url : null,
-      },
+      data: { caminho: filePath, url: url && url.trim() !== "" ? url : null },
     });
 
     res.json({ success: true, banner: novoBanner });
@@ -182,46 +146,26 @@ app.post("/api/upload-banner", upload.single("file"), async (req, res) => {
 });
 
 // Servir imagens estáticas
-app.use(
-  "/images/propaganda",
-  express.static(path.join(__dirname, "images/propaganda"))
-);
+app.use("/images", express.static(uploadDir));
 
-// Rota para listar todos os banners
-app.get("/api/banners", async (req, res) => {
-  try {
-    const banners = await prisma.banner.findMany({
-      orderBy: { id: "desc" },
-    });
-    res.json(banners);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao buscar banners" });
-  }
-});
-
-// Apagar banner
+// Excluir banner
 app.delete("/api/banners/:id", async (req, res) => {
   const { id } = req.params;
-
   try {
     const banner = await prisma.banner.findUnique({ where: { id } });
-
     if (!banner) return res.status(404).json({ error: "Banner não encontrado" });
 
-    const filePath = path.join(__dirname, "..", "public", banner.caminho);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+    const filePath = path.join(__dirname, "images", path.basename(banner.caminho));
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
 
     await prisma.banner.delete({ where: { id } });
-
     res.json({ message: "Banner excluído com sucesso" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Erro ao excluir banner" });
   }
 });
+
 
 // ======================= PREÇOS DAS MOEDAS =======================
 
@@ -240,13 +184,10 @@ app.get("/api/moedas", async (req, res) => {
 app.put("/api/moedas", async (req, res) => {
   try {
     const { play, xbox, pc } = req.body;
-
     let preco = await prisma.moedaPreco.findFirst();
 
     if (!preco) {
-      preco = await prisma.moedaPreco.create({
-        data: { play, xbox, pc },
-      });
+      preco = await prisma.moedaPreco.create({ data: { play, xbox, pc } });
     } else {
       preco = await prisma.moedaPreco.update({
         where: { id: preco.id },
@@ -261,71 +202,23 @@ app.put("/api/moedas", async (req, res) => {
   }
 });
 
-// ======================= PAGAMENTO MERCADO PAGO =======================
-
-const client = new MercadoPagoConfig({ accessToken: process.env.ACCESS_TOKEN });
-
-app.post("/api/pagamento", async (req, res) => {
-  const { usuario, carta, valorTotal, quantMoedas } = req.body;
-
-  if (!usuario || !valorTotal || !quantMoedas) {
-    return res.status(400).json({ error: "Dados incompletos" });
-  }
-
-  try {
-    const preference = {
-      items: [{ title: carta, quantity: 1, unit_price: valorTotal }],
-      payer: { email: `${usuario}@teste.com` },
-      payment_methods: { default_payment_method_id: "pix" },
-      back_urls: {
-        success: "https://elitecoinsfc.com.br/success",
-        failure: "https://elitecoinsfc.com.br/failure",
-        pending: "https://elitecoinsfc.com.br/pending",
-      },
-      auto_return: "approved",
-    };
-
-    const response = await fetch(
-      "https://api.mercadopago.com/checkout/preferences",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(preference),
-      }
-    );
-
-    const data = await response.json();
-    return res.json({ init_point: data.init_point });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao criar preferência" });
-  }
-});
-
 // ======================= CUPONS =======================
 
+// Criar cupom
 app.post("/api/cupons", async (req, res) => {
   try {
     const { parceiro, codigo, desconto } = req.body;
-
     if (!parceiro || !codigo || !desconto) {
       return res.status(400).json({ error: "Preencha todos os campos!" });
     }
 
     const novoCupom = await prisma.cupom.create({
-      data: {
-        parceiro,
-        codigo,
-        desconto: parseFloat(desconto),
-      },
+      data: { parceiro, codigo, desconto: parseFloat(desconto) },
     });
 
     res.json({ success: true, cupom: novoCupom });
   } catch (error) {
-    console.error("Erro ao cadastrar cupom:", error);
+    console.error(error);
     res.status(500).json({ error: "Erro interno ao salvar cupom" });
   }
 });
@@ -333,12 +226,10 @@ app.post("/api/cupons", async (req, res) => {
 // Listar cupons
 app.get("/api/cupons", async (req, res) => {
   try {
-    const cupons = await prisma.cupom.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+    const cupons = await prisma.cupom.findMany({ orderBy: { createdAt: "desc" } });
     res.json(cupons);
   } catch (error) {
-    console.error("Erro ao buscar cupons:", error);
+    console.error(error);
     res.status(500).json({ error: "Erro interno" });
   }
 });
@@ -346,15 +237,11 @@ app.get("/api/cupons", async (req, res) => {
 // Excluir cupom
 app.delete("/api/cupons/:id", async (req, res) => {
   const { id } = req.params;
-
   try {
-    const cupom = await prisma.cupom.delete({
-      where: { id: id },
-    });
-
+    const cupom = await prisma.cupom.delete({ where: { id: id } });
     res.json({ success: true, message: "Cupom excluído com sucesso", cupom });
   } catch (err) {
-    console.error("Erro ao excluir cupom:", err);
+    console.error(err);
     res.status(500).json({ success: false, error: "Erro ao excluir cupom" });
   }
 });
