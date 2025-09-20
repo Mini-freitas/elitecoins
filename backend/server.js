@@ -24,6 +24,7 @@ app.use(
 );
 app.use(express.json());
 
+
 // 📌 Middleware para verificar token JWT
 function verificarToken(req, res, next) {
   const token = req.headers["authorization"]?.split(" ")[1];
