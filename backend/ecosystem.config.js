@@ -1,18 +1,18 @@
-import dotenv from "dotenv";
-dotenv.config();
+require('dotenv').config();
 
-export default {
+module.exports = {
   apps: [
     {
       name: "elitecoins-backend",
-      script: "./server.js",
+      script: "./server.js", // mesmo caminho do seu backend
+      watch: false,
       env: {
+        NODE_ENV: "production",
         PORT: process.env.PORT,
-        JWT_SECRET: process.env.JWT_SECRET,
         DATABASE_URL: process.env.DATABASE_URL,
-        API_KEY: process.env.API_KEY,
-        EMAIL: process.env.EMAIL,
-      },
-    },
-  ],
+        JWT_SECRET: process.env.JWT_SECRET,
+       
+      }
+    }
+  ]
 };
