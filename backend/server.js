@@ -14,18 +14,19 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const prisma = new PrismaClient();
+const HOST_URL = process.env.HOST_URL || "https://elitecoinsfc.com.br";
 
 app.use(
   cors({
-    origin: ["https://elitecoinsfc.com.br"],
+    origin: [HOST_URL],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 app.use(express.json());
 
+// ======================= AUTENTICAÇÃO =======================
 
-// 📌 Middleware para verificar token JWT
 function verificarToken(req, res, next) {
   const token = req.headers["authorization"]?.split(" ")[1];
   if (!token) return res.status(403).json({ error: "Token não fornecido" });
@@ -36,8 +37,6 @@ function verificarToken(req, res, next) {
     next();
   });
 }
-
-// ======================= AUTENTICAÇÃO =======================
 
 // Rota protegida (apenas admin)
 app.get("/api/admin", verificarToken, (req, res) => {
@@ -51,16 +50,13 @@ app.get("/api/admin", verificarToken, (req, res) => {
 app.post("/api/registrar", async (req, res) => {
   try {
     let { nome, email, senha, tipo } = req.body;
-
     if (!nome || !email || !senha || !tipo) {
       return res.status(400).json({ error: "Preencha todos os campos" });
     }
-
     email = String(email).toLowerCase().trim();
 
     const senhaForteRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
     if (!senhaForteRegex.test(senha)) {
       return res.status(400).json({
         error:
@@ -69,12 +65,9 @@ app.post("/api/registrar", async (req, res) => {
     }
 
     const usuarioExistente = await prisma.usuario.findUnique({ where: { email } });
-    if (usuarioExistente) {
-      return res.status(400).json({ error: "Email já cadastrado" });
-    }
+    if (usuarioExistente) return res.status(400).json({ error: "Email já cadastrado" });
 
     const senhaHash = await bcrypt.hash(senha, 10);
-
     const novoUsuario = await prisma.usuario.create({
       data: { nome, email, senha: senhaHash, tipo },
     });
@@ -111,16 +104,14 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// ======================= SALVAR IMAGEM =======================
+// ======================= BANNERS E IMAGENS =======================
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Garante que a pasta exista
 const uploadDir = path.join(__dirname, "images");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-// Configuração do multer
+// Config multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
@@ -131,9 +122,8 @@ const upload = multer({ storage });
 app.post("/api/upload-banner", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "Nenhum arquivo enviado" });
-
     const { url } = req.body;
-    const filePath = `https://elitecoinsfc.com.br/images/${req.file.filename}`;
+    const filePath = `${HOST_URL}/images/${req.file.filename}`;
 
     const novoBanner = await prisma.banner.create({
       data: { caminho: filePath, url: url && url.trim() !== "" ? url : null },
@@ -167,42 +157,30 @@ app.delete("/api/banners/:id", async (req, res) => {
   }
 });
 
-
 // Listar banners
-/// Listar banners
 app.get("/api/banners", async (req, res) => {
   try {
     const banners = await prisma.banner.findMany({
       orderBy: { criadoEm: "desc" },
-      select: {
-        id: true,
-        caminho: true,
-        url: true,
-        criadoEm: true,
-      },
+      select: { id: true, caminho: true, url: true, criadoEm: true },
     });
 
-    // Garante que o caminho seja relativo a /images/
-    const bannersFormatados = banners.map(b => ({
-      id: b.id,
-      caminho: b.caminho.startsWith("http")
-        ? "/images/" + b.caminho.split("/").pop()
-        : b.caminho,
-      url: b.url || null,
-      criadoEm: b.criadoEm,
-    }));
-
-    res.json(bannersFormatados);
+    res.json(
+      banners.map((b) => ({
+        id: b.id,
+        caminho: b.caminho,
+        url: b.url || null,
+        criadoEm: b.criadoEm,
+      }))
+    );
   } catch (err) {
     console.error(err);
-    res.json([]); // sempre retorna array
+    res.json([]);
   }
 });
 
-
 // ======================= PREÇOS DAS MOEDAS =======================
 
-// Buscar preços
 app.get("/api/moedas", async (req, res) => {
   try {
     const preco = await prisma.moedaPreco.findFirst();
@@ -213,7 +191,6 @@ app.get("/api/moedas", async (req, res) => {
   }
 });
 
-// Atualizar preços
 app.put("/api/moedas", async (req, res) => {
   try {
     const { play, xbox, pc } = req.body;
@@ -237,13 +214,11 @@ app.put("/api/moedas", async (req, res) => {
 
 // ======================= CUPONS =======================
 
-// Criar cupom
 app.post("/api/cupons", async (req, res) => {
   try {
     const { parceiro, codigo, desconto } = req.body;
-    if (!parceiro || !codigo || !desconto) {
+    if (!parceiro || !codigo || !desconto)
       return res.status(400).json({ error: "Preencha todos os campos!" });
-    }
 
     const novoCupom = await prisma.cupom.create({
       data: { parceiro, codigo, desconto: parseFloat(desconto) },
@@ -256,7 +231,6 @@ app.post("/api/cupons", async (req, res) => {
   }
 });
 
-// Listar cupons
 app.get("/api/cupons", async (req, res) => {
   try {
     const cupons = await prisma.cupom.findMany({ orderBy: { createdAt: "desc" } });
@@ -267,19 +241,19 @@ app.get("/api/cupons", async (req, res) => {
   }
 });
 
-// Excluir cupom
 app.delete("/api/cupons/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const cupom = await prisma.cupom.delete({ where: { id: id } });
+    const cupom = await prisma.cupom.delete({ where: { id } });
     res.json({ success: true, message: "Cupom excluído com sucesso", cupom });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, error: "Erro ao excluir cupom" });
+    res.status(500).json({ error: "Erro ao excluir cupom" });
   }
 });
 
 // ======================= INICIAR SERVIDOR =======================
+
 app.listen(PORT, () => {
   console.log(`✅ Servidor rodando na porta ${PORT}`);
 });
