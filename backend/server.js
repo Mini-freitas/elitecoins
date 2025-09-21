@@ -168,6 +168,19 @@ app.delete("/api/banners/:id", async (req, res) => {
 });
 
 
+// Listar banners
+app.get("/api/banners", async (req, res) => {
+  try {
+    const banners = await prisma.banner.findMany({ orderBy: { createdAt: "desc" } });
+    res.json(banners);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Erro ao listar banners" });
+  }
+});
+
+
+
 // ======================= PREÇOS DAS MOEDAS =======================
 
 // Buscar preços
