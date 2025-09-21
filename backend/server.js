@@ -169,15 +169,17 @@ app.delete("/api/banners/:id", async (req, res) => {
 
 
 // Listar banners
+// backend/server.js (ou onde estiver a rota)
 app.get("/api/banners", async (req, res) => {
   try {
-    const banners = await prisma.banner.findMany({ orderBy: { createdAt: "desc" } });
-    res.json(banners);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao listar banners" });
+    const banners = await prisma.banner.findMany({ orderBy: { createdAt: 'desc' } });
+    res.json(banners); // ⚠️ deve ser um array
+  } catch (err) {
+    console.error(err);
+    res.status(500).json([]); // retorna array vazio em caso de erro
   }
 });
+
 
 
 

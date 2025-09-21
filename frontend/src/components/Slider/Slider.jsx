@@ -1,6 +1,5 @@
-// src/components/Slider/Slider.jsx
 import React, { useState, useEffect } from "react";
-import api from "../../services/api"; // ← usa api.js padronizado
+import api from "../../services/api"; // ← usa o api.js padronizado
 import {
   SliderContainer,
   Slides,
@@ -16,16 +15,18 @@ const Slider = () => {
 
   // Buscar banners do backend ao carregar
   useEffect(() => {
-    const fetchBanners = async () => {
-      try {
-        const res = await api.get("/banners"); // rota sem /api
-        setBanners(res.data);
-      } catch (err) {
-        console.error("Erro ao buscar banners:", err);
-      }
-    };
-    fetchBanners();
-  }, []);
+  const fetchBanners = async () => {
+    try {
+      const res = await api.get("/banners");
+      setBanners(Array.isArray(res.data) ? res.data : []); // garante que seja array
+    } catch (err) {
+      console.error("Erro ao buscar banners:", err);
+      setBanners([]);
+    }
+  };
+  fetchBanners();
+}, []);
+
 
   // Avança automaticamente a cada 10 segundos se tiver mais de 1 banner
   useEffect(() => {
@@ -39,7 +40,9 @@ const Slider = () => {
   if (banners.length === 0) {
     return (
       <SliderContainer>
-        <p style={{ color: "white" }}>Nenhum banner cadastrado</p>
+        <p style={{ color: "white" }}>
+          Nenhum banner cadastrado
+        </p>
       </SliderContainer>
     );
   }
@@ -48,10 +51,7 @@ const Slider = () => {
     <SliderContainer id="titulo_menu">
       <Slides>
         {banners.map((banner, index) => (
-          <Slide
-            key={banner.id}
-            style={{ display: activeSlide === index ? "block" : "none" }}
-          >
+          <Slide key={banner.id} style={{ display: activeSlide === index ? "block" : "none" }} >
             <a href={banner.url || "#"} target="_blank" rel="noopener noreferrer">
               <ImgSlider src={banner.caminho} />
             </a>
@@ -62,13 +62,7 @@ const Slider = () => {
       {banners.length > 1 && (
         <AutoNavigation>
           {banners.map((_, index) => (
-            <AutoButton
-              key={index}
-              onClick={() => setActiveSlide(index)}
-              style={{
-                backgroundColor: activeSlide === index ? "#13df00ff" : "transparent",
-              }}
-            />
+            <AutoButton key={index} onClick={() => setActiveSlide(index)} style={{ backgroundColor: activeSlide === index ? "#13df00ff" : "transparent",}} />
           ))}
         </AutoNavigation>
       )}
