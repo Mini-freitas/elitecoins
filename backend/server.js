@@ -169,18 +169,35 @@ app.delete("/api/banners/:id", async (req, res) => {
 
 
 // Listar banners
-// backend/server.js (ou onde estiver a rota)
+/// Listar banners
 app.get("/api/banners", async (req, res) => {
   try {
-    const banners = await prisma.banner.findMany({ orderBy: { createdAt: 'desc' } });
-    res.json(banners); // ⚠️ deve ser um array
+    const banners = await prisma.banner.findMany({
+      orderBy: { criadoEm: "desc" },
+      select: {
+        id: true,
+        caminho: true,
+        url: true,
+        criadoEm: true,
+      },
+    });
+
+    // Garante que o caminho seja relativo a /images/
+    const bannersFormatados = banners.map(b => ({
+      id: b.id,
+      caminho: b.caminho.startsWith("http")
+        ? "/images/" + b.caminho.split("/").pop()
+        : b.caminho,
+      url: b.url || null,
+      criadoEm: b.criadoEm,
+    }));
+
+    res.json(bannersFormatados);
   } catch (err) {
     console.error(err);
-    res.status(500).json([]); // retorna array vazio em caso de erro
+    res.json([]); // sempre retorna array
   }
 });
-
-
 
 
 // ======================= PREÇOS DAS MOEDAS =======================
