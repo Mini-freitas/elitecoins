@@ -24,7 +24,7 @@ export const ImgSlider = styled.div`
   height: 100%;
   width: 100vw;
   display: flex;
-  background-image: ${(props) => `url(http://localhost:3000${props.src})`};
+  background-image: ${(props) => `url(${props.src})`};
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
