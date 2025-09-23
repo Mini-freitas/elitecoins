@@ -23,7 +23,6 @@ export const BoxRecarga = styled.div`
 
 `;
 export const BoxRecargaManual = styled.div`
-  position: relative;
   height:8rem;
   width:80%;
   background: linear-gradient(135deg,  #333 0%, #111 100%);
@@ -50,6 +49,7 @@ export const Detalhebox = styled.a`
   align-items: center;
   text-decoration:none;
 
+
   svg{
     color:black;
     height:1.5rem;
@@ -65,27 +65,14 @@ export const Detalhebox2 = styled.a`
   justify-content:center;
   align-items: center;
   text-decoration:none;
+  color:white;
 
 `;
-export const RecargaSegura = styled.div`
-  position: absolute;
-  top:-2.7rem; 
-  right: -16rem;
-  height:100%;
-  width:100%;
-  border-radius:5px;
-  cursor:pointer;
-  display:flex;
-  justify-content:center;
-  align-items: center;
-  gap:10px;
-  font-family:var(--fonte-principal)
-  font-size: smaller;
 
-`;
 export const H4 = styled.h4`
   font-family:var(--fonte-principal)
   font-size: smaller;
+  color:white;
 `;
 
 

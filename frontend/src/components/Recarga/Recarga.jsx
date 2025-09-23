@@ -1,5 +1,5 @@
 import React from "react";
-import {RecargaContainer, BoxRecarga, BoxRecargaManual, Detalhebox, Detalhebox2, RecargaSegura, H4} from "./styles";
+import {RecargaContainer, BoxRecarga, BoxRecargaManual, Detalhebox, Detalhebox2, H4} from "./styles";
 import { Link } from 'react-router-dom';
 import Cartas from "../CarrosselCartas/Cartas";
 import TituloRecarga from "../TituloRecarga/TituloRecarga";
@@ -19,8 +19,6 @@ const Recarga = () => {
             <H4>
              CLIQUE AQUI PARA FAZER A RECARGA <br /> <b style={{ color: "var(--cor-verde_cana)" }}> MANUALMENTE</b> PELO WHATSAPP
             </H4>
-            <RecargaSegura>
-            </RecargaSegura>
           </Detalhebox2>
         </BoxRecargaManual>
       </BoxRecarga>
