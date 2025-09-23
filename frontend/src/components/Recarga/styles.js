@@ -22,7 +22,7 @@ export const BoxRecarga = styled.div`
   align-items:center ;
 
 `;
-export const BoxRecargaManual = styled.a`
+export const BoxRecargaManual = styled.div`
   position: relative;
   height:8rem;
   width:80%;
@@ -39,7 +39,7 @@ export const BoxRecargaManual = styled.a`
 
 `;
 
-export const Detalhebox = styled.div`
+export const Detalhebox = styled.a`
   height:100%;
   width:20%;
   background-color:var(--cor-verde_cana);
@@ -48,6 +48,7 @@ export const Detalhebox = styled.div`
   display:flex;
   justify-content:center;
   align-items: center;
+  text-decoration:none;
 
   svg{
     color:black;
@@ -55,7 +56,7 @@ export const Detalhebox = styled.div`
     width: 1.5rem;
   }
 `;
-export const Detalhebox2 = styled.div`
+export const Detalhebox2 = styled.a`
   height:100%;
   width:100%;
   border-radius:5px;
@@ -63,6 +64,7 @@ export const Detalhebox2 = styled.div`
   display:flex;
   justify-content:center;
   align-items: center;
+  text-decoration:none;
 
 `;
 export const RecargaSegura = styled.div`
