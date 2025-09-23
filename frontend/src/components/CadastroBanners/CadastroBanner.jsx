@@ -52,7 +52,7 @@ function CadBanner({ onBannerSalvo }) {
         <h1 className="h1admin">
           ATUALIZE O <b style={{ color: "var(--cor-verde_cana)" }}>BANNER</b> DE PUBLICIDADES
         </h1>
-        <p className="padmin">Lembre que a imagem deve ter 1075 x 300 px no formato svg</p>
+        <p className="padmin">Lembre que a imagem deve ter 1920 x 532 px no formato svg</p>
 
         <input
           ref={fileInputRef}
