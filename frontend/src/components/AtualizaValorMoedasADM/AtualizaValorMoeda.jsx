@@ -51,19 +51,19 @@ function ValorMoedas() {
           ATUALIZE O <b style={{ color: "var(--cor-verde_cana)" }}>VALOR</b> DAS ELITE COINS
         </h1>
         <p className="padmin">
-          As moedas estão configuradas em K então 1000 é o mesmo que 1 milhão de moedas
+          As moedas estão configuradas em K então 100 é o mesmo que 100 mil moedas
         </p>
         <input
           className="inputadnim"
           type="number"
-          placeholder="Valor de 1000K para Playstation e Xbox"
+          placeholder="Valor de 100K para Playstation e Xbox"
           value={playXbox}
           onChange={(e) => setPlayXbox(e.target.value)}
         />
         <input
           className="inputadnim"
           type="number"
-          placeholder="Valor de 1000K para Pc"
+          placeholder="Valor de 100K para Pc"
           value={pc}
           onChange={(e) => setPc(e.target.value)}
         />

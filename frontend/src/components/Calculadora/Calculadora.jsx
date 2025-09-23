@@ -69,7 +69,7 @@ const Calculadora = ({ cartaSelecionada, usuario }) => {
       : cartaSelecionada === "play" ? precos.play
       : precos.pc;
 
-    const valorEmReal = (moedas / 1000000) * precoPor1000Moedas;
+    const valorEmReal = (moedas / 100000) * precoPor1000Moedas;
 
     let desc = 0;
     if (moedas >= 100000 && moedas < 500000) desc = 1;

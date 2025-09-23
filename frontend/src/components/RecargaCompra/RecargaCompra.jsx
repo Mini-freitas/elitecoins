@@ -61,7 +61,7 @@ const Recarga = ({ setCartaSelecionada }) => {
             {valores.xbox},00
           </div>
           <div style={{ position: "absolute", bottom: "4rem", right: "2.9rem", fontSize:"15px", color: "#fff" }}>
-            1000k
+            100k
           </div>
         </Carta1>
 
@@ -70,7 +70,7 @@ const Recarga = ({ setCartaSelecionada }) => {
             {valores.play},00
           </div>
           <div style={{ position: "absolute", bottom: "4rem", right: "2.9rem", fontSize:"15px", color: "#fff" }}>
-            1000k
+            100k
           </div>
         </Carta2>
 
@@ -79,7 +79,7 @@ const Recarga = ({ setCartaSelecionada }) => {
             {valores.pc},00
           </div>
           <div style={{ position: "absolute", bottom: "4rem", right: "2.9rem", fontSize:"15px", color: "#fff" }}>
-            1000k
+            100k
           </div>
         </Carta3>
       </ContainerCartasRecarga>

@@ -144,7 +144,7 @@ const Cartas = () => {
             {valores.xbox},00
             </div>
             <div style={{ position: "absolute", bottom: "3.5rem", right: "2.2rem",fontSize:"12px", color: "#fff" }}>
-              1000k
+              100k
             </div>
             </Carta1Carrossel>
             <Carta2Carrossel ref={carta2Ref}>
@@ -152,7 +152,7 @@ const Cartas = () => {
               {valores.play},00
             </div>
             <div style={{ position: "absolute", bottom: "3.5rem", right: "2.2rem",fontSize:"12px", color: "#fff" }}>
-              1000k
+              100k
             </div>
             </Carta2Carrossel>
             <Carta3Carrossel ref={carta3Ref}>
@@ -160,7 +160,7 @@ const Cartas = () => {
               {valores.pc},00
             </div>
             <div style={{ position: "absolute", bottom: "3.5rem", right: "2.2rem",fontSize:"12px", color: "#fff" }}>
-              1000k
+              100k
             </div>
             </Carta3Carrossel>
           </BaseCarrossel>
