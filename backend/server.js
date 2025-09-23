@@ -18,7 +18,7 @@ const HOST_URL = process.env.HOST_URL || "https://elitecoinsfc.com.br";
 
 app.use(
   cors({
-    origin: [HOST_URL],
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
