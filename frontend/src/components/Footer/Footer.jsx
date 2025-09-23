@@ -38,7 +38,7 @@ const Footer = ({usuario, handleLogout }) => {
             <CirculoIconeFooter href="https://www.facebook.com/profile.php?id=61580413455992&locale=pt_BR">
               <CirculoIconeFooterImg src={iconeFacebook} alt="Icone Facebook" />
             </CirculoIconeFooter>
-            <CirculoIconeFooter href="https://www.instagram.com/elite_coins_fc26/">
+            <CirculoIconeFooter href="https://www.instagram.com/elitecoinsfc26?igsh=ZmhxdTQzd2szM2Ez">
               <CirculoIconeFooterSvg 
                 xmlns="http://www.w3.org/2000/svg" 
                 width="16" 
