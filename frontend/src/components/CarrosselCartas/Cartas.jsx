@@ -143,7 +143,7 @@ const Cartas = () => {
             <div style={{ position: "absolute", bottom: "3.5rem", left: "2.2rem",fontSize:"12px", color: "#fff" }}>
             {valores.xbox},00
             </div>
-            <div style={{ position: "absolute", bottom: "3.5rem", right: "3.2rem",fontSize:"12px", color: "#fff" }}>
+            <div style={{ position: "absolute", bottom: "3.5rem", right: "2.5rem",fontSize:"12px", color: "#fff" }}>
               100k
             </div>
             </Carta1Carrossel>
@@ -151,7 +151,7 @@ const Cartas = () => {
             <div style={{ position: "absolute", bottom: "3.5rem", left: "2.2rem",fontSize:"12px", color: "#fff" }}>
               {valores.play},00
             </div>
-            <div style={{ position: "absolute", bottom: "3.5rem", right: "3.2rem",fontSize:"12px", color: "#fff" }}>
+            <div style={{ position: "absolute", bottom: "3.5rem", right: "2.5rem",fontSize:"12px", color: "#fff" }}>
               100k
             </div>
             </Carta2Carrossel>
@@ -159,7 +159,7 @@ const Cartas = () => {
             <div style={{ position: "absolute", bottom: "3.5rem", left: "2.2rem",fontSize:"12px", color: "#fff" }}>
               {valores.pc},00
             </div>
-            <div style={{ position: "absolute", bottom: "3.5rem", right: "3.2rem",fontSize:"12px", color: "#fff" }}>
+            <div style={{ position: "absolute", bottom: "3.5rem", right: "2.5rem",fontSize:"12px", color: "#fff" }}>
               100k
             </div>
             </Carta3Carrossel>
