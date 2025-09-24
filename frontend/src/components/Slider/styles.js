@@ -18,9 +18,19 @@ export const SlidesInput = styled.div`
 `;
 export const Slide = styled.div`
   width: 100%;
+  height: 100%;
   position: relative;
+  display:flex;
+  justfy-content:center;
+  align-itens:center;
+
+  a{
+    text-decoration:none;
+    height:100%;
+    width:100%;
+  }
 `;
-export const ImgSlider = styled.div`
+export const ImgSliderFrente = styled.div`
   height: 100%;
   width: 100vw;
   display: flex;

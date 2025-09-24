@@ -6,7 +6,7 @@ import {
   Slide,
   AutoNavigation,
   AutoButton,
-  ImgSlider,
+  ImgSliderFrente
 } from "./styles";
 
 const Slider = () => {
@@ -53,7 +53,7 @@ const Slider = () => {
         {banners.map((banner, index) => (
           <Slide key={banner.id} style={{ display: activeSlide === index ? "block" : "none" }} >
             <a href={banner.url || "#"} target="_blank" rel="noopener noreferrer">
-              <ImgSlider src={banner.caminho} />
+              <ImgSliderFrente src={banner.caminho} />
             </a>
           </Slide>
         ))}
