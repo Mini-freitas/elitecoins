@@ -12,7 +12,7 @@
 
 .listaBanner{
   height: auto;
-  width: 70%;
+  max-width: 70%;
   border: 1px solid white;
   border-radius:5px;
   display: flex;
@@ -24,7 +24,7 @@
 }
 .listaBannerBox{
   min-height: 80%;
-  width: 100%;
+  width: 20rem;
   overflow-x: scroll;
   overflow-y: hidden;
   scrollbar-width: thin;
