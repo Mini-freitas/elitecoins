@@ -6,6 +6,32 @@ export const SvgUsuario = styled.button`
   outline: none;
   border: none;
   cursor: pointer;
+
+  svg{
+  color: white;
+  cursor: pointer;
+  height: 1.5rem;
+  width: 1.5rem;
+
+  /* Tablet grande */
+  @media (max-width: 1024px) {
+    height: 1.3rem;
+    width: 1.3rem;
+  }
+
+  /* Tablet médio */
+  @media (max-width: 768px) {
+    height: 1.3rem;
+    width: 1.3rem;
+  }
+
+  /* Celular */
+  @media (max-width: 480px) {
+    height: 1.2rem;
+    width: 1.2rem;
+  }
+  
+  }
 `;
 
 export const BoxMenuUsuario = styled.div`

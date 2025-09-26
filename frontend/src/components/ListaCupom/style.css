@@ -63,3 +63,11 @@
 .lixeiracupom:hover{
 color: red;
 }
+@media (max-width: 440px){
+.containerListaCupom{
+  
+  align-items: flex-start;
+  position: relative;
+  top:-5.4rem
+}
+}

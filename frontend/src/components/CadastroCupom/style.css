@@ -2,7 +2,7 @@
     grid-area: cupomCadastro;
     display:flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
 }
 .boxCupomParcerias{
   width:70%;
@@ -35,4 +35,12 @@
     font-weight: bold;
     cursor: pointer;
     font-family: var(--fonte-secundaria);
+}
+@media (max-width: 440px){
+  .containerCadastroCupom{
+    
+    align-items: flex-start;
+    position: relative;
+    top:-4.5rem
+}
 }
