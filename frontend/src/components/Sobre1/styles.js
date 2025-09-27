@@ -12,6 +12,11 @@ export const BoxSobre1 = styled.div`
   text-align: center;
   border-radius: 10px;
   background: linear-gradient(135deg,  #333 0%, #111 100%);
+
+  @media(max-width:440px){
+    height: 100%;
+    width: 40%;
+  }
 `;
 export const CirculoIconeSobre = styled.div`
   height: 4rem;
@@ -22,6 +27,7 @@ export const CirculoIconeSobre = styled.div`
   background-color: var(--cor-verde_cana);
   border-radius: 50%;
   margin-top: 2rem;
+  
 `;
 export const CirculoIconeSobreImg = styled.img`
   height: 8rem;
@@ -42,4 +48,9 @@ export const BoxSobre1H4 = styled.h4`
   font-weight: 500;
   font-size: medium;
   margin-top: .5rem;
+
+    
+  @media(max-width:440px){
+    font-size: 10px;
+  }
 `;

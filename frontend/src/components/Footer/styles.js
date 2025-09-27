@@ -9,6 +9,10 @@ export const FooterContainer = styled.footer`
   align-items: center;
   border-top: 2px solid var(--cor-cinza);
   background-color: var(--cor-preto);
+
+  @media(max-width:440px){
+    width:100vw;
+  }
 `;
 
 export const AlinhaFooter = styled.div`

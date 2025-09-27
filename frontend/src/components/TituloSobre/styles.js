@@ -3,10 +3,20 @@ import styled from 'styled-components'
 export const TituloSobreContainer = styled.div`
   height: auto;
   width: auto;
+  @media(max-width:440px){
+    display:flex;
+    flex-direction:column;
+    gap:1rem;
+  }
 `;
 export const TitulosAreasNavegacao = styled.h1`
   height:auto;
   width:auto;
+
+  @media(max-width:440px){
+    font-size: 1.2rem;
+    text-align:center;
+  }
 `;
 
 export const TxtSobre = styled.div`
@@ -16,4 +26,14 @@ export const TxtSobre = styled.div`
   font-style: normal;
   font-size: medium;
   text-align: center;
+
+  @media(max-width:440px){
+    font-size:small;
+    max-width:300px;
+    text-align:start;
+
+    br{
+      display:none;
+    }
+  }
 `;

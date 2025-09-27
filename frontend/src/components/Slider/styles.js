@@ -7,6 +7,12 @@ export const SliderContainer = styled.div`
   position: relative;
   margin: 0 auto;
   overflow: hidden;
+
+  @media (max-width:440px){
+    width:100vw;
+    height:100%;
+    background-color: #232323ff;
+    }
 `;
 export const Slides = styled.div`
   height: 100%;
@@ -40,6 +46,10 @@ export const ImgSliderFrente = styled.div`
   background-repeat: no-repeat;
   justify-content: center;
   align-items: center;
+
+  @media (max-width:440px){
+    background-size: contain;
+  }
 `;
 
 export const ManualNavigation = styled.div`

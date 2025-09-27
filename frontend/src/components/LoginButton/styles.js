@@ -18,6 +18,12 @@ export const BoxLogin = styled.div`
   background-color: var(--cor-verde_cana);
   cursor: pointer;
 
+
+  @media (max-width: 440px){
+    height: 1rem;
+    width: 1rem;
+  }
+
 `;
 export const BoxLoginH2 = styled.div`
   color: var(--cor-preto);
@@ -26,6 +32,10 @@ export const BoxLoginH2 = styled.div`
   font-style: normal;
   font-size: medium;
   text-align: center;
+
+  @media (max-width: 440px){
+    font-size:small;
+  }
 `
 export const BoxLoginSvg = styled.div`
 
@@ -36,5 +46,10 @@ export const BoxLoginSvg = styled.div`
   align-items: center;
   color: var(--cor-preto);
   cursor: pointer;
+
+  @media (max-width: 440px){
+    height: 1rem;
+    width: 1rem;
+  }
 `;
 

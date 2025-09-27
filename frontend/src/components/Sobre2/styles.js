@@ -12,10 +12,17 @@ export const BoxSobre2 = styled.div`
   text-align: center;
   border-radius: 10px;
   background-color: var(--cor-verde_cana);
+
+  @media(max-width:440px){
+    height: 100%;
+    width: 40%;
+    padding:10px;
+  }
 `;
 export const CirculoIconeSobre2Img = styled.img`
   height: 8rem;
   width: 8rem;
+  
 `;
 export const CirculoIconeSobre2 = styled.div`
   height: 4rem;
@@ -34,6 +41,7 @@ export const BoxSobre2H3 = styled.h3`
   font-weight: 800;
   font-size: medium;
   margin-top: .5rem;
+
 `;
 export const BoxSobre2H4 = styled.h4`
   color: var(--cor-cinza-escuro);
@@ -41,6 +49,10 @@ export const BoxSobre2H4 = styled.h4`
   font-style: normal;
   font-weight: 800;
   font-size: small;
+
+  @media(max-width:440px){
+    font-size: 11.9px;
+  }
 `;
 export const BtLerMais = styled.div`
   height: auto;
@@ -57,10 +69,18 @@ export const BtLerMais = styled.div`
   padding: .5rem 3.5rem;
   text-decoration: none;
   text-align: center;
+
+  @media(max-width:440px){
+   display:none;
+  }
 `;
 export const BtLerMaisSvg = styled.svg`
   height: 1rem;
   width: 1rem;
   margin-top: 5px;
   color: var(--cor-verde_cana);
+
+  @media(max-width:440px){
+   display:none;
+  }
 `;

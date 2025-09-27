@@ -26,10 +26,26 @@ export const ExplicacaoDuvidasH2 = styled.h2`
   font-weight: 500;
   font-style: normal;
   font-size: 1.3rem;
+
+  @media(max-width:440px){
+    font-size:12px;
+    text-align:start;
+    max-width: 280px;
+    margin-right:1.2rem;
+
+    br{
+      display:none;
+    }
+  }
 `;
 export const TitulosAreasNavegacao = styled.h2`
   color: var(--cor-branca);
   font-family: var(--fonte-principal);
   text-align: start;
   font-size: 2.1rem;
+
+  @media(max-width:440px){
+    font-size: 1.2rem;
+    margin-left:2rem;
+  }
 `;

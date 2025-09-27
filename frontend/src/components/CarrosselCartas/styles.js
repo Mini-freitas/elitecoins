@@ -11,6 +11,12 @@ export const CartasContainer = styled.div`
   justify-content: center;
   align-items: center;
   perspective: 1000px;
+
+   @media (max-width:440px){
+        width: 100%;
+        justify-content:center;
+        align-items: center;
+    }
 `;
 export const CarrosselCartas = styled.div`
   position: relative;
@@ -33,6 +39,11 @@ export const CarrosselCartas = styled.div`
     border-radius: 50%;
     background-color: rgba(99, 248, 0, 0.527);
     filter: blur(90px);
+
+    @media (max-width:440px){
+        width: 100%;
+        gap:1rem;
+    }
   }
 `;
 export const BaseCarrossel = styled.div`
@@ -44,8 +55,14 @@ export const BaseCarrossel = styled.div`
   transform-style: preserve-3d;
   transform-origin: center;
   border-radius: 50%;
+
+  @media (max-width:440px){
+    height: 8rem;
+    width: 18rem;
+  }
 `;
 export const Carta1Carrossel = styled.div`
+  position:relative;
   position: absolute;
   height: 16rem;
   width: 11rem;
@@ -62,8 +79,14 @@ export const Carta1Carrossel = styled.div`
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;  
+
+  @media (max-width:440px){
+    height: 11.5rem;
+    width: 9rem;
+  }
 `;
 export const Carta2Carrossel = styled.div`
+  position:relative;
   position: absolute;
   height: 16rem;
   width: 11rem;
@@ -80,8 +103,14 @@ export const Carta2Carrossel = styled.div`
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+
+  @media (max-width:440px){
+    height: 11.5rem;
+    width: 9rem;
+  }
 `;
 export const Carta3Carrossel = styled.div`
+  position:relative;
   position: absolute;
   height: 16rem;
   width: 11rem;
@@ -98,4 +127,36 @@ export const Carta3Carrossel = styled.div`
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+
+  @media (max-width:440px){
+    height: 11.5rem;
+    width: 9rem;
+  }
+`;
+export const PrecoCoins = styled.div`
+  position: absolute;
+  bottom: 3.5rem;
+  left: 2.2rem;
+  font-size:12px;
+  color: #fff; 
+
+  @media (max-width:440px){
+    bottom: 1.9rem;
+    left:1.7rem;
+    font-size: 11px;
+
+  }
+`;
+export const QuantCoins = styled.div`
+  position:absolute;
+  bottom: 3.5rem;
+  right: 2.5rem;
+  font-size:12px;
+  color: #fff;
+
+  @media (max-width:440px){
+    bottom: 1.9rem;
+    right:1.9rem;
+    font-size: 11px;
+  }
 `;

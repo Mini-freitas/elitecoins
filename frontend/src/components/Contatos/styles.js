@@ -9,6 +9,10 @@ export const ContatosContainer = styled.div`
   align-items: start;
   gap: 2rem;
   margin-top: 3rem;
+
+  @media(max-width:440px){
+   width:100vw;
+  }
 `;
 export const ContatosContainerColuna = styled.div`
   height: auto;

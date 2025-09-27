@@ -6,11 +6,17 @@ export const RecargaContainer = styled.div`
   position: relative;
   background-color: var(--cor-recarga);
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content:center;
   align-items: start;
   gap: 4rem;
   margin-top: 4rem;
+
+  @media (max-width:440px){
+    width:100vw;
+    align-itens: center;
+
+  }
 `;
 
 export const BoxRecarga = styled.div`
@@ -20,6 +26,11 @@ export const BoxRecarga = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items:center ;
+
+  @media (max-width:440px){
+    width:100%;    
+    position:relative;
+  }
 
 `;
 export const BoxRecargaManual = styled.div`
@@ -36,6 +47,13 @@ export const BoxRecargaManual = styled.div`
   font-family:var(--font-principal);
   color:white;
 
+  @media (max-width:440px){
+  gap:.5rem;
+  height:auto;
+  width:50%;
+  padding:.5rem;
+  
+  }
 `;
 
 export const Detalhebox = styled.a`
@@ -54,6 +72,11 @@ export const Detalhebox = styled.a`
     color:black;
     height:1.5rem;
     width: 1.5rem;
+
+    @media (max-width:440px){
+      height:1rem;
+      width:1rem;
+    }
   }
 `;
 export const Detalhebox2 = styled.a`
@@ -73,6 +96,43 @@ export const H4 = styled.h4`
   font-family:var(--fonte-principal)
   font-size: smaller;
   color:white;
+
+  @media (max-width:440px){
+    font-size: 11px;
+  }
 `;
 
+export const BoxalinhaBts = styled.div`
+  height:5rem;
+  width:100%;
+  display:flex;
+  flex-direction:row;
+  justify-content: center;
+  align-items: center;
+  gap:2rem;
 
+  @media (max-width:440px){
+  gap:1rem;
+  }
+
+`;
+export const BtPaginaCompra = styled.button`
+  display:none;
+ 
+  @media(max-width:440px){
+    display:flex;
+    background-color: var(--cor-verde_cana);
+    color: var(--cor-preto);
+    font-size: medium;
+    font-family: var(--fonte-secundaria);
+    font-weight: 600;
+    font-style: normal;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    padding:1rem;
+    font-size:small;
+  }
+`;

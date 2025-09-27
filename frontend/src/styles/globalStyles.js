@@ -59,9 +59,9 @@ const MyGlobalStyle = createGlobalStyle`
 }
 
 /* Celular pequeno */
-@media (max-width: 480px) {
+@media (max-width: 440px) {
   #root {
-    grid-template-rows: 3rem auto 15rem;
+    grid-template-rows: 4.5rem auto 15rem;
   }
 }
 

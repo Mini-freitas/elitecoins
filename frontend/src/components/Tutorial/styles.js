@@ -8,6 +8,11 @@ export const TutorialContainer = styled.div`
   align-items: center;
   gap: 3rem;
   margin-top: 2.5rem;
+
+  @media(max-width:440px){
+    width:100vw;
+    justify-content:center;
+  }
 `;
 
 export const BoxPrincipaisDuvidas = styled.div`

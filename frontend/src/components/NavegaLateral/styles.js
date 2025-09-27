@@ -5,7 +5,8 @@ export const NavegacaoH2 = styled.div`
   font-family: var(--fonte-secundaria);
   font-weight: 400;
   font-style: normal;
-  color: white;left: 8rem;
+  color: white;
+  left: 8rem;
 
   &:hover{
     color: var(--cor-verde_cana);
@@ -35,4 +36,18 @@ export const ContainerNavegaLateral = styled.div`
     width: 1.3rem;
     color: rgb(0, 0, 0);
   }
+
+  /* Celular pequeno */
+@media (max-width: 440px) {
+  display:none;
+  top:5rem;
+  width: 1.7rem;
+  background-color: #23ca02f1;
+
+  svg{
+    height: 1.2rem;
+    width: 1.2rem;
+  }
+
+}
 `;

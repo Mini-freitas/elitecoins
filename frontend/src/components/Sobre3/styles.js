@@ -12,6 +12,11 @@ export const BoxSobre3 = styled.div`
   text-align: center;
   border-radius: 10px;
   background: linear-gradient(135deg,  #333 0%, #111 100%);
+
+  @media(max-width:440px){
+    height: 100%;
+    width: 40%;
+  }
 `;
 export const CirculoIconeSobre3 = styled.div`
   height: 4rem;
@@ -42,4 +47,8 @@ export const BoxSobre3H4 = styled.h4`
   font-weight: 500;
   font-size: medium;
   margin-top: .5rem;
+
+  @media(max-width:440px){
+    font-size: 10px;
+  }
 `;

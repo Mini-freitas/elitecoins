@@ -16,7 +16,7 @@ const Sobre1 = () => {
         </BoxSobre1H3>
         <BoxSobre1H4>
           Nossa equipe está disponível <br />
-          24h para te atender e tirar <br />
+          para te atender e tirar <br />
           suas dúvidas
         </BoxSobre1H4>
       </BoxSobre1>

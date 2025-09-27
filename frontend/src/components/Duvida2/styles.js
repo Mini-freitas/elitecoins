@@ -12,6 +12,11 @@ export const Duvida2Container = styled.div`
   text-align: start;
   border-radius: 10px;
   background-color: var(--cor-verde_cana);
+
+   @media(max-width:440px){
+    height: 12rem;
+    width: 18rem;
+  }
 `;
 export const Duvida2H3 = styled.h3`
   color: var(--cor-preto);
@@ -20,6 +25,11 @@ export const Duvida2H3 = styled.h3`
   font-style: normal;
   font-size: medium;
   margin-left: 25px;
+
+  @media(max-width:440px){
+    font-size:small; 
+    margin-left: 15px;
+  }
 `;
 export const Duvida2H4 = styled.h4`
   color: var(--cor-preto);
@@ -28,6 +38,15 @@ export const Duvida2H4 = styled.h4`
   font-style: normal;
   font-size: small;
   margin-left: 25px;
+
+  @media(max-width:440px){
+    font-size:10px; 
+    margin-left:15px;
+
+    br{
+      display:none;
+    }
+  }
 `;
 export const Duvida2H5 = styled.h5`
   color: var(--cor-preto);
@@ -39,6 +58,7 @@ export const Duvida2H5 = styled.h5`
   cursor: pointer;
   text-align: center;
   text-decoration: none;
+
 `;
 export const NumeroPergunta2 = styled.h2`
   position: absolute;
@@ -46,4 +66,8 @@ export const NumeroPergunta2 = styled.h2`
   left: 10px;
   color: var(--cor-preto);
   font-family: var(--fonte-secundaria);
+
+   @media(max-width:440px){
+    font-size:20px; 
+  }
 `;

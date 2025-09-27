@@ -16,7 +16,7 @@ const Sobre3 = () => {
         <BoxSobre3H4>
           Compre no nosso site de forma <br />
           simples, fácil e obtenha suas <br />
-          moedas em 30min
+          moedas mais rapido
         </BoxSobre3H4>
       </BoxSobre3>
   );

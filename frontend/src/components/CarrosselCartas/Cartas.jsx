@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import {CartasContainer,CarrosselCartas,BaseCarrossel,Carta1Carrossel,Carta2Carrossel,Carta3Carrossel} from "./styles";
+import {CartasContainer,CarrosselCartas,BaseCarrossel, QuantCoins ,PrecoCoins, Carta1Carrossel,Carta2Carrossel,Carta3Carrossel} from "./styles";
 import api from "../../services/api"; // ← usa api.js padronizado
 
 const Cartas = () => {
@@ -140,28 +140,28 @@ const Cartas = () => {
         <CarrosselCartas>
           <BaseCarrossel ref={baseRef}>
             <Carta1Carrossel ref={carta1Ref}>
-            <div style={{ position: "absolute", bottom: "3.5rem", left: "2.2rem",fontSize:"12px", color: "#fff" }}>
+            <PrecoCoins>
             {valores.xbox},00
-            </div>
-            <div style={{ position: "absolute", bottom: "3.5rem", right: "2.5rem",fontSize:"12px", color: "#fff" }}>
+            </PrecoCoins>
+            <QuantCoins>
               100k
-            </div>
+            </QuantCoins>
             </Carta1Carrossel>
             <Carta2Carrossel ref={carta2Ref}>
-            <div style={{ position: "absolute", bottom: "3.5rem", left: "2.2rem",fontSize:"12px", color: "#fff" }}>
+            <PrecoCoins>
               {valores.play},00
-            </div>
-            <div style={{ position: "absolute", bottom: "3.5rem", right: "2.5rem",fontSize:"12px", color: "#fff" }}>
+            </PrecoCoins>
+            <QuantCoins>
               100k
-            </div>
+            </QuantCoins>
             </Carta2Carrossel>
             <Carta3Carrossel ref={carta3Ref}>
-            <div style={{ position: "absolute", bottom: "3.5rem", left: "2.2rem",fontSize:"12px", color: "#fff" }}>
+            <PrecoCoins>
               {valores.pc},00
-            </div>
-            <div style={{ position: "absolute", bottom: "3.5rem", right: "2.5rem",fontSize:"12px", color: "#fff" }}>
+            </PrecoCoins>
+            <QuantCoins>
               100k
-            </div>
+            </QuantCoins>
             </Carta3Carrossel>
           </BaseCarrossel>
         </CarrosselCartas>

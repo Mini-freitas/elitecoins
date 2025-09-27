@@ -19,7 +19,7 @@ export const FerramentasContainer = styled.div`
   }
 
   /* Celular */
-  @media (max-width: 480px) {
+  @media (max-width: 440px) {
     gap: 0.6rem;
   }
 `;
@@ -51,7 +51,7 @@ export const Icone = styled.svg`
   }
 
   /* Celular */
-  @media (max-width: 480px) {
+  @media (max-width: 440px) {
     height: 1rem;
     width: 1rem;
   }

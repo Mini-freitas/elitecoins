@@ -7,6 +7,11 @@ export const Servicos = styled.div`
   justify-content:start;
   align-items: center;
   gap: 1rem;
+
+  @media(max-width:440px){
+    width:100vw;
+    justify-content:center;
+  }
 `;
 export const BoxInfoSobre = styled.div`
   height: auto;

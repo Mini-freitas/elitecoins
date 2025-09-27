@@ -16,7 +16,7 @@ const Sobre2 = () => {
         <BoxSobre2H4>
           Informações criptografadas e <br />
           verificadas pelo sistema de <br />
-          segurança do Google
+          segurança SSL
         </BoxSobre2H4>
         <BtLerMais href="/lerMais.html">
           Ler mais

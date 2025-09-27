@@ -13,7 +13,7 @@ export const MainContainer = styled.main`
   grid-template-columns: 1fr;
   grid-template-rows: 28rem 1fr 1.2fr 1fr 1fr; /* padrão desktop */
   gap: 5rem;
-  width: 100%;
+  width: 100vw;
   box-sizing: border-box;
 
   /* Tablet grande */
@@ -35,8 +35,7 @@ export const MainContainer = styled.main`
   }
 
   /* Celular pequeno */
-  @media (max-width: 480px) {
-    grid-template-rows: 16rem auto auto auto auto;
-    gap: 1.5rem;
+  @media (max-width: 440px) {
+    grid-template-rows: .6fr .4fr .4fr .4fr .4fr;
   }
 `;
