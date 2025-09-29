@@ -23,4 +23,11 @@ export const BoxPrincipaisDuvidas = styled.div`
   justify-content: center;
   align-items: end;
   gap: 3px;
+
+  @media(max-width:440px){
+    width:100vw;
+    flex-direction: column;
+    justify-content:center;
+    align-items: center;
+  }
 `;

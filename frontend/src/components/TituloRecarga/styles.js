@@ -12,6 +12,7 @@ export const CartasTxtBox = styled.div`
     width:100%;
     justify-content:center;
     align-items: center;
+    margin-top:3rem;
   }
   
 `;
@@ -56,7 +57,7 @@ export const DetalheBolinha = styled.div`
 
 export const BoxTextos = styled.div`
   display:flex;
-  flex-diection:column;
+  flex-direction:column;
   justfy-content:center;
   align-itens:center;
   gap:1rem; 
@@ -72,9 +73,9 @@ export const RecargaTxt = styled.h4`
   font-style: normal;
 
   @media(max-width:440px){
-    font-size:12px;
+    font-size:10px;
     text-align:start;
-    max-width: 200px;
+    max-width: 180px;
 
     br{
       display:none;

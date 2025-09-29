@@ -5,15 +5,16 @@ import cartaPlaystation from "../../images/cartas/cartaPLAYSTATION.svg";
 import cartaPC from "../../images/cartas/cartaPC.svg";
 
 export const CartasContainer = styled.div`
-  height: 43%;
-  width: 50%;
+  height: auto;
+  width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   perspective: 1000px;
 
    @media (max-width:440px){
-        width: 100%;
+        height: auto;
+        width: 80%;
         justify-content:center;
         align-items: center;
     }
@@ -28,6 +29,7 @@ export const CarrosselCartas = styled.div`
   transform-style: preserve-3d; 
   transform: rotateX(90deg);
   transform-origin: bottom;
+  top:-4rem;
 
   &::before{
     content: "";
@@ -41,9 +43,16 @@ export const CarrosselCartas = styled.div`
     filter: blur(90px);
 
     @media (max-width:440px){
-        width: 100%;
-        gap:1rem;
+      height: 20rem;
+      width: 50%;
+      gap:1rem;
     }
+    }
+  @media (max-width:440px){
+    height: auto;
+    width: 100%;
+    top:0;
+  }
   }
 `;
 export const BaseCarrossel = styled.div`
@@ -57,8 +66,8 @@ export const BaseCarrossel = styled.div`
   border-radius: 50%;
 
   @media (max-width:440px){
-    height: 8rem;
-    width: 18rem;
+    height: 10rem;
+    width: 78%;
   }
 `;
 export const Carta1Carrossel = styled.div`
@@ -81,8 +90,8 @@ export const Carta1Carrossel = styled.div`
   background-size: cover;  
 
   @media (max-width:440px){
-    height: 11.5rem;
-    width: 9rem;
+    height: 11rem;
+    width: 8rem;
   }
 `;
 export const Carta2Carrossel = styled.div`
@@ -105,8 +114,8 @@ export const Carta2Carrossel = styled.div`
   background-size: cover;
 
   @media (max-width:440px){
-    height: 11.5rem;
-    width: 9rem;
+    height: 11rem;
+    width: 8rem;
   }
 `;
 export const Carta3Carrossel = styled.div`
@@ -129,8 +138,8 @@ export const Carta3Carrossel = styled.div`
   background-size: cover;
 
   @media (max-width:440px){
-    height: 11.5rem;
-    width: 9rem;
+    height: 11rem;
+    width: 8rem;
   }
 `;
 export const PrecoCoins = styled.div`
@@ -141,9 +150,9 @@ export const PrecoCoins = styled.div`
   color: #fff; 
 
   @media (max-width:440px){
-    bottom: 1.9rem;
-    left:1.7rem;
-    font-size: 11px;
+    bottom: 2.2rem;
+    left:1.4rem;
+    font-size: 7px;
 
   }
 `;
@@ -155,8 +164,8 @@ export const QuantCoins = styled.div`
   color: #fff;
 
   @media (max-width:440px){
-    bottom: 1.9rem;
-    right:1.9rem;
-    font-size: 11px;
+    bottom: 2.2rem;
+    right:1.7rem;
+    font-size: 7px;
   }
 `;

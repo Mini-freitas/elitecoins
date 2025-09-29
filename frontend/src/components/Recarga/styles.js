@@ -6,36 +6,41 @@ export const RecargaContainer = styled.div`
   position: relative;
   background-color: var(--cor-recarga);
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content:center;
   align-items: start;
   gap: 4rem;
   margin-top: 4rem;
+  margin-left: 4rem;
 
   @media (max-width:440px){
     width:100vw;
     align-itens: center;
-
+    flex-direction: column;
+    gap:5rem;
+    margin:.5rem;
   }
 `;
 
 export const BoxRecarga = styled.div`
-  height:85%;
+  height:100%;
   width: 50%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items:center ;
+  justify-content: start;
+  align-items:center;
 
   @media (max-width:440px){
+    height: auto;
     width:100%;    
     position:relative;
+    top:-4rem;
   }
 
 `;
 export const BoxRecargaManual = styled.div`
-  height:8rem;
-  width:80%;
+  height:6rem;
+  width:70%;
   background: linear-gradient(135deg,  #333 0%, #111 100%);
   border-radius:5px;
   cursor:pointer;
@@ -112,6 +117,7 @@ export const BoxalinhaBts = styled.div`
   gap:2rem;
 
   @media (max-width:440px){
+  margin-top:1.5rem;
   gap:1rem;
   }
 

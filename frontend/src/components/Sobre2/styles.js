@@ -13,10 +13,10 @@ export const BoxSobre2 = styled.div`
   border-radius: 10px;
   background-color: var(--cor-verde_cana);
 
-  @media(max-width:440px){
-    height: 100%;
-    width: 40%;
-    padding:10px;
+ @media(max-width:440px){
+    height: 8rem;
+    width: 80%;
+    flex-direction: row;
   }
 `;
 export const CirculoIconeSobre2Img = styled.img`
@@ -33,6 +33,12 @@ export const CirculoIconeSobre2 = styled.div`
   background-color: var(--cor-preto);
   border-radius: 50%;
   margin-top: 2rem;
+
+  @media(max-width:440px){
+    position:absolute;
+    top:.5rem;
+    left:2rem;
+  }
 `;
 export const BoxSobre2H3 = styled.h3`
   color: var(--cor-preto);
@@ -41,6 +47,12 @@ export const BoxSobre2H3 = styled.h3`
   font-weight: 800;
   font-size: medium;
   margin-top: .5rem;
+
+  @media(max-width:440px){
+    position:absolute;
+    top:2rem;
+    left:8.5rem;
+  }
 
 `;
 export const BoxSobre2H4 = styled.h4`
@@ -51,7 +63,11 @@ export const BoxSobre2H4 = styled.h4`
   font-size: small;
 
   @media(max-width:440px){
-    font-size: 11.9px;
+    position:absolute;
+    top:4rem;
+    left:8.5rem;
+    font-size: 10px;
+    text-align: left;
   }
 `;
 export const BtLerMais = styled.div`

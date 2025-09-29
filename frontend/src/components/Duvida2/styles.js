@@ -14,8 +14,8 @@ export const Duvida2Container = styled.div`
   background-color: var(--cor-verde_cana);
 
    @media(max-width:440px){
-    height: 12rem;
-    width: 18rem;
+    height: 8rem;
+    width: 80%;
   }
 `;
 export const Duvida2H3 = styled.h3`
@@ -27,6 +27,7 @@ export const Duvida2H3 = styled.h3`
   margin-left: 25px;
 
   @media(max-width:440px){
+    margin-top: 2rem;
     font-size:small; 
     margin-left: 15px;
   }
@@ -58,6 +59,10 @@ export const Duvida2H5 = styled.h5`
   cursor: pointer;
   text-align: center;
   text-decoration: none;
+
+  @media(max-width:440px){
+    display:none;
+  }
 
 `;
 export const NumeroPergunta2 = styled.h2`

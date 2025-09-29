@@ -22,4 +22,11 @@ export const BoxInfoSobre = styled.div`
   align-items: end;
   gap: 1rem;
   margin-top: 1rem;
+
+  @media(max-width:440px){
+    flex-direction: column;
+    align-items: center;
+    gap:3px;
+
+  }
 `;

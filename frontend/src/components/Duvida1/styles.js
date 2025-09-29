@@ -14,8 +14,8 @@ export const Duvida1Container = styled.div`
   background: linear-gradient(135deg,  #333 0%, #111 100%);
 
   @media(max-width:440px){
-    height: 11rem;
-    width: 14rem;
+    height: 8rem;
+    width: 80%;
   }
 `;
 export const Duvida1H3 = styled.h3`

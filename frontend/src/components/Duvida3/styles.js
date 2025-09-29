@@ -13,9 +13,9 @@ export const Duvida3Container = styled.div`
   border-radius: 10px;
   background: linear-gradient(135deg,  #333 0%, #111 100%);
 
-   @media(max-width:440px){
-    height: 11rem;
-    width: 14rem;
+  @media(max-width:440px){
+    height: 8rem;
+    width: 80%;
   }
 `;
 export const Duvida3H3 = styled.h3`
