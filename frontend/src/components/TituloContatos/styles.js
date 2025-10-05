@@ -12,6 +12,17 @@ export const ContatosContainerTitulo = styled.div`
 export const TitulosAreasNavegacao = styled.h1`
     height: auto;
     width: auto;
+
+    @media(max-width:440px){
+    font-size: 1.2rem;
+    text-align: center;
+    word-spacing:0;
+
+    br{
+    display:none;
+    }
+
+  }
 `
 export const DetalheContato = styled.div`
   height: auto;
@@ -22,11 +33,22 @@ export const DetalheContato = styled.div`
   align-items: center;
   gap: 1.5rem;
   margin-right: .5rem;
+
+  @media(max-width:440px){
+    width:100%;
+    br{
+      display:none;
+    }
+  }
 `;
 export const DetalheTracinho = styled.div`
   height: 3rem;
   width: 5px;
   background-color: var(--cor-cinza);
+
+  @media(max-width:440px){
+    display:none;
+  }
 `;
 export const DetalheContatoH4 = styled.h4`
   color: var(--cor-cinza);
@@ -35,4 +57,8 @@ export const DetalheContatoH4 = styled.h4`
   font-style: normal;
   font-size: medium;
   text-align: start;
+
+  @media(max-width:440px){
+    width:80%;
+  }
 `;

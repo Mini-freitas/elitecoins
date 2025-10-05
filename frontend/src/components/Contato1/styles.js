@@ -8,6 +8,11 @@ export const BoxContato1 = styled.div`
   justify-content: center;
   align-items: center;
   gap: 1.5rem;
+
+  @media(max-width:440px){
+    justify-content: start;
+    width:15rem;
+  }
 `;
 export const IconeCirculo = styled.div`
   height: 3rem;
@@ -17,10 +22,20 @@ export const IconeCirculo = styled.div`
   align-items: center;
   background-color: var(--cor-verde_cana);
   border-radius: 50%;
+
+  @media(max-width:440px){
+    height: 2rem;
+    width: 2rem;
+   }
 `;
 export const IconeCirculoImg = styled.img`
   height: 6rem;
   width: 6rem;
+
+  @media(max-width:440px){
+    height: 5rem;
+    width: 5rem;
+   }
 `;
 export const IconeTxt = styled.div`
   height: auto;
@@ -38,6 +53,10 @@ export const IconeTxtH3 = styled.h3`
   font-style: normal;
   font-size: medium;
   text-align: start;
+
+  @media(max-width:440px){
+    font-size: small;
+   }
 `;
 export const IconeTxtH4 = styled.h4`
   color: var(--cor-cinza-escuro);
@@ -46,4 +65,8 @@ export const IconeTxtH4 = styled.h4`
   font-style: normal;
   font-size: medium;
   text-align: start;
+
+  @media(max-width:440px){
+    font-size: small;
+   }
 `;

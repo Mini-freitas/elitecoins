@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { 
   FooterContainer, AlinhaFooter, ContainerRedesSociais, LogoFooter, RedesSociaisTitle, 
   BoxIconesFooter, CirculoIconeFooter, CirculoIconeFooterSvg, CirculoIconeFooterImg, 
-  ContainerFooter, List, ListItem, ContainerAgradecimentos, BtsFooter, Logoff, 
+  ContainerFooter, ContainerFooter1, List, ListItem, ContainerAgradecimentos, BtsFooter, Logoff, 
   VoltarTopo, FooterAfter 
 } from './styles';
 
@@ -57,7 +57,7 @@ const Footer = ({usuario, handleLogout }) => {
         </ContainerRedesSociais>
 
         {/* Navegação */}
-        <ContainerFooter>
+        <ContainerFooter1>
           <List>
             Navegação
             <ListItem onClick={() => scrollToSection("titulo_menu")}>Menu</ListItem>
@@ -66,7 +66,7 @@ const Footer = ({usuario, handleLogout }) => {
             <ListItem onClick={() => scrollToSection("titulo_sobre")}>Sobre</ListItem>
             <ListItem onClick={() => scrollToSection("titulo_contato")}>Contato</ListItem>
           </List>
-        </ContainerFooter>
+        </ContainerFooter1>
 
         {/* Funcionamento */}
         <ContainerFooter>

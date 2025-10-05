@@ -14,9 +14,10 @@ export const BoxSobre1 = styled.div`
   background: linear-gradient(135deg,  #333 0%, #111 100%);
 
   @media(max-width:440px){
-    height: 8rem;
-    width: 80%;
-    flex-direction: row;
+    height: 6rem;
+    width: 60%;
+    align-items: center;
+    margin-right: 3rem;
   }
 `;
 export const CirculoIconeSobre = styled.div`
@@ -30,8 +31,10 @@ export const CirculoIconeSobre = styled.div`
   margin-top: 2rem;
 
    @media(max-width:440px){
+    height: 3rem;
+    width: 3rem;
     position:absolute;
-    top:.5rem;
+    bottom:1.3rem;
     left:2rem;
   }
   
@@ -39,6 +42,11 @@ export const CirculoIconeSobre = styled.div`
 export const CirculoIconeSobreImg = styled.img`
   height: 8rem;
   width: 8rem;
+
+  @media(max-width:440px){
+    height: 6rem;
+    width: 6rem;
+  }
 `;
 export const BoxSobre1H3 = styled.h3`
   color: var(--cor-branca);
@@ -50,8 +58,9 @@ export const BoxSobre1H3 = styled.h3`
 
   @media(max-width:440px){
     position:absolute;
-    top:2rem;
-    left:8.5rem;
+    top:.7rem;
+    left:6.5rem;
+    font-size:small;
   }
 `;
 export const BoxSobre1H4 = styled.h4`
@@ -65,8 +74,8 @@ export const BoxSobre1H4 = styled.h4`
     
   @media(max-width:440px){
     position:absolute;
-    top:4rem;
-    left:8.5rem;
+    top:2.5rem;
+    left:6.5rem;
     font-size: 10px;
     text-align: left;
   }

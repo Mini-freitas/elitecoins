@@ -14,8 +14,11 @@ export const Duvida2Container = styled.div`
   background-color: var(--cor-verde_cana);
 
    @media(max-width:440px){
-    height: 8rem;
-    width: 80%;
+    height: 6rem;
+    width: 60%;
+    align-items: center;
+    margin-left: 3rem;
+
   }
 `;
 export const Duvida2H3 = styled.h3`
@@ -27,9 +30,8 @@ export const Duvida2H3 = styled.h3`
   margin-left: 25px;
 
   @media(max-width:440px){
-    margin-top: 2rem;
+    margin-top: 1rem;
     font-size:small; 
-    margin-left: 15px;
   }
 `;
 export const Duvida2H4 = styled.h4`
@@ -42,7 +44,9 @@ export const Duvida2H4 = styled.h4`
 
   @media(max-width:440px){
     font-size:10px; 
-    margin-left:15px;
+    text-align:center;
+    margin-left: 0;
+    width: 90%;
 
     br{
       display:none;

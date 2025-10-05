@@ -8,4 +8,10 @@ export const ImagemContato = styled.div`
   background-size: 25rem;
   background-position: center;
   background-repeat: no-repeat;
+
+
+  /* Celular pequeno */
+  @media (max-width: 440px) {
+    display:none;
+  }
 `;

@@ -36,6 +36,7 @@ export const MainContainer = styled.main`
 
   /* Celular pequeno */
   @media (max-width: 440px) {
-    grid-template-rows: .6fr .4fr .4fr .4fr .4fr;
-  }
+    grid-template-rows: 7.6rem auto auto auto auto;
+    gap:0;
+    }
 `;

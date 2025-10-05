@@ -27,7 +27,6 @@ export const TitulosAreasNavegacao = styled.h1`
     font-size: 1.2rem;
     text-align: center;
     word-spacing:0;
-
   }
 `;
 export const Detalhe = styled.div`

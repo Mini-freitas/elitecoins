@@ -12,6 +12,7 @@ export const ContatosContainer = styled.div`
 
   @media(max-width:440px){
    width:100vw;
+   margin-top:5rem;
   }
 `;
 export const ContatosContainerColuna = styled.div`
@@ -22,6 +23,10 @@ export const ContatosContainerColuna = styled.div`
   justify-content: center;
   align-items: center;
   gap: 2rem;
+
+  @media(max-width:440px){
+   width:100%;
+  }
 `;
 export const BoxIconesContato = styled.div`
   height: auto;
@@ -31,6 +36,12 @@ export const BoxIconesContato = styled.div`
   justify-content: end;
   align-items: center;
   gap: 1rem;
+
+  @media(max-width:440px){
+    justify-content: center;
+    flex-direction: column;
+
+   }
 `;
 export const BoxIconesCirculos = styled.div`
   height: auto;
@@ -40,6 +51,13 @@ export const BoxIconesCirculos = styled.div`
   justify-content: start;
   align-items: start;
   gap: 1rem;
+  
+ @media(max-width:440px){
+    width:100%;
+    justify-content: center;
+    align-items: center;
+
+   }
 `;
 
 

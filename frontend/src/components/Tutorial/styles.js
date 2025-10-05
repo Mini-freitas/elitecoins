@@ -12,6 +12,8 @@ export const TutorialContainer = styled.div`
   @media(max-width:440px){
     width:100vw;
     justify-content:center;
+    margin-top: 5rem;
+
   }
 `;
 

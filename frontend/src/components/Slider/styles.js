@@ -11,7 +11,6 @@ export const SliderContainer = styled.div`
   @media (max-width:440px){
     width:100vw;
     height:100%;
-    background-color: #232323ff;
     }
 `;
 export const Slides = styled.div`
@@ -49,6 +48,7 @@ export const ImgSliderFrente = styled.div`
 
   @media (max-width:440px){
     background-size: contain;
+
   }
 `;
 

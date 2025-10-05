@@ -14,8 +14,10 @@ export const Duvida1Container = styled.div`
   background: linear-gradient(135deg,  #333 0%, #111 100%);
 
   @media(max-width:440px){
-    height: 8rem;
-    width: 80%;
+    height: 6rem;
+    width: 60%;
+    align-items: center;
+    margin-right: 3rem;
   }
 `;
 export const Duvida1H3 = styled.h3`
@@ -30,7 +32,6 @@ export const Duvida1H3 = styled.h3`
     font-size:small; 
     margin-left: 15px;
     position:relative;
-    top:10px;
   }
 `;
 export const Duvida1H4 = styled.h4`
@@ -42,10 +43,11 @@ export const Duvida1H4 = styled.h4`
   margin-left: 20px;
 
    @media(max-width:440px){
-    font-size:10px; 
-    margin-left: 15px;
-    position:relative;
-    top:10px;
+    font-size:9px; 
+    text-align:center;
+    margin-left: 0;
+    width: 90%;
+
 
     br{
     display:none;

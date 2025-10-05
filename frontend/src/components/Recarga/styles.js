@@ -11,14 +11,16 @@ export const RecargaContainer = styled.div`
   align-items: start;
   gap: 4rem;
   margin-top: 4rem;
-  margin-left: 4rem;
 
   @media (max-width:440px){
     width:100vw;
+
     align-itens: center;
     flex-direction: column;
     gap:5rem;
-    margin:.5rem;
+    margin:0;
+    margin-top:2rem;
+
   }
 `;
 
