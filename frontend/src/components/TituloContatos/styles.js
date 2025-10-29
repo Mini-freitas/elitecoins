@@ -59,6 +59,8 @@ export const DetalheContatoH4 = styled.h4`
   text-align: start;
 
   @media(max-width:440px){
-    width:80%;
+    font-size: small;
+    margin:0 1rem;
+    text-align: center;
   }
 `;

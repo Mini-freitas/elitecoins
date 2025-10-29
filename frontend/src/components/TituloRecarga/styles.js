@@ -62,7 +62,7 @@ export const BoxTextos = styled.div`
   gap:1rem; 
 
   @media(max-width:440px){
-    flex-direction:row;
+  margin:0 1rem
   }
 `;
 export const RecargaTxt = styled.h4`
@@ -72,9 +72,8 @@ export const RecargaTxt = styled.h4`
   font-style: normal;
 
   @media(max-width:440px){
-    font-size:10px;
-    text-align:start;
-    max-width: 180px;
+    font-size:small;
+    text-align:center;
 
     br{
       display:none;

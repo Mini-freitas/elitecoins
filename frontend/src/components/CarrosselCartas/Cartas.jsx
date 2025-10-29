@@ -1,30 +1,36 @@
 import React, { useEffect, useRef, useState } from "react";
-import {CartasContainer,CarrosselCartas,BaseCarrossel, QuantCoins ,PrecoCoins, Carta1Carrossel,Carta2Carrossel,Carta3Carrossel} from "./styles";
+import {
+  CartasContainer,
+  CarrosselCartas,
+  BaseCarrossel,
+  QuantCoins,
+  PrecoCoins,
+  Carta1Carrossel,
+  Carta2Carrossel,
+  Carta3Carrossel,
+} from "./styles";
 import api from "../../services/api"; // ← usa api.js padronizado
 
 const Cartas = () => {
-
-// Estado para armazenar os valores das moedas
+  // Estado para armazenar os valores das moedas
   const [valores, setValores] = useState({ play: 0, xbox: 0, pc: 0 });
 
   useEffect(() => {
-  const fetchValores = async () => {
-    try {
-      const res = await api.get("/moedas");
-      // res.data já vai ter { play, xbox, pc }
-      setValores({
-        play: res.data.play || 0,
-        xbox: res.data.xbox || 0,
-        pc: res.data.pc || 0
-      });
-    } catch (err) {
-      console.error("Erro ao buscar valores das moedas:", err);
-    }
-  };
+    const fetchValores = async () => {
+      try {
+        const res = await api.get("/moedas");
+        setValores({
+          play: res.data.play || 0,
+          xbox: res.data.xbox || 0,
+          pc: res.data.pc || 0,
+        });
+      } catch (err) {
+        console.error("Erro ao buscar valores das moedas:", err);
+      }
+    };
 
-  fetchValores();
-}, []);
-
+    fetchValores();
+  }, []);
 
   const baseRef = useRef(null);
   const carta1Ref = useRef(null);
@@ -32,6 +38,9 @@ const Cartas = () => {
   const carta3Ref = useRef(null);
 
   useEffect(() => {
+    // 🧱 BLOQUEIA a animação em telas menores que 441px
+    if (window.innerWidth <= 440) return;
+
     const cartas = [carta1Ref.current, carta2Ref.current, carta3Ref.current];
     let isDragging = false;
     let startX = 0;
@@ -136,36 +145,26 @@ const Cartas = () => {
   }, []);
 
   return (
-      <CartasContainer>
-        <CarrosselCartas>
-          <BaseCarrossel ref={baseRef}>
-            <Carta1Carrossel ref={carta1Ref}>
-            <PrecoCoins>
-            {valores.xbox},00
-            </PrecoCoins>
-            <QuantCoins>
-              100k
-            </QuantCoins>
-            </Carta1Carrossel>
-            <Carta2Carrossel ref={carta2Ref}>
-            <PrecoCoins>
-              {valores.play},00
-            </PrecoCoins>
-            <QuantCoins>
-              100k
-            </QuantCoins>
-            </Carta2Carrossel>
-            <Carta3Carrossel ref={carta3Ref}>
-            <PrecoCoins>
-              {valores.pc},00
-            </PrecoCoins>
-            <QuantCoins>
-              100k
-            </QuantCoins>
-            </Carta3Carrossel>
-          </BaseCarrossel>
-        </CarrosselCartas>
-      </CartasContainer>    
+    <CartasContainer>
+      <CarrosselCartas>
+        <BaseCarrossel ref={baseRef}>
+          <Carta1Carrossel ref={carta1Ref}>
+            <PrecoCoins>{valores.xbox},00</PrecoCoins>
+            <QuantCoins>100k</QuantCoins>
+          </Carta1Carrossel>
+
+          <Carta2Carrossel ref={carta2Ref}>
+            <PrecoCoins>{valores.play},00</PrecoCoins>
+            <QuantCoins>100k</QuantCoins>
+          </Carta2Carrossel>
+
+          <Carta3Carrossel ref={carta3Ref}>
+            <PrecoCoins>{valores.pc},00</PrecoCoins>
+            <QuantCoins>100k</QuantCoins>
+          </Carta3Carrossel>
+        </BaseCarrossel>
+      </CarrosselCartas>
+    </CartasContainer>
   );
 };
 

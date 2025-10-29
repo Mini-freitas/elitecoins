@@ -8,7 +8,10 @@ import {
   ContainerCartasRecarga, 
   Carta1, 
   Carta2, 
-  Carta3 
+  Carta3,
+  QuantCoins,
+  PrecoCoins
+
 } from './styles';
 import api from "../../services/api"; // ← usa api.js padronizado
 
@@ -57,30 +60,30 @@ const Recarga = ({ setCartaSelecionada }) => {
         <Alinhatelaid id="titulo_recarga"></Alinhatelaid>
 
         <Carta1 data-carta="carta1" onClick={() => handleCartaClick("xbox")}>
-          <div style={{ position: "absolute", bottom: "4rem", left: "2.9rem", fontSize:"15px", color: "#fff" }}>
+          <PrecoCoins>
             {valores.xbox},00
-          </div>
-          <div style={{ position: "absolute", bottom: "4rem", right: "3.3rem", fontSize:"15px", color: "#fff" }}>
+          </PrecoCoins>
+          <QuantCoins>
             100k
-          </div>
+          </QuantCoins>
         </Carta1>
 
         <Carta2 data-carta="carta2" onClick={() => handleCartaClick("play")}>
-          <div style={{ position: "absolute", bottom: "4rem", left: "2.9rem", fontSize:"15px", color: "#fff" }}>
+          <PrecoCoins >
             {valores.play},00
-          </div>
-          <div style={{ position: "absolute", bottom: "4rem", right: "3.3rem", fontSize:"15px", color: "#fff" }}>
+          </PrecoCoins>
+          <QuantCoins>
             100k
-          </div>
+          </QuantCoins>
         </Carta2>
 
         <Carta3 data-carta="carta3" onClick={() => handleCartaClick("pc")}>
-          <div style={{ position: "absolute", bottom: "4rem", left: "2.9rem", fontSize:"15px", color: "#fff" }}>
+          <PrecoCoins>
             {valores.pc},00
-          </div>
-          <div style={{ position: "absolute", bottom: "4rem", right: "3.3rem", fontSize:"15px", color: "#fff" }}>
+          </PrecoCoins>
+          <QuantCoins>
             100k
-          </div>
+          </QuantCoins>
         </Carta3>
       </ContainerCartasRecarga>
     </RecargaContainer>

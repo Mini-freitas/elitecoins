@@ -7,6 +7,10 @@ export const CalculadoraContainer = styled.div`
   justify-content: start;
   align-items: center;
   gap: 1rem;
+
+  @media (max-width: 440px) {
+    margin-top: 5rem;
+  }
 `;
 
 export const ContainerCalculadora = styled.div`
@@ -17,6 +21,14 @@ export const ContainerCalculadora = styled.div`
   justify-content: center;
   align-items: start;
   gap: 3rem;
+
+   @media (max-width: 440px) {
+    margin-top: 1rem;
+    width:100%;
+    flex-direction: column;
+    align-items:center;
+
+  }
 `;
 
 export const BoxCartaRange = styled.div`
@@ -26,6 +38,11 @@ export const BoxCartaRange = styled.div`
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: 440px) {
+    margin-top: 1rem;
+    width:85%;
+  }
 `;
 
 export const CartaSaidaValores = styled.div`
@@ -91,6 +108,11 @@ export const Step = styled.div`
     font-size: 1rem;
     font-weight: 600;
     font-style: normal;
+
+  @media (max-width: 440px) {
+    font-size:10px;
+    left: 0;
+  }
   }
 `;
 
@@ -116,6 +138,14 @@ export const BoxValores = styled.div`
   align-items: center;
   background: linear-gradient(135deg, #333 0%, #111 100%);
   border-radius: 10px;
+
+  @media (max-width: 440px) {
+    position: relative;
+    width:80%;
+    height:8rem;
+    margin-top:-2rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 export const AutoTitulo = styled.div`
@@ -130,6 +160,7 @@ export const AutoTitulo = styled.div`
   font-family: var(--fonte-secundaria);
   font-size: small;
   color: var(--cor-cinza);
+
 `;
 
 export const MoedasRecebidas = styled.div`
@@ -149,6 +180,10 @@ export const MoedasRecebidas = styled.div`
     font-size: 1rem;
     font-weight: 400;
     color: var(--cor-cinza);
+
+  @media (max-width: 440px) {
+    font-size: small;
+  }
   }
 
   p {
@@ -156,6 +191,10 @@ export const MoedasRecebidas = styled.div`
     font-size: 2rem;
     font-weight: 400;
     color: var(--cor-verde_cana);
+
+  @media (max-width: 440px) {
+    font-size: large;
+  }
   }
 `;
 
@@ -168,11 +207,22 @@ export const DescontoBox = styled.div`
   align-items: start;
   margin-left: 3rem;
 
+  @media (max-width: 440px) {
+    position: absolute;
+    right: 1.5rem;
+    top: 3rem;
+    width: auto;
+  }
+
   #quant_desconto {
     font-family: var(--fonte-secundaria);
     font-size: small;
     font-weight: 400;
     color: var(--cor-cinza);
+    
+  @media (max-width: 440px) {
+    font-size: small;
+  }
   }
 
   #preco_real {
@@ -194,11 +244,20 @@ export const TotalPagamento = styled.div`
   gap: 0.3rem;
   margin-left: 3rem;
 
+  @media (max-width: 440px) {
+  margin-top:.5rem;
+  gap:0;
+  }
+
   h2 {
     font-family: var(--fonte-secundaria);
     font-size: 1rem;
     font-weight: 400;
     color: var(--cor-cinza);
+
+  @media (max-width: 440px) {
+    font-size: small;
+  }
   }
 
   p {
@@ -207,8 +266,16 @@ export const TotalPagamento = styled.div`
     font-weight: 400;
     color: var(--cor-branca);
 
+  @media (max-width: 440px) {
+    font-size: large;
+  }
+
     b {
       color: var(--cor-verde_cana);
+
+      @media (max-width: 440px) {
+        font-size: large;
+      }
     }
   }
 `;
@@ -222,11 +289,23 @@ export const Economia = styled.div`
   align-items: start;
   margin-left: 3rem;
 
+  @media (max-width: 440px) {
+    position: absolute;
+    right: 2.8rem;
+    top: 5rem;
+    width:auto;
+    padding:.5rem;
+  }
+
   h2 {
     font-family: var(--fonte-secundaria);
     font-size: 1rem;
     font-weight: 400;
     color: var(--cor-cinza);
+
+    @media (max-width: 440px) {
+      font-size: small;
+    }
   }
 
   p {
@@ -242,15 +321,46 @@ export const Confirmacao = styled.h3`
   font-size: small;
   font-weight: 400;
   color: var(--cor-cinza);
+
+  @media (max-width: 440px) {
+    font-size: 10px;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-itens:center;  
+  }
 `;
 
-export const BotaoContinuar = styled.div`
-  padding: 1rem 2.8rem;
-  background-color: var(--cor-verde_cana);
-  color: var(--cor-preto);
-  font-family: var(--fonte-secundaria);
-  font-weight: 600;
-  text-align: center;
-  border-radius: 5px;
-  cursor: pointer;
+export const CartaSelecionadaCalculadora = styled.img`
+  height: 20rem;
+  width: 20rem;
+
+  @media (max-width: 440px) {
+    height: 80%;
+    width: 80%;  
+  }
+`;
+export const BoxCartacalculadora = styled.div`
+  position: absolute;
+  left: 1.8rem;
+  bottom: 2.4rem;
+  font-family: var(--fonte-principal);
+
+  @media (max-width: 440px) {
+    left: 3.2rem;
+    bottom: 4rem; 
+    font-size: 11px;
+  }
+`;
+export const Boxquantmoedas = styled.div`
+  position: absolute;
+  right: 2.2rem;
+  bottom: 2.4rem;
+  font-family: var(--fonte-principal);
+
+    @media (max-width: 440px) {
+      right: 3.5rem;
+      bottom: 4rem;
+      font-size: 11px;
+  }
 `;

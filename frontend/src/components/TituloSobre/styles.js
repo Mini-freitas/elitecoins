@@ -29,8 +29,7 @@ export const TxtSobre = styled.div`
 
   @media(max-width:440px){
     font-size:small;
-    max-width:300px;
-    text-align:start;
+    margin:0 1rem;
 
     br{
       display:none;

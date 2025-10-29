@@ -1,7 +1,6 @@
 // src/components/Calculadora/Calculadora.jsx
 import React, { useEffect, useState } from "react";
 import api from "../../services/api"; // usa api.js padronizado
-import './calculadora.css';
 import { 
   CalculadoraContainer,
   ContainerCalculadora,
@@ -19,6 +18,9 @@ import {
   TotalPagamento,
   Economia,
   Confirmacao,
+  CartaSelecionadaCalculadora,
+  BoxCartacalculadora,
+  Boxquantmoedas,
 } from './styles';
 import TituloCalculadora from '../TituloCalculadora/TituloCalculadora';
 import cartaPC from "../../images/cartas/cartaPC.svg";
@@ -134,18 +136,18 @@ const Calculadora = ({ cartaSelecionada, usuario }) => {
         <BoxCartaRange>
           <CartaSaidaValores>
             <CartaSelecionada>
-              {cartaSelecionada === "xbox" && <img src={cartaXBOX} alt="Carta Xbox" className="cartaSelecionadaCalculadora"/>}
-              {cartaSelecionada === "play" && <img src={cartaPLAYSTATION} alt="Carta PlayStation" className="cartaSelecionadaCalculadora" />}
-              {cartaSelecionada === "pc" && <img src={cartaPC} alt="Carta PC" className="cartaSelecionadaCalculadora" />}
+              {cartaSelecionada === "xbox" && <CartaSelecionadaCalculadora src={cartaXBOX} alt="Carta Xbox" />}
+              {cartaSelecionada === "play" && <CartaSelecionadaCalculadora src={cartaPLAYSTATION} alt="Carta PlayStation" />}
+              {cartaSelecionada === "pc" && <CartaSelecionadaCalculadora src={cartaPC} alt="Carta PC" />}
 
               {cartaSelecionada && (
                 <>
-                  <div className="boxCartacalculadora">
+                  <BoxCartacalculadora>
                     {valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </div>
-                  <div className="boxquantmoedas">
+                  </BoxCartacalculadora>
+                  <Boxquantmoedas className="boxquantmoedas">
                     {formatMoedas(quantMoedas)}
-                  </div>
+                  </Boxquantmoedas>
                 </>
               )}
             </CartaSelecionada>

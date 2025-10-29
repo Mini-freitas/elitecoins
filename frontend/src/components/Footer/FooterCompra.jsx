@@ -2,8 +2,8 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import { 
   FooterContainer, AlinhaFooter, ContainerRedesSociais, LogoFooter, RedesSociaisTitle, 
-  BoxIconesFooter, CirculoIconeFooter, CirculoIconeFooterSvg, CirculoIconeFooterImg, 
-  ContainerFooter, List, ListItem, ContainerAgradecimentos, BtsFooter, Logoff, 
+  BoxIconesFooter, CirculoIconeFooter, CirculoIconeFooterSvg, CirculoIconeFooterImg,
+  ContainerFooter,ContainerFooter1, List, ListItem, ContainerAgradecimentos, BtsFooter, Logoff, 
   VoltarTopo, FooterAfter 
 } from './styles';
 
@@ -52,7 +52,7 @@ const FooterCompra = ({usuario, handleLogout }) => {
         </ContainerRedesSociais>
 
         {/* NAVEGAÇÃO PELO FOOTER */}
-        <ContainerFooter>
+        <ContainerFooter1>
           <List>
             Navegação
             <ListItem onClick={() => scrollToSection("titulo_menu")}>Menu</ListItem>
@@ -61,7 +61,7 @@ const FooterCompra = ({usuario, handleLogout }) => {
             <ListItem onClick={() => scrollToSection("titulo_calculadora")}>Calculadora</ListItem>
             <ListItem onClick={() => scrollToSection("titulo_contato")}>Contato</ListItem>
           </List>
-        </ContainerFooter>
+        </ContainerFooter1>
 
         <ContainerFooter>
           <List>

@@ -15,7 +15,7 @@ export const BoxSobre2 = styled.div`
 
   @media(max-width:440px){
     height: 6rem;
-    width: 60%;
+    width: 65%;
     align-items: center;
     margin-left: 3rem;
 

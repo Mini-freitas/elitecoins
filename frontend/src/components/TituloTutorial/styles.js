@@ -8,6 +8,13 @@ export const BoxTituloDuvidas = styled.div`
   justify-content: space-around;
   align-items: center;
   text-align: start;
+
+    @media(max-width:440px){
+    flex-direction:column;
+    justify-content: center;
+    text-align: center;
+    gap:1.5rem;
+  }
 `;
 export const TituloDuvidas = styled.div`
   height: 100%;
@@ -20,6 +27,7 @@ export const ExplicacaoDuvidas = styled.div`
   width: auto;
   display: flex;
   justify-content: start;
+
 `;
 export const ExplicacaoDuvidasH2 = styled.h2`
   font-family: var(--fonte-principal);
@@ -28,10 +36,9 @@ export const ExplicacaoDuvidasH2 = styled.h2`
   font-size: 1.3rem;
 
   @media(max-width:440px){
-    font-size:12px;
-    text-align:start;
-    max-width: 280px;
-    margin-right:1.2rem;
+    font-size:small;
+    text-align:center;
+    margin:0 1rem;
 
     br{
       display:none;
@@ -46,6 +53,9 @@ export const TitulosAreasNavegacao = styled.h2`
 
   @media(max-width:440px){
     font-size: 1.2rem;
-    margin-left:2rem;
+
+    br{
+      display:none;
+    }
   }
 `;

@@ -11,6 +11,10 @@ export const RecargaContainer = styled.div`
   gap: 1rem;
   align-items: center;
   text-align: center;
+
+ @media (max-width: 440px) {
+    margin-top: 8rem;
+  }
 `;
 
 export const RecargaContainerH1 = styled.h1`
@@ -20,11 +24,24 @@ export const RecargaContainerH1 = styled.h1`
   b {
     color: var(--cor-verde_cana);
   }
+
+  @media (max-width: 440px) {
+    font-size:medium;
+    text-align:center;
+  }
 `;
 export const RecargaContainerH2 = styled.h2`
-  color: var(--cor-cinza);
-  font-family: var(--fonte-secundaria);
-  font-size: 1.2rem;
+  font-family: var(--fonte-principal);
+  font-style: normal;
+  font-weight: 400;
+  color: var(--cor-branca);
+  font-size: large;
+
+    @media (max-width: 440px) {
+      font-size:small;
+      text-align:center;
+      margin: 1rem 1rem;
+  }
 `;
 export const Alinhatelaid = styled.div`
   position: absolute;
@@ -44,12 +61,17 @@ export const ContainerCartasRecarga = styled.div`
   justify-content: center;
   align-items: center;
   gap: 5rem;
+
+  @media (max-width: 440px) {
+    height: auto;
+    width: 100%;
+    gap: 1rem;
+  }
 `;
 
 export const Carta1 = styled.div`
   height: 19rem;
   width: 14rem;
-  border-radius: 4rem;
   filter: contrast(150%);
   cursor: pointer;
   background-image: url(${cartaXbox});
@@ -60,12 +82,16 @@ export const Carta1 = styled.div`
     transform: scale(1.04);
     transition: 0.5s;
   }
+
+  @media (max-width: 440px) {
+     height: 10rem;
+    width: 6.9rem;
+  }
 `;
 
 export const Carta2 = styled.div`
   height: 19rem;
   width: 14rem;
-  border-radius: 4rem;
   filter: contrast(150%);
   cursor: pointer;
   background-image: url(${cartaPlaystation});
@@ -76,12 +102,16 @@ export const Carta2 = styled.div`
     transform: scale(1.04);
     transition: 0.5s;
   }
+
+   @media (max-width: 440px) {
+    height: 10rem;
+    width: 6.9rem;
+  }
 `;
 
 export const Carta3 = styled.div`
   height: 19rem;
   width: 14rem;
-  border-radius: 4rem;
   filter: contrast(150%);
   cursor: pointer;
   background-image: url(${cartaPC});
@@ -91,5 +121,38 @@ export const Carta3 = styled.div`
   &:hover {
     transform: scale(1.04);
     transition: 0.5s;
+  }
+
+   @media (max-width: 440px) {
+    height: 10rem;
+    width: 6.9rem;
+  }
+`;
+
+export const QuantCoins = styled.div`
+    position: absolute;
+    bottom: 4rem;
+    right: 3.3rem;
+    font-size:15px;
+    color: #fff;
+
+  @media (max-width: 440px) {
+    bottom: 2.2rem;
+    right: 1.5rem;
+    font-size: 8px;
+  }
+`;
+export const PrecoCoins = styled.div`
+  position: absolute;
+  bottom: 4rem;
+  left: 2.9rem;
+  font-size: 15px;
+  color: #fff;
+
+  @media (max-width: 440px) {
+    position: absolute;
+    bottom: 2.2rem;
+    left: 1.4rem;
+    font-size: 8px;
   }
 `;

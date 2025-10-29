@@ -8,14 +8,17 @@ datasource db {
 }
 
 model Usuario {
-  id         String       @id @default(auto()) @map("_id") @db.ObjectId
-  nome       String
-  email      String       @unique
-  senha      String
-  tipo       TipoUsuario  @default(COMUM)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  credenciais Credencial[]
+  id               String        @id @default(auto()) @map("_id") @db.ObjectId
+  nome             String
+  email            String        @unique
+  senha            String
+  tipo             TipoUsuario   @default(COMUM)
+  emailVerificado  Boolean       @default(false)
+  tokenVerificacao String? // token enviado por e-mail
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  credenciais      Credencial[]
+  Notificacao      Notificacao[]
 }
 
 model Credencial {
@@ -31,35 +34,43 @@ model Credencial {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  usuarioId String   @db.ObjectId
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarioId String  @db.ObjectId
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
 }
 
 enum TipoUsuario {
   ADMIN
   COMUM
 }
+
 model Banner {
   id       String   @id @default(auto()) @map("_id") @db.ObjectId
   caminho  String
-  url      String?  
+  url      String?
   criadoEm DateTime @default(now())
 }
 
 model MoedaPreco {
-  id     String  @id @default(auto()) @map("_id") @db.ObjectId
-  play   Int
-  xbox   Int
-  pc     Int
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  play Int
+  xbox Int
+  pc   Int
 }
+
 model Cupom {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  parceiro   String   // Nome do parceiro
-  codigo     String   @unique // Código único do cupom
-  desconto   Float    // Porcentagem de desconto (ex: 10.5 = 10,5%)
-  createdAt  DateTime @default(now()) // Data de criação
-  updatedAt  DateTime @updatedAt      // Atualizado automaticamente
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  parceiro  String // Nome do parceiro
+  codigo    String   @unique // Código único do cupom
+  desconto  Float // Porcentagem de desconto (ex: 10.5 = 10,5%)
+  createdAt DateTime @default(now()) // Data de criação
+  updatedAt DateTime @updatedAt // Atualizado automaticamente
 }
 
-
-
+model Notificacao {
+  id        String   @id @default(cuid()) @map("_id")
+  usuarioId String
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  mensagem  String
+  vista     Boolean  @default(false)
+  criadoEm  DateTime @default(now())
+}

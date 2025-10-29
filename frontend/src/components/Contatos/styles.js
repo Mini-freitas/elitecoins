@@ -12,7 +12,7 @@ export const ContatosContainer = styled.div`
 
   @media(max-width:440px){
    width:100vw;
-   margin-top:5rem;
+   margin-top:0;
   }
 `;
 export const ContatosContainerColuna = styled.div`
@@ -38,9 +38,9 @@ export const BoxIconesContato = styled.div`
   gap: 1rem;
 
   @media(max-width:440px){
-    justify-content: center;
+    width:100%;
+    justify-content: start;
     flex-direction: column;
-
    }
 `;
 export const BoxIconesCirculos = styled.div`

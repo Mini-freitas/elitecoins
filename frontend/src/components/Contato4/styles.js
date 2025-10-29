@@ -34,8 +34,8 @@ export const IconeCirculoImg = styled.img`
   width: 6rem;
 
    @media(max-width:440px){
-    height: 5rem;
-    width: 5rem;
+    height: 4rem;
+    width: 4rem;
    }
 `;
 export const IconeTxt = styled.div`

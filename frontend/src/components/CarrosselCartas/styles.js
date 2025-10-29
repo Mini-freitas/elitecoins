@@ -12,13 +12,15 @@ export const CartasContainer = styled.div`
   align-items: center;
   perspective: 1000px;
 
-   @media (max-width:440px){
-        height: auto;
-        width: 80%;
-        justify-content:center;
-        align-items: center;
-    }
+  @media (max-width: 440px) {
+    height: auto;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+  }
 `;
+
 export const CarrosselCartas = styled.div`
   position: relative;
   height: auto;
@@ -26,12 +28,12 @@ export const CarrosselCartas = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  transform-style: preserve-3d; 
+  transform-style: preserve-3d;
   transform: rotateX(90deg);
   transform-origin: bottom;
-  top:-4rem;
+  top: -4rem;
 
-  &::before{
+  &::before {
     content: "";
     position: absolute;
     height: 20rem;
@@ -41,22 +43,23 @@ export const CarrosselCartas = styled.div`
     border-radius: 50%;
     background-color: rgba(99, 248, 0, 0.527);
     filter: blur(90px);
+  }
 
-    @media (max-width:440px){
-      height: 20rem;
-      width: 50%;
-      gap:1rem;
-    }
-    }
-  @media (max-width:440px){
+  @media (max-width: 440px) {
+    transform: none;
+    top: 0;
     height: auto;
     width: 100%;
-    top:0;
-  }
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &::before {
+      display: none; /* Remove o círculo verde no fundo */
+    }
   }
 `;
+
 export const BaseCarrossel = styled.div`
-  position: absolute;
   position: relative;
   height: 20rem;
   width: 20rem;
@@ -65,14 +68,18 @@ export const BaseCarrossel = styled.div`
   transform-origin: center;
   border-radius: 50%;
 
-  @media (max-width:440px){
-    height: 10rem;
-    width: 78%;
+  @media (max-width: 440px) {
+    height: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 0.8rem;
   }
 `;
-export const Carta1Carrossel = styled.div`
-  position:relative;
-  position: absolute;
+
+const cartaBase = `
   height: 16rem;
   width: 11rem;
   display: flex;
@@ -80,92 +87,71 @@ export const Carta1Carrossel = styled.div`
   justify-content: center;
   transform-origin: bottom;
   transform: rotateX(-90deg);
-  cursor:grab;
+  cursor: grab;
   filter: contrast(150%);
-  top: -15rem;
-  right: -5rem;
-  background-image: url(${cartaXbox});
   background-position: center;
   background-repeat: no-repeat;
-  background-size: cover;  
+  background-size: cover;
 
-  @media (max-width:440px){
-    height: 11rem;
-    width: 8rem;
+  @media (max-width: 440px) {
+    position: static;
+    transform: none;
+    height: 10rem;
+    width: 6.9rem;
+    cursor: default;
   }
 `;
-export const Carta2Carrossel = styled.div`
-  position:relative;
+
+export const Carta1Carrossel = styled.div`
+  ${cartaBase}
   position: absolute;
-  height: 16rem;
-  width: 11rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform-origin: bottom;
-  transform: rotateX(-90deg);
-  cursor:grab;
-  filter: contrast(150%);
+  top: -15rem;
+  left: -5rem;
+  background-image: url(${cartaXbox});
+`;
+
+export const Carta2Carrossel = styled.div`
+  ${cartaBase}
+  position: absolute;
   bottom: 0;
   left: 4.5rem;
   background-image: url(${cartaPlaystation});
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-
-  @media (max-width:440px){
-    height: 11rem;
-    width: 8rem;
-  }
 `;
+
 export const Carta3Carrossel = styled.div`
-  position:relative;
+  ${cartaBase}
   position: absolute;
-  height: 16rem;
-  width: 11rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform-origin: bottom;
-  transform: rotateX(-90deg);
-  cursor:grab;
-  filter: contrast(150%);
   top: -15rem;
-  left: -5rem;
+  left: 15rem;
   background-image: url(${cartaPC});
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-
-  @media (max-width:440px){
-    height: 11rem;
-    width: 8rem;
-  }
 `;
+
 export const PrecoCoins = styled.div`
   position: absolute;
   bottom: 3.5rem;
   left: 2.2rem;
-  font-size:12px;
-  color: #fff; 
-
-  @media (max-width:440px){
-    bottom: 2.2rem;
-    left:1.4rem;
-    font-size: 7px;
-
-  }
-`;
-export const QuantCoins = styled.div`
-  position:absolute;
-  bottom: 3.5rem;
-  right: 2.5rem;
-  font-size:12px;
+  font-size: 12px;
   color: #fff;
 
-  @media (max-width:440px){
+  @media (max-width: 440px) {
+    position: absolute;
     bottom: 2.2rem;
-    right:1.7rem;
-    font-size: 7px;
+    left: 1.4rem;
+    font-size: 8px;
+  }
+`;
+
+export const QuantCoins = styled.div`
+  position: absolute;
+  bottom: 3.5rem;
+  right: 2.5rem;
+  font-size: 12px;
+  color: #fff;
+
+  @media (max-width: 440px) {
+    position: absolute;
+    bottom: 2.2rem;
+    right: 1.5rem;
+    font-size: 8px;
   }
 `;

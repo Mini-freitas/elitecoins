@@ -1,30 +1,7 @@
 import styled from "styled-components";
 
-export const FerramentasContainer = styled.div`
-  position: relative; 
-  
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.2rem; 
 
-  /* Tablet grande */
-  @media (max-width: 1024px) {
-    gap: 1rem;
-  }
-
-  /* Tablet médio */
-  @media (max-width: 768px) {
-    gap: 0.8rem;
-  }
-
-  /* Celular */
-  @media (max-width: 440px) {
-    gap: 0.6rem;
-  }
-`;
-
-export const Mensagem = styled.div`
+export const Notificacaocontainer = styled.div`
   position: relative;
 `;
 
@@ -89,4 +66,18 @@ export const Badge = styled.span`
     width: 0.7rem;
     font-size: 0.6rem;
   }
+`;
+export const BoxMenuNotificacao = styled.div`
+  position: absolute; 
+  top: 3.8rem;
+  right: -4rem;
+  z-index: 1000;
+  height: 18rem;
+  width: 15rem;
+  display:flex;
+  justify-content:center;
+  align-itens:center;
+  background-color: #ffffffa9;
+  padding-top: 10px;
+  overflow-y: scroll;
 `;

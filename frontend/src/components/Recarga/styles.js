@@ -9,8 +9,8 @@ export const RecargaContainer = styled.div`
   flex-direction: row;
   justify-content:center;
   align-items: start;
-  gap: 4rem;
   margin-top: 4rem;
+  margin-left:3rem;
 
   @media (max-width:440px){
     width:100vw;

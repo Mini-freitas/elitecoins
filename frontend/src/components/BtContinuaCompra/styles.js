@@ -8,4 +8,9 @@ export const BotaoContinuar = styled.div`
   text-align: center;
   border-radius: 5px;
   cursor: pointer;
+
+  @media(max-width: 440px) {
+    padding: .8rem 2.5rem;
+    font-size: 11px;
+  }
 `;
