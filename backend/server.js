@@ -26,21 +26,7 @@ app.use(
 );
 app.use(express.json());
 
-// ======================= AUTENTICAÇÃO =======================
-
-function verificarToken(req, res, next) {
-  const token = req.headers["authorization"]?.split(" ")[1];
-  if (!token) return res.status(403).json({ error: "Token não fornecido" });
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(401).json({ error: "Token inválido" });
-    req.usuario = decoded;
-    next();
-  });
-}
-
 // ======================= EMAIL CONFIG =======================
-
 async function enviarEmailConfirmacao(email, token) {
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_HOST,
@@ -52,8 +38,9 @@ async function enviarEmailConfirmacao(email, token) {
     },
   });
 
-  // ✅ Link de confirmação apontando para seu domínio na Hostinger
-  const link = `https://api.elitecoinsfc.com.br/api/confirmar-email/${token}`;
+  // ✅ Define o domínio base a partir do .env
+  const baseUrl = process.env.BASE_URL || "https://www.elitecoinsfc.com.br";
+  const link = `${baseUrl}/api/confirmar-email/${token}`;
 
   await transporter.sendMail({
     from: `"Elite Coins" <${process.env.EMAIL_USER}>`,
@@ -73,19 +60,34 @@ async function enviarEmailConfirmacao(email, token) {
         text-decoration:none;
         font-weight:bold;
       ">Confirmar E-mail</a>
-      <p style="margin-top:20px;font-size:14px;color:#555;">Se você não criou uma conta, ignore esta mensagem.</p>
+      <p style="margin-top:20px;font-size:14px;color:#555;">
+        Se você não criou uma conta, ignore esta mensagem.
+      </p>
     </div>
     `,
   });
+}
+
+// ======================= MIDDLEWARE DE AUTENTICAÇÃO =======================
+function verificarToken(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: "Token não fornecido" });
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.usuario = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error: "Token inválido" });
+  }
 }
 
 // ======================= ROTAS =======================
 
 // Rota protegida (apenas admin)
 app.get("/api/admin", verificarToken, (req, res) => {
-  console.log("Acessando rota admin pelo usuário:", req.usuario);
   if (req.usuario.tipo !== "ADMIN") {
-    console.log("Acesso negado: usuário não é admin");
     return res.status(403).json({ error: "Acesso negado" });
   }
   res.json({ message: "Bem-vindo à área admin!" });
@@ -96,43 +98,28 @@ app.post("/api/registrar", async (req, res) => {
   try {
     let { nome, email, senha, tipo } = req.body;
 
-    console.log("Dados recebidos no cadastro:", { nome, email, senha, tipo });
-
     if (!nome || !email || !senha || !tipo) {
-      console.log("Erro: campos obrigatórios não preenchidos");
       return res.status(400).json({ error: "Preencha todos os campos" });
     }
 
     email = String(email).toLowerCase().trim();
     senha = senha.trim();
 
-    const regras = {
-      tamanho: senha.length >= 8,
-      maiuscula: /[A-Z]/.test(senha),
-      minuscula: /[a-z]/.test(senha),
-      numero: /\d/.test(senha),
-      especial: /[@$!%*?&.]/.test(senha),
-    };
-    console.log("Regras de senha:", regras);
-
     const senhaForteRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{8,}$/;
     if (!senhaForteRegex.test(senha)) {
-      console.log("Senha inválida segundo regex");
       return res.status(400).json({
         error:
-          "A senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, letra minúscula, número e caractere especial",
+          "A senha deve ter pelo menos 8 caracteres, incluindo letra maiúscula, minúscula, número e caractere especial",
       });
     }
 
     const usuarioExistente = await prisma.usuario.findUnique({ where: { email } });
     if (usuarioExistente) {
-      console.log("Erro: usuário já existe:", email);
       return res.status(400).json({ error: "Email já cadastrado" });
     }
 
     const senhaHash = await bcrypt.hash(senha, 10);
-
     const tokenVerificacao = jwt.sign({ email }, process.env.JWT_SECRET, {
       expiresIn: "30m",
     });
@@ -148,20 +135,18 @@ app.post("/api/registrar", async (req, res) => {
       },
     });
 
-    // Envia o e-mail de confirmação
     await enviarEmailConfirmacao(email, tokenVerificacao);
 
-    // 🔔 Cria notificação automática após o cadastro
     await prisma.notificacao.create({
       data: {
         usuarioId: novoUsuario.id,
         mensagem:
-          "Bem-vindo(a) à Elite Coins! 🎉 Verifique seu e-mail para confirmar sua conta e ativar todos os recursos.",
+          "Bem-vindo(a) à Elite Coins! 🎉 Verifique seu e-mail para confirmar sua conta.",
         vista: false,
       },
     });
 
-    // Exclui usuário não confirmado após 30 minutos
+    // Remove usuário não confirmado após 30 minutos
     setTimeout(async () => {
       const user = await prisma.usuario.findUnique({ where: { email } });
       if (user && !user.emailVerificado) {
@@ -189,8 +174,6 @@ app.post("/api/registrar", async (req, res) => {
 app.get("/api/confirmar-email/:token", async (req, res) => {
   try {
     const { token } = req.params;
-    console.log("Token recebido para confirmação:", token);
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const email = decoded.email;
 
@@ -204,7 +187,6 @@ app.get("/api/confirmar-email/:token", async (req, res) => {
       data: { emailVerificado: true, tokenVerificacao: null },
     });
 
-    // ✅ Notificação de sucesso
     await prisma.notificacao.create({
       data: {
         usuarioId: usuario.id,
@@ -213,15 +195,14 @@ app.get("/api/confirmar-email/:token", async (req, res) => {
       },
     });
 
-    // ✅ Redireciona para o site principal
-    return res.redirect("https://elitecoinsfc.com.br?emailConfirmado=true");
+    return res.redirect("https://www.elitecoinsfc.com.br?emailConfirmado=true");
   } catch (error) {
     console.error("Erro na confirmação de email:", error);
     return res.status(400).send("Link inválido ou expirado.");
   }
 });
 
-// ✅ NOVA ROTA — Confirmar e-mail direto pelo sistema
+// Confirmação direta via API
 app.put("/api/confirmar-email-direto/:id", async (req, res) => {
   try {
     const { id } = req.params;

@@ -1,0 +1,13 @@
+
+.boxCartacalculadora{
+    position: absolute;
+    left: 1.8rem;
+    bottom: 2.4rem;
+    font-family: var(--fonte-principal);
+}
+.boxquantmoedas{
+    position: absolute;
+    right: 2.2rem;
+    bottom: 2.4rem;
+    font-family: var(--fonte-principal);
+}
