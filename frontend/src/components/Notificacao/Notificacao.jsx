@@ -5,6 +5,7 @@ import {
   Badge,
   Icone,
   BoxMenuNotificacao,
+  TituloBox,
 } from "./styles";
 
 const Notificacao = ({ usuario, menuAberto, setMenuAberto, fecharMenuUsuario }) => {
@@ -92,6 +93,7 @@ const Notificacao = ({ usuario, menuAberto, setMenuAberto, fecharMenuUsuario }) 
       {/* Menu de notificações */}
       {menuAberto && (
         <BoxMenuNotificacao>
+          <TituloBox>Notificações</TituloBox>
           {carregando ? (
             <p>Carregando...</p>
           ) : notificacoes.length > 0 ? (
@@ -105,7 +107,7 @@ const Notificacao = ({ usuario, menuAberto, setMenuAberto, fecharMenuUsuario }) 
                   height: "3rem",
                   background: n.vista ? "#1f1f1f" : "#004d00",
                   color: "#f5f5f5",
-                  borderRadius: "6px",
+                  borderRadius: "2px",
                   marginBottom: "6px",
                   cursor: "pointer",
                 }}

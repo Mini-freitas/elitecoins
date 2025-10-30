@@ -75,9 +75,17 @@ export const BoxMenuNotificacao = styled.div`
   height: 18rem;
   width: 15rem;
   display:flex;
+  flex-direction:column;
   justify-content:center;
   align-itens:center;
   background-color: #ffffffa9;
   padding-top: 10px;
   overflow-y: scroll;
+`;
+
+export const TituloBox = styled.h3`
+  font-family: var(--fonte-secundaria);
+  font-size: small;
+  color:black;
+  margin:.5rem;
 `;
