@@ -26,7 +26,7 @@ const Ferramentas = ({ usuario, handleLogout }) => {
     <FerramentasContainer ref={ferramentasRef}>
       {/* Exemplo de botão de mensagens estático */}
       <Mensagem>
-        <Badge>3</Badge>
+        <Badge>0</Badge>
         <Icone xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
           <path d="M2.678 11.894a1 1 0 0 1 .287.801 11 11 0 0 1-.398 2c1.395-.323 
           2.247-.697 2.634-.893a1 1 0 0 1 .71-.074A8 8 0 0 0 8 14c3.996 
