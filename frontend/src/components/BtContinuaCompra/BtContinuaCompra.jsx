@@ -30,7 +30,7 @@ const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }
       }
     } catch (err) {
       console.error("Erro ao criar preferência:", err);
-      alert("Erro ao processar pagamento, tente novamente.");
+      alert("O método automático esta em manutenção e voltará em breve, favor comprar pelo whatsapp ou instagram.");
     } finally {
       setIsLoading(false);
     }
