@@ -76,7 +76,7 @@ export const BoxMenuNotificacao = styled.div`
   width: 15rem;
   display:flex;
   flex-direction:column;
-  justify-content:center;
+  justify-content:start;
   align-itens:center;
   background-color: #ffffffa9;
   padding-top: 10px;
