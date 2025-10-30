@@ -12,7 +12,7 @@ export const ContatosContainer = styled.div`
 
   @media(max-width:440px){
    width:100vw;
-   margin-top:0;
+   margin-top:5rem;
   }
 `;
 export const ContatosContainerColuna = styled.div`

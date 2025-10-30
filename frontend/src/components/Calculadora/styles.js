@@ -142,9 +142,8 @@ export const BoxValores = styled.div`
   @media (max-width: 440px) {
     position: relative;
     width:80%;
-    height:8rem;
+    height:10rem;
     margin-top:-2rem;
-    margin-bottom: 1rem;
   }
 `;
 

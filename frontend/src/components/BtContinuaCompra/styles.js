@@ -10,6 +10,7 @@ export const BotaoContinuar = styled.div`
   cursor: pointer;
 
   @media(max-width: 440px) {
+    margin-top:.5rem;
     padding: .8rem 2.5rem;
     font-size: 11px;
   }
