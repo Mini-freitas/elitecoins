@@ -144,6 +144,7 @@ export const BoxValores = styled.div`
     width:80%;
     height:10rem;
     margin-top:-2rem;
+    padding-bottom:1rem;
   }
 `;
 
