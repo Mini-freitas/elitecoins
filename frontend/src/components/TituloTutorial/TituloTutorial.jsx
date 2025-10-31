@@ -6,8 +6,7 @@ const Titulo = () => {
     <BoxTituloDuvidas>
         <TituloDuvidas>
             <TitulosAreasNavegacao>
-                SEM <b style={{ color: "var(--cor-verde_cana)" }}>DUVIDAS</b> SUA EXPERIÊNCIA<br />
-                É MELHOR
+                SEM <b style={{ color: "var(--cor-verde_cana)" }}>DUVIDAS</b> SUA EXPERIÊNCIA <br />É MELHOR
             </TitulosAreasNavegacao>
         </TituloDuvidas>
         <ExplicacaoDuvidas>
