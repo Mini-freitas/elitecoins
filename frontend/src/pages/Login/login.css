@@ -78,3 +78,12 @@
     font-family: var(--fonte-secundaria);
     color: white;
 }
+
+.button-google {
+  background-color: #4285f4;
+  color: white;
+  margin-top: 10px;
+}
+.button-google:hover {
+  background-color: #357ae8;
+}

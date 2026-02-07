@@ -1,7 +1,8 @@
-// src/components/Login/Login.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import api from "../../services/api"; // ← usa api.js padronizado
+import { GoogleLogin } from "@react-oauth/google";
+import jwt_decode from "jwt-decode"; // ✅ import default correto
+import api from "../../services/api";
 import "./login.css";
 
 function Login({ handleLogin }) {
@@ -10,34 +11,58 @@ function Login({ handleLogin }) {
   const [erro, setErro] = useState("");
   const navigate = useNavigate();
 
-  const login = async (e) => {
+  // LOGIN LOCAL
+  const loginLocal = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post("/login", { email, senha }); // rota sem /api
-
+      const res = await api.post("/login", { email, senha });
       handleLogin(res.data.usuario);
-
       sessionStorage.setItem("usuario", JSON.stringify(res.data.usuario));
-
-      if (res.data.usuario.tipo === "ADMIN") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
+      navigate("/"); // redireciona para página principal
     } catch (err) {
       setErro(err.response?.data?.error || "Erro ao logar. Verifique suas credenciais.");
+    }
+  };
+
+  // LOGIN GOOGLE
+  const loginGoogle = async (credentialResponse) => {
+    try {
+      if (!credentialResponse?.credential) {
+        setErro("Erro: credential não recebida do Google");
+        return;
+      }
+
+      const dados = jwt_decode(credentialResponse.credential); // ✅ decodifica token
+      const usuarioGoogle = {
+        nome: dados.name,
+        email: dados.email,
+        avatar: dados.picture,
+        googleId: dados.sub, // coincidir com backend
+      };
+
+      // envia para backend
+      const res = await api.post("/login-google", usuarioGoogle);
+
+      handleLogin(res.data.usuario);
+      sessionStorage.setItem("usuario", JSON.stringify(res.data.usuario));
+
+      navigate("/"); // redireciona para página principal
+    } catch (err) {
+      console.error("Erro login Google:", err);
+      setErro("Não foi possível logar com Google");
     }
   };
 
   return (
     <div className="login">
       <a href="./">
-        <img className="imglogin" src="../favicon.svg" alt="" />
+        <img className="imglogin" src="../favicon.svg" alt="Logo" />
       </a>
       <h2 className="h2login">
         FAÇA SEU <b style={{ color: "var(--cor-verde_cana)" }}>LOGIN</b> <br /> NA ELITE COINS
       </h2>
-      <form className="formlogin" onSubmit={login}>
+
+      <form className="formlogin" onSubmit={loginLocal}>
         <input
           className="inputlogin"
           type="email"
@@ -58,7 +83,16 @@ function Login({ handleLogin }) {
           Entrar
         </button>
       </form>
+
+      <div style={{ marginTop: "20px" }}>
+        <GoogleLogin
+          onSuccess={loginGoogle}
+          onError={() => setErro("Erro ao logar com Google")}
+        />
+      </div>
+
       {erro && <p className="erro">{erro}</p>}
+
       <p className="loginp">
         Não tem conta?{" "}
         <Link to="/cadastro" className="link">

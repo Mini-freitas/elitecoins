@@ -114,7 +114,10 @@ app.post("/api/registrar", async (req, res) => {
       });
     }
 
-    const usuarioExistente = await prisma.usuario.findUnique({ where: { email } });
+    // 🔹 Verificação aprimorada de email já cadastrado
+    const usuarioExistente = await prisma.usuario.findFirst({
+      where: { email }, // encontra qualquer email igual
+    });
     if (usuarioExistente) {
       return res.status(400).json({ error: "Email já cadastrado" });
     }
@@ -169,6 +172,7 @@ app.post("/api/registrar", async (req, res) => {
     res.status(500).json({ error: "Erro ao registrar usuário" });
   }
 });
+
 
 // Confirmação de e-mail (via link)
 app.get("/api/confirmar-email/:token", async (req, res) => {
@@ -262,6 +266,63 @@ app.post("/api/login", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Erro ao realizar login" });
+  }
+});
+
+
+// ================= LOGIN GOOGLE =================
+app.post("/api/login-google", async (req, res) => {
+  try {
+    const { nome, email, avatar, googleId } = req.body;
+
+    // Valida campos obrigatórios
+    if (!nome || !email || !googleId) {
+      return res.status(400).json({ error: "Dados insuficientes para login Google." });
+    }
+
+    const emailNormalizado = email.toLowerCase().trim();
+
+    // Verifica se usuário já existe
+    let usuario = await prisma.usuario.findUnique({
+      where: { email: emailNormalizado },
+    });
+
+    if (!usuario) {
+      // Cria novo usuário Google
+      usuario = await prisma.usuario.create({
+        data: {
+          nome,
+          email: emailNormalizado,
+          avatar: avatar || null,
+          provider: "GOOGLE",
+          providerId: googleId,
+          tipo: "COMUM",
+          emailVerificado: true, // login Google garante email verificado
+        },
+      });
+    } else {
+      // Atualiza providerId e avatar se necessário
+      usuario = await prisma.usuario.update({
+        where: { email: emailNormalizado },
+        data: {
+          provider: "GOOGLE",
+          providerId: googleId,
+          avatar: avatar || usuario.avatar,
+        },
+      });
+    }
+
+    // Gera token JWT
+    const token = jwt.sign(
+      { id: usuario.id, email: usuario.email, tipo: usuario.tipo },
+      process.env.JWT_SECRET,
+      { expiresIn: "2h" }
+    );
+
+    return res.json({ message: "Login Google realizado com sucesso", usuario, token });
+  } catch (err) {
+    console.error("Erro login Google:", err);
+    return res.status(500).json({ error: "Erro ao processar login Google." });
   }
 });
 
@@ -495,6 +556,427 @@ app.put("/api/notificacoes/usuario/:usuarioId/vistas", async (req, res) => {
   }
 });
 
+
+/// ======================= CREDENCIAIS =======================
+
+// ===============================
+// LISTAR CREDENCIAIS DO USUÁRIO
+// ===============================
+app.get("/api/credenciais/:usuarioId", async (req, res) => {
+  try {
+    const { usuarioId } = req.params;
+
+    const credenciais = await prisma.credencial.findMany({
+      where: { usuarioId },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+    });
+
+    return res.json(credenciais);
+  } catch (err) {
+    console.error("❌ Erro ao buscar credenciais:", err);
+    return res.status(500).json({ error: "Erro ao buscar credenciais" });
+  }
+});
+
+// ===============================
+// CRIAR CREDENCIAL (CORRIGIDO)
+// ===============================
+app.post("/api/credenciais", async (req, res) => {
+  try {
+    const {
+      usuarioId,
+      orderID,
+      user,
+      pass,
+      platform,
+      ba,
+      limit,
+      sortMode,
+      persona,
+    } = req.body;
+
+    if (!usuarioId || !orderID || !user || !pass || !platform || !ba) {
+      return res.status(400).json({
+        error: "Preencha todos os campos obrigatórios",
+      });
+    }
+
+    const totalAntes = await prisma.credencial.count({
+      where: { usuarioId },
+    });
+
+    if (totalAntes >= 3) {
+      return res.status(400).json({
+        error: "Você já atingiu o limite de 3 credenciais",
+      });
+    }
+
+    const novaCredencial = await prisma.credencial.create({
+      data: {
+        usuarioId,
+        orderID,
+        user,
+        pass,
+        platform,
+        ba,
+        limit: limit || null,
+        sortMode: sortMode || null,
+        persona: persona || null,
+      },
+    });
+
+    // 🔥 RECONTA APÓS CRIAR
+    const totalDepois = await prisma.credencial.count({
+      where: { usuarioId },
+    });
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+    });
+
+    const perfilCompleto =
+      Boolean(usuario.nome) &&
+      Boolean(usuario.dataNascimento) &&
+      Boolean(usuario.telefone);
+
+    let novaEtapa = 1;
+    if (perfilCompleto) novaEtapa = 2;
+    if (totalDepois > 0) novaEtapa = 3;
+
+    const usuarioAtualizado = await prisma.usuario.update({
+      where: { id: usuarioId },
+      data: { perfilEtapa: novaEtapa },
+    });
+
+    return res.json({
+      success: true,
+      credencial: novaCredencial,
+      usuario: usuarioAtualizado, // 🔥 USUÁRIO COMPLETO
+    });
+  } catch (err) {
+    console.error("❌ Erro ao criar credencial:", err);
+    return res.status(500).json({ error: "Erro ao criar credencial" });
+  }
+});
+
+// ===============================
+// ATUALIZAR CREDENCIAL
+// ===============================
+app.put("/api/credenciais/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { orderID, user, pass, platform, ba, limit, sortMode, persona } =
+      req.body;
+
+    const credencialExistente = await prisma.credencial.findUnique({
+      where: { id },
+    });
+
+    if (!credencialExistente) {
+      return res.status(404).json({
+        error: "Credencial não encontrada",
+      });
+    }
+
+    const credencialAtualizada = await prisma.credencial.update({
+      where: { id },
+      data: {
+        orderID: orderID || credencialExistente.orderID,
+        user: user || credencialExistente.user,
+        pass: pass || credencialExistente.pass,
+        platform: platform || credencialExistente.platform,
+        ba: ba || credencialExistente.ba,
+        limit: limit ?? credencialExistente.limit,
+        sortMode: sortMode ?? credencialExistente.sortMode,
+        persona: persona ?? credencialExistente.persona,
+      },
+    });
+
+    return res.json({
+      success: true,
+      credencial: credencialAtualizada,
+    });
+  } catch (err) {
+    console.error("❌ Erro ao atualizar credencial:", err);
+    return res.status(500).json({ error: "Erro ao atualizar credencial" });
+  }
+});
+
+// ===============================
+// EXCLUIR CREDENCIAL (JÁ CORRETO)
+// ===============================
+app.delete("/api/credenciais/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const credencial = await prisma.credencial.findUnique({
+      where: { id },
+    });
+
+    if (!credencial) {
+      return res.status(404).json({
+        error: "Credencial não encontrada",
+      });
+    }
+
+    const usuarioId = credencial.usuarioId;
+
+    await prisma.credencial.delete({
+      where: { id },
+    });
+
+    const credenciaisRestantes = await prisma.credencial.count({
+      where: { usuarioId },
+    });
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+    });
+
+    const perfilCompleto =
+      Boolean(usuario.nome) &&
+      Boolean(usuario.dataNascimento) &&
+      Boolean(usuario.telefone);
+
+    let novaEtapa = 1;
+    if (perfilCompleto) novaEtapa = 2;
+    if (credenciaisRestantes > 0) novaEtapa = 3;
+
+    const usuarioAtualizado = await prisma.usuario.update({
+      where: { id: usuarioId },
+      data: { perfilEtapa: novaEtapa },
+    });
+
+    return res.json({
+      success: true,
+      usuario: usuarioAtualizado,
+      credenciaisRestantes,
+    });
+  } catch (err) {
+    console.error("❌ Erro ao excluir credencial:", err);
+    return res.status(500).json({
+      error: "Erro interno ao excluir credencial",
+    });
+  }
+});
+
+
+// ======================= PERFIL DO USUÁRIO =======================
+
+/**
+ * PUT /api/usuarios/:id
+ * Atualiza dados do perfil
+ * Avança etapa automaticamente
+ * Libera voucher ao completar perfil
+ */
+app.put("/api/usuarios/:id", async (req, res) => {
+  const { id } = req.params;
+  const { nome, dataNascimento, telefone } = req.body;
+
+  try {
+    const usuario = await prisma.usuario.findUnique({
+      where: { id },
+      include: { credenciais: true },
+    });
+
+    if (!usuario) {
+      return res.status(404).json({
+        erro: "Usuário não encontrado",
+      });
+    }
+
+    const perfilCompleto =
+      Boolean(nome) &&
+      Boolean(dataNascimento) &&
+      Boolean(telefone);
+
+    let novaEtapa = 1;
+    if (perfilCompleto) novaEtapa = 2;
+    if (usuario.credenciais.length > 0) novaEtapa = 3;
+
+    const usuarioAtualizado = await prisma.usuario.update({
+      where: { id },
+      data: {
+        nome,
+        telefone,
+        dataNascimento: dataNascimento
+          ? new Date(dataNascimento)
+          : usuario.dataNascimento,
+        perfilEtapa: novaEtapa,
+        voucherAtivo:
+          perfilCompleto && !usuario.voucherAtivo
+            ? true
+            : usuario.voucherAtivo,
+      },
+    });
+
+    return res.json(usuarioAtualizado);
+  } catch (erro) {
+    console.error("❌ Erro ao atualizar perfil:", erro);
+    return res.status(500).json({
+      erro: "Erro interno ao atualizar perfil",
+    });
+  }
+});
+
+//API MERCADO PAGO 
+
+import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
+
+// =========================
+// CONFIGURAÇÃO MERCADO PAGO
+// =========================
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN,
+  baseURL: "https://api.sandbox.mercadopago.com" // ⚡ endpoint sandbox
+});
+
+
+// =========================
+// ROTA: CRIAR PAGAMENTO
+// =========================
+app.post("/api/pagamento", async (req, res) => {
+  try {
+    const { usuarioId, plataforma, quantia, quantMoedas } = req.body;
+
+    if (!usuarioId || !plataforma || !quantia) {
+      return res.status(400).json({ erro: "Dados inválidos" });
+    }
+
+    // 1️⃣ cria compra no banco
+    const compra = await prisma.compra.create({
+      data: {
+        usuarioId,
+        plataforma,
+        quantia: Number(quantia),
+        moeda: quantMoedas?.toString() || "FIFA",
+        status: "AGUARDANDO_PAGAMENTO",
+      },
+    });
+
+    // 2️⃣ cria preferência
+    const preference = new Preference(client);
+
+const response = await preference.create({
+  body: {
+    items: [
+      {
+        title: `Moedas FIFA - ${plataforma} (${quantMoedas})`,
+        quantity: 1,
+        currency_id: "BRL",
+        unit_price: Number(quantia),
+      },
+    ],
+    metadata: { compraId: compra.id },
+    notification_url: `${HOST_URL}/webhook-mercadopago`,
+    back_urls: {
+      success: `${HOST_URL}/pagamentoaprovado`,
+      failure: `${HOST_URL}/pagamentofalhou`,
+      pending: `${HOST_URL}/pagamentopendente`,
+    },
+    auto_return: "approved",
+  },
+  sandbox: true // ⚡ aqui você indica sandbox
+});
+
+    // 3️⃣ salvar id da preferência
+    await prisma.compra.update({
+      where: { id: compra.id },
+      data: { mpPaymentId: response.id },
+    });
+
+    // 4️⃣ retorna init_point para frontend
+    res.json({ init_point: response.init_point });
+  } catch (error) {
+    console.error("Erro ao criar pagamento:", error);
+    res.status(500).json({ erro: "Erro ao criar pagamento" });
+  }
+});
+
+// =========================
+// ROTA: LISTAR COMPRAS
+// =========================
+app.get("/compras/:usuarioId", async (req, res) => {
+  try {
+    const { usuarioId } = req.params;
+
+    const compras = await prisma.compra.findMany({
+      where: { usuarioId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json(compras);
+  } catch (error) {
+    console.error("Erro ao buscar compras:", error);
+    res.status(500).json({ erro: "Erro ao buscar compras" });
+  }
+});
+
+// =========================
+// WEBHOOK MERCADO PAGO
+// =========================
+app.post("/webhook-mercadopago", async (req, res) => {
+  try {
+    console.log("=== Webhook recebido ===");
+    console.log(JSON.stringify(req.body, null, 2));
+
+    const { type, data } = req.body;
+
+    // Ignora eventos que não sejam de pagamento
+    if (type !== "payment") return res.sendStatus(200);
+
+    const paymentId = data?.id;
+    if (!paymentId) return res.sendStatus(200);
+
+    // Segurança: validar assinatura apenas em produção
+    const mpSignature = req.headers["x-meli-signature"];
+    if (process.env.NODE_ENV === "production") {
+      if (!mpSignature || mpSignature !== process.env.MP_WEBHOOK_TOKEN) {
+        console.log("Assinatura inválida:", mpSignature);
+        return res.status(401).send("Não autorizado");
+      }
+    } else {
+      console.log("Modo sandbox: assinatura não verificada");
+    }
+
+    // Ignora webhook de teste do painel
+    if (paymentId === "123456") {
+      console.log("Webhook de teste recebido");
+      return res.sendStatus(200);
+    }
+
+    // Consulta pagamento real
+    const pagamento = new Payment(client);
+    const paymentData = await pagamento.get({ id: paymentId });
+
+    console.log("Dados do pagamento real:", paymentData);
+
+    const compraId = paymentData.metadata?.compraId;
+    const status = paymentData.status;
+    const valor = paymentData.transaction_amount;
+
+    if (compraId) {
+      await prisma.compra.update({
+        where: { id: compraId },
+        data: {
+          mpStatus: status,
+          quantia: valor,
+          pagoEm: status === "approved" ? new Date() : null,
+          updatedAt: new Date(),
+        },
+      });
+      console.log(`Compra ${compraId} atualizada com status ${status}`);
+    } else {
+      console.log("Nenhum compraId encontrado no metadata");
+    }
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error("Erro no webhook:", err);
+    res.sendStatus(200); // sempre responder 200 para não gerar retries
+  }
+});
 
 // ======================= INICIAR SERVIDOR =======================
 

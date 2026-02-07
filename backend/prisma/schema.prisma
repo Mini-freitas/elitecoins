@@ -7,22 +7,71 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//////////////////////
+// ENUMS
+//////////////////////
+
+enum TipoUsuario {
+  ADMIN
+  COMUM
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+}
+
+enum StatusCompra {
+  AGUARDANDO_PAGAMENTO    // Cliente ainda não pagou
+  TRANSFERENCIA_ANDAMENTO // Pagamento feito, aguardando transferência
+  CONCLUIDA               // Compra concluída
+}
+
+//////////////////////
+// MODELS
+//////////////////////
+
 model Usuario {
   id               String        @id @default(auto()) @map("_id") @db.ObjectId
+
+  // DADOS BÁSICOS
   nome             String
   email            String        @unique
-  senha            String
-  tipo             TipoUsuario   @default(COMUM)
+
+  // AUTENTICAÇÃO
+  senha            String?
+  provider         AuthProvider  @default(LOCAL)
+  providerId       String?
   emailVerificado  Boolean       @default(false)
-  tokenVerificacao String? // token enviado por e-mail
+  tokenVerificacao String?
+
+  // PERFIL
+  avatar           String?
+  dataNascimento   DateTime?
+  telefone         String?
+
+  // PROGRESSO DO PERFIL (1 a 3)
+  perfilEtapa      Int           @default(1)
+
+  // VOUCHER
+  voucherAtivo     Boolean       @default(false)
+  voucherUsos      Int           @default(0)
+  voucherMaxUsos   Int           @default(3)
+
+  // CONTROLE
+  tipo             TipoUsuario   @default(COMUM)
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
+
+  // RELAÇÕES
   credenciais      Credencial[]
-  Notificacao      Notificacao[]
+  notificacoes     Notificacao[]
+  compras          Compra[]
 }
 
 model Credencial {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
+
   orderID   String   @unique
   user      String
   pass      String
@@ -31,16 +80,12 @@ model Credencial {
   limit     Int?
   sortMode  String?
   persona   String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  usuarioId String  @db.ObjectId
+  usuarioId String   @db.ObjectId
   usuario   Usuario @relation(fields: [usuarioId], references: [id])
-}
-
-enum TipoUsuario {
-  ADMIN
-  COMUM
 }
 
 model Banner {
@@ -59,18 +104,47 @@ model MoedaPreco {
 
 model Cupom {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  parceiro  String // Nome do parceiro
-  codigo    String   @unique // Código único do cupom
-  desconto  Float // Porcentagem de desconto (ex: 10.5 = 10,5%)
-  createdAt DateTime @default(now()) // Data de criação
-  updatedAt DateTime @updatedAt // Atualizado automaticamente
+  parceiro  String
+  codigo    String   @unique
+  desconto  Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Notificacao {
-  id        String   @id @default(cuid()) @map("_id")
-  usuarioId String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  usuarioId String   @db.ObjectId
   usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+
   mensagem  String
   vista     Boolean  @default(false)
   criadoEm  DateTime @default(now())
 }
+
+model Compra {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  usuarioId   String       @db.ObjectId
+  usuario     Usuario      @relation(fields: [usuarioId], references: [id])
+
+  plataforma  String
+  quantia     Float
+  moeda       String
+  
+  status      StatusCompra @default(AGUARDANDO_PAGAMENTO)
+
+  // DADOS DO MERCADO PAGO
+  mpPaymentId   String?
+  mpStatus      String?
+
+  // DADOS DA API DE TRANSFERÊNCIA
+  transferenciaId     String?
+  transferenciaStatus String?
+
+  pagoEm      DateTime?
+  concluidoEm DateTime?
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+

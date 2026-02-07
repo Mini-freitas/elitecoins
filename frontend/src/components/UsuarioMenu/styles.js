@@ -76,3 +76,25 @@ export const NomeUsuario = styled.span`
   color: black;
   font-family: "Abel", sans-serif;
 `;
+
+export const AvatarBox = styled.div`
+  width: 2rem;
+  height: 2rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background-color: white;
+  color: black;
+  border-radius: 50%;
+
+  font-family: "Abel", sans-serif;
+`;
+
+export const Avatar = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+`;
