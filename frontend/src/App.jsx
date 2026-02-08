@@ -9,9 +9,10 @@ import Cadastro from "./pages/Cadastro/Cadastro";
 import Admin from "./pages/Admin/Admin";
 import Compra from "./pages/Compra/Compra";
 
-import Seguranca from "./pages/usuario/Seguranca";
-import Compras from "./pages/usuario/Compras/Compras";
-import ExcluirConta from "./pages/usuario/ExcluirConta";
+import Perfil from "./pages/Usuario/Perfil/Perfil";
+import Seguranca from "./pages/Usuario/Seguranca";
+import Compras from "./pages/Usuario/Compras/Compras";
+import ExcluirConta from "./pages/Usuario/ExcluirConta";
 
 import PagamentoAprovado from "./pages/Pagamentos/Pagamentoaprovado";
 import PagamentoPendente from "./pages/Pagamentos/Pagamentopendente";
@@ -59,6 +60,18 @@ function App() {
           }
         />
 
+        <Route
+          path="/usuario/perfil"
+          element={
+            <RotaProtegida>
+              <Perfil
+                usuario={usuario}
+                handleLogout={handleLogout}
+                handleLogin={handleLogin} // 👈 ESSENCIAL
+              />
+            </RotaProtegida>
+          }
+        />
 
         <Route path="/usuario/seguranca" element={<RotaProtegida><Seguranca usuario={usuario} /></RotaProtegida>} />
         <Route path="/usuario/compras" element={<RotaProtegida><Compras usuario={usuario} /></RotaProtegida>} />
