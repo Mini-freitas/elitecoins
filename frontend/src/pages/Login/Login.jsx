@@ -11,14 +11,25 @@ function Login({ handleLogin }) {
   const [erro, setErro] = useState("");
   const navigate = useNavigate();
 
+  // função de redirecionamento por tipo
+  const redirecionarUsuario = (usuario) => {
+    if (usuario.tipo === "ADMIN") {
+      navigate("/admin");
+    } else {
+      navigate("/");
+    }
+  };
+
   // LOGIN LOCAL
   const loginLocal = async (e) => {
     e.preventDefault();
     try {
       const res = await api.post("/login", { email, senha });
+
       handleLogin(res.data.usuario);
       sessionStorage.setItem("usuario", JSON.stringify(res.data.usuario));
-      navigate("/"); // redireciona para página principal
+
+      redirecionarUsuario(res.data.usuario); // corrigido
     } catch (err) {
       setErro(err.response?.data?.error || "Erro ao logar. Verifique suas credenciais.");
     }
@@ -32,21 +43,20 @@ function Login({ handleLogin }) {
         return;
       }
 
-      const dados = jwt_decode(credentialResponse.credential); // ✅ decodifica token
+      const dados = jwt_decode(credentialResponse.credential);
       const usuarioGoogle = {
         nome: dados.name,
         email: dados.email,
         avatar: dados.picture,
-        googleId: dados.sub, // coincidir com backend
+        googleId: dados.sub,
       };
 
-      // envia para backend
       const res = await api.post("/login-google", usuarioGoogle);
 
       handleLogin(res.data.usuario);
       sessionStorage.setItem("usuario", JSON.stringify(res.data.usuario));
 
-      navigate("/"); // redireciona para página principal
+      redirecionarUsuario(res.data.usuario); // corrigido
     } catch (err) {
       console.error("Erro login Google:", err);
       setErro("Não foi possível logar com Google");
