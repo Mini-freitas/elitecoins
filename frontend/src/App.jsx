@@ -9,7 +9,6 @@ import Cadastro from "./pages/Cadastro/Cadastro";
 import Admin from "./pages/Admin/Admin";
 import Compra from "./pages/Compra/Compra";
 
-import Perfil from "./pages/usuario/Perfil/Perfil";
 import Seguranca from "./pages/usuario/Seguranca";
 import Compras from "./pages/usuario/Compras/Compras";
 import ExcluirConta from "./pages/usuario/ExcluirConta";
@@ -60,18 +59,6 @@ function App() {
           }
         />
 
-        <Route
-          path="/usuario/perfil"
-          element={
-            <RotaProtegida>
-              <Perfil
-                usuario={usuario}
-                handleLogout={handleLogout}
-                handleLogin={handleLogin} // 👈 ESSENCIAL
-              />
-            </RotaProtegida>
-          }
-        />
 
         <Route path="/usuario/seguranca" element={<RotaProtegida><Seguranca usuario={usuario} /></RotaProtegida>} />
         <Route path="/usuario/compras" element={<RotaProtegida><Compras usuario={usuario} /></RotaProtegida>} />

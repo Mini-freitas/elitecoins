@@ -1,2 +1,14 @@
 Acesso: ssh -i C:\Users\%USERNAME%\ssh\id_ed25519 root@72.60.136.26
 Senha: Elitecoins26@
+
+
+após entrar: su -- deploy 
+senha do deploy: Elite26@
+
+dentro do deploy: cd /home/usuario
+
+para clonar basta dar um: git pull origin main
+
+para rodar o backend um npm start
+
+e o frontend um npm run build
