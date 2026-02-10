@@ -964,19 +964,29 @@ async function concluirCompra(compraId) {
 // =========================
 app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
-    const { type, data } = req.body;
+    console.log("Webhook recebido:", req.body);
 
-    // Só processa pagamentos
-    if (type !== "payment") return res.sendStatus(200);
+    const paymentId =
+      req.body?.data?.id ||
+      req.body?.id ||
+      req.query?.data_id;
 
-    const paymentId = data?.id;
-    if (!paymentId) return res.sendStatus(200);
+    if (!paymentId) {
+      console.log("Sem paymentId");
+      return res.sendStatus(200);
+    }
 
     const pagamento = new Payment(client);
     const paymentData = await pagamento.get({ id: paymentId });
 
+    console.log("Dados do pagamento:", paymentData);
+
     const compraId = paymentData.metadata?.compraId;
-    if (!compraId) return res.sendStatus(200);
+
+    if (!compraId) {
+      console.log("Sem compraId no metadata");
+      return res.sendStatus(200);
+    }
 
     const statusMp = paymentData.status;
 
@@ -1018,7 +1028,6 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       },
     });
 
-    // Se pagamento aprovado, inicia transferência
     if (novoStatus === "TRANSFERENCIA_ANDAMENTO") {
       await concluirCompra(compraId);
     }
