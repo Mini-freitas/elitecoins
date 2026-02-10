@@ -962,9 +962,11 @@ async function concluirCompra(compraId) {
 // =========================
 // WEBHOOK MERCADO PAGO
 // =========================
-app.post("/webhook-mercadopago", async (req, res) => {
+app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
     const { type, data } = req.body;
+
+    // Só processa pagamentos
     if (type !== "payment") return res.sendStatus(200);
 
     const paymentId = data?.id;
@@ -1016,6 +1018,7 @@ app.post("/webhook-mercadopago", async (req, res) => {
       },
     });
 
+    // Se pagamento aprovado, inicia transferência
     if (novoStatus === "TRANSFERENCIA_ANDAMENTO") {
       await concluirCompra(compraId);
     }
