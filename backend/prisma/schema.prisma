@@ -22,13 +22,15 @@ enum AuthProvider {
 }
 
 enum StatusCompra {
-  AGUARDANDO_PAGAMENTO
-  TRANSFERENCIA_ANDAMENTO
-  CONCLUIDA
-  FALHOU
-  EXPIRADA
+  pending
+  approved
+  in_process
+  rejected
+  cancelled
+  refunded
+  charged_back
+  expired
 }
-
 
 //////////////////////
 // MODELS
@@ -88,7 +90,7 @@ model Credencial {
   updatedAt DateTime @updatedAt
 
   usuarioId String   @db.ObjectId
-  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
 }
 
 model Banner {
@@ -134,7 +136,7 @@ model Compra {
   quantia     Float
   moeda       String
 
-  status      StatusCompra @default(AGUARDANDO_PAGAMENTO)
+  status      StatusCompra @default(pending)
 
   // MERCADO PAGO
   mpPreferenceId String?
@@ -148,6 +150,3 @@ model Compra {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
-
-
-

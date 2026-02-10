@@ -835,16 +835,12 @@ const client = new MercadoPagoConfig({
 // =========================
 app.post("/api/pagamento", async (req, res) => {
   try {
-    console.log("=== NOVA REQUISIÇÃO DE PAGAMENTO ===");
-    console.log("Body recebido:", req.body);
-
     const { usuarioId, plataforma, quantia, quantMoedas } = req.body;
 
     if (!usuarioId || !plataforma || !quantia) {
       return res.status(400).json({ erro: "Dados inválidos" });
     }
 
-    // busca usuário para pegar o email
     const usuario = await prisma.usuario.findUnique({
       where: { id: usuarioId },
     });
@@ -860,13 +856,10 @@ app.post("/api/pagamento", async (req, res) => {
         plataforma,
         quantia: Number(quantia),
         moeda: quantMoedas?.toString() || "FIFA",
-        status: "AGUARDANDO_PAGAMENTO",
+        status: "pending", // alinhado com enum do Prisma
       },
     });
 
-    console.log("Compra criada:", compra);
-
-    // cria preferência
     const preference = new Preference(client);
 
     const response = await preference.create({
@@ -881,10 +874,12 @@ app.post("/api/pagamento", async (req, res) => {
         ],
 
         payer: {
-          email: usuario.email, // preenche automaticamente
+          email: usuario.email,
         },
 
-        metadata: { compraId: compra.id },
+        metadata: {
+          compraId: compra.id,
+        },
 
         notification_url: `${HOST_URL}/api/webhook-mercadopago`,
 
@@ -898,11 +893,9 @@ app.post("/api/pagamento", async (req, res) => {
       },
     });
 
-    console.log("Preferência criada:", response);
-
     await prisma.compra.update({
       where: { id: compra.id },
-      data: { mpPreferenceId: response.id },
+      data: { mpPreferenceId: response.id.toString() },
     });
 
     res.json({ init_point: response.init_point });
@@ -939,7 +932,10 @@ async function concluirCompra(compraId) {
     where: { id: compraId },
   });
 
-  if (!compra || compra.status !== "TRANSFERENCIA_ANDAMENTO") return;
+  if (!compra) return;
+
+  // agora a compra é concluída quando o pagamento é approved
+  if (compra.status !== "approved") return;
 
   await prisma.credencial.create({
     data: {
@@ -955,7 +951,6 @@ async function concluirCompra(compraId) {
   await prisma.compra.update({
     where: { id: compra.id },
     data: {
-      status: "CONCLUIDA",
       concluidoEm: new Date(),
     },
   });
@@ -982,55 +977,34 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       req.body?.id ||
       req.query?.data_id;
 
-    if (!paymentId) return res.sendStatus(200);
+    if (!paymentId) {
+      console.log("Webhook sem paymentId");
+      return res.sendStatus(200);
+    }
 
     const pagamento = new Payment(client);
     const paymentData = await pagamento.get({ id: paymentId });
 
     const compraId = paymentData.metadata?.compraId;
-    if (!compraId) return res.sendStatus(200);
+    if (!compraId) {
+      console.log("Sem compraId no metadata");
+      return res.sendStatus(200);
+    }
 
     const statusMp = paymentData.status;
-
-    let novoStatus = null;
-    let pagoEm = null;
-
-    switch (statusMp) {
-      case "approved":
-        novoStatus = "TRANSFERENCIA_ANDAMENTO";
-        pagoEm = new Date();
-        break;
-
-      case "pending":
-      case "in_process":
-        novoStatus = "AGUARDANDO_PAGAMENTO";
-        break;
-
-      case "rejected":
-      case "cancelled":
-        novoStatus = "FALHOU";
-        break;
-
-      case "expired":
-        novoStatus = "EXPIRADA";
-        break;
-
-      default:
-        return res.sendStatus(200);
-    }
 
     await prisma.compra.update({
       where: { id: compraId },
       data: {
-        status: novoStatus,
-        mpPaymentId: paymentId,
+        status: statusMp, // salva direto no enum
+        mpPaymentId: paymentId.toString(),
         mpStatus: statusMp,
-        pagoEm,
+        pagoEm: statusMp === "approved" ? new Date() : null,
         updatedAt: new Date(),
       },
     });
 
-    if (novoStatus === "TRANSFERENCIA_ANDAMENTO") {
+    if (statusMp === "approved") {
       await concluirCompra(compraId);
     }
 
@@ -1045,21 +1019,25 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
 // CRON: EXPIRAR COMPRAS
 // =========================
 cron.schedule("*/5 * * * *", async () => {
-  const limite = new Date(Date.now() - 30 * 60 * 1000);
+  try {
+    const limite = new Date(Date.now() - 30 * 60 * 1000);
 
-  const expiradas = await prisma.compra.updateMany({
-    where: {
-      status: "AGUARDANDO_PAGAMENTO",
-      createdAt: { lt: limite },
-    },
-    data: {
-      status: "EXPIRADA",
-      expiradoEm: new Date(),
-    },
-  });
+    const expiradas = await prisma.compra.updateMany({
+      where: {
+        status: "pending",
+        createdAt: { lt: limite },
+      },
+      data: {
+        status: "expired",
+        expiradoEm: new Date(),
+      },
+    });
 
-  if (expiradas.count > 0) {
-    console.log(`${expiradas.count} compras expiradas automaticamente`);
+    if (expiradas.count > 0) {
+      console.log(`${expiradas.count} compras expiradas automaticamente`);
+    }
+  } catch (err) {
+    console.error("Erro no cron:", err);
   }
 });
 
@@ -1078,7 +1056,7 @@ app.post("/api/compras/:id/cancelar", async (req, res) => {
       return res.status(404).json({ erro: "Compra não encontrada" });
     }
 
-    if (compra.status !== "AGUARDANDO_PAGAMENTO") {
+    if (compra.status !== "pending") {
       return res.status(400).json({
         erro: "Compra não pode ser cancelada",
       });
@@ -1087,18 +1065,17 @@ app.post("/api/compras/:id/cancelar", async (req, res) => {
     await prisma.compra.update({
       where: { id },
       data: {
-        status: "EXPIRADA",
+        status: "cancelled",
         expiradoEm: new Date(),
       },
     });
 
     res.json({ ok: true });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ erro: "Erro ao cancelar compra" });
   }
 });
-
-
 
 // ======================= INICIAR SERVIDOR =======================
 
