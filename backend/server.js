@@ -1039,11 +1039,11 @@ cron.schedule("*/5 * * * *", async () => {
 
     const expiradas = await prisma.compra.updateMany({
       where: {
-        status: "pending",
+        status: "pending", // ✅ nome correto do enum
         createdAt: { lt: limite },
       },
       data: {
-        status: "expired",
+        status: "expired", // ✅ nome correto do enum
         expiradoEm: new Date(),
       },
     });
@@ -1055,6 +1055,7 @@ cron.schedule("*/5 * * * *", async () => {
     console.error("Erro no cron:", err);
   }
 });
+
 
 // =========================
 // CANCELAR COMPRA
