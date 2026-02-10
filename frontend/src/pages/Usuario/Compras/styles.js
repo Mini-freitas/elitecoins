@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
 export const Comprassec = styled.div`
-  height: 100vh;
-  width: 100vw;
+  min-height: 100vh;
+  width: 100%;
   background-color: var(--cor-preto);
   display: grid;
   grid-template-areas: 
@@ -10,69 +10,112 @@ export const Comprassec = styled.div`
     "p"
     "f";
   grid-template-columns: 1fr;
-  grid-template-rows: 5rem 1fr 15rem; /* header 5rem, footer 15rem, resto pro main */
+  grid-template-rows: 5rem 1fr 15rem;
   font-family: var(--fonte-principal);
-  overflow-x: hidden;
-  overflow-y: auto;
 `;
 
 export const MainCompras = styled.main`
-  grid-area:p;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
+  grid-area: p;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 2rem;
-  margin:2rem;
+  padding: 2rem 1rem;
 `;
 
-
 export const Header = styled.div`
-
   h2 {
     margin: 0;
-    font-size: 1.5rem;
-    color:white;
+    font-size: 1.8rem;
+    color: white;
+  }
+`;
+
+export const GridCompras = styled.div`
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  gap: 1.5rem;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
   }
 `;
 
 export const BoxCompras = styled.div`
-  width:50%;
-  padding: 1rem;
+  padding: 1.5rem;
   background: #f1f3f4;
-  border-radius: 8px;
+  border-radius: 10px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 
   h3 {
-    margin-top: 0;
-    margin-bottom: 0.75rem;
-  }
-
-  p {
-    margin: 0.25rem 0;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
   }
 `;
 
 export const CompraItem = styled.div`
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #ddd;
-
-  &:last-child {
-    border-bottom: none;
-  }
+  background: white;
+  padding: 0.75rem;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 
   p {
-    margin: 0.25rem 0;
+    margin: 0;
+    font-size: 0.9rem;
   }
 `;
 
 export const StatusBadge = styled.span`
-  padding: 0.25rem 0.5rem;
+  align-self: flex-start;
+  padding: 0.25rem 0.6rem;
   border-radius: 12px;
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 600;
   color: #fff;
+  margin-top: 0.25rem;
+
   background-color: ${({ status }) =>
     status === "AGUARDANDO_PAGAMENTO" ? "#fbbc05" :
     status === "TRANSFERENCIA_ANDAMENTO" ? "#1a73e8" :
     "#34a853"};
+`;
+
+export const BotaoCancelar = styled.button`
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: #ff4d4f;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+
+  &:hover {
+    background: #d9363e;
+  }
+`;
+
+export const VerMais = styled.button`
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  color: #1a73e8;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;

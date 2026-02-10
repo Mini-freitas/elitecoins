@@ -22,10 +22,13 @@ enum AuthProvider {
 }
 
 enum StatusCompra {
-  AGUARDANDO_PAGAMENTO    // Cliente ainda não pagou
-  TRANSFERENCIA_ANDAMENTO // Pagamento feito, aguardando transferência
-  CONCLUIDA               // Compra concluída
+  AGUARDANDO_PAGAMENTO
+  TRANSFERENCIA_ANDAMENTO
+  CONCLUIDA
+  FALHOU
+  EXPIRADA
 }
+
 
 //////////////////////
 // MODELS
@@ -123,28 +126,28 @@ model Notificacao {
 
 model Compra {
   id          String       @id @default(auto()) @map("_id") @db.ObjectId
+
   usuarioId   String       @db.ObjectId
   usuario     Usuario      @relation(fields: [usuarioId], references: [id])
 
   plataforma  String
   quantia     Float
   moeda       String
-  
+
   status      StatusCompra @default(AGUARDANDO_PAGAMENTO)
 
-  // DADOS DO MERCADO PAGO
-  mpPaymentId   String?
-  mpStatus      String?
+  // MERCADO PAGO
+  mpPreferenceId String?
+  mpPaymentId    String?
+  mpStatus       String?
 
-  // DADOS DA API DE TRANSFERÊNCIA
-  transferenciaId     String?
-  transferenciaStatus String?
+  pagoEm        DateTime?
+  expiradoEm    DateTime?
+  concluidoEm   DateTime?
 
-  pagoEm      DateTime?
-  concluidoEm DateTime?
-
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
+
 
 

@@ -1,11 +1,17 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
+
 import {
   SvgUsuario,
   BoxMenuUsuario,
   BtLogout,
   NomeUsuario,
   Avatar,
-  AvatarBox
+  AvatarBox,
+  MenuItem,
+  MenuLista,
+  Divider,
+  TopoUsuario,
 } from "./styles";
 
 function UsuarioMenu({
@@ -15,7 +21,8 @@ function UsuarioMenu({
   setMenuAberto,
   fecharMenuNotificacao
 }) {
-  const navigate = useNavigate(); // Hook do react-router-dom
+  const navigate = useNavigate();
+  const menuRef = useRef();
 
   const handleToggleMenu = () => {
     fecharMenuNotificacao();
@@ -28,14 +35,25 @@ function UsuarioMenu({
     .map(n => n[0].toUpperCase())
     .join("");
 
-  // Função para navegar e fechar menu
   const irPara = (rota) => {
     setMenuAberto(false);
     navigate(rota);
   };
 
+  // fechar ao clicar fora
+  useEffect(() => {
+    const handleClickFora = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuAberto(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickFora);
+    return () => document.removeEventListener("mousedown", handleClickFora);
+  }, [setMenuAberto]);
+
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative" }} ref={menuRef}>
       <SvgUsuario onClick={handleToggleMenu}>
         {usuario?.avatar ? (
           <AvatarBox>
@@ -44,23 +62,48 @@ function UsuarioMenu({
         ) : (
           <AvatarBox>
             <span>{iniciais || "U"}</span>
-          </AvatarBox>  
+          </AvatarBox>
         )}
       </SvgUsuario>
 
       {menuAberto && (
         <BoxMenuUsuario>
-          <NomeUsuario>{usuario?.nome}</NomeUsuario>
+          <TopoUsuario>
+            {usuario?.avatar ? (
+              <Avatar src={usuario.avatar} alt="Avatar" />
+            ) : (
+              <AvatarBox style={{ width: "3rem", height: "3rem" }}>
+                <span>{iniciais || "U"}</span>
+              </AvatarBox>
+            )}
+            <NomeUsuario>{usuario?.nome}</NomeUsuario>
+          </TopoUsuario>
 
-          {/* Itens do menu */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "1rem", marginTop: "2rem" }}>
-            <button onClick={() => irPara("/usuario/perfil")}>Perfil</button>
-            <button onClick={() => irPara("/usuario/seguranca")}>Segurança</button>
-            <button onClick={() => irPara("/usuario/compras")}>Compras</button>
-            <button onClick={() => irPara("/usuario/excluir")}>Excluir Conta</button>
-          </div>
+          <Divider />
 
-          <BtLogout onClick={handleLogout}>Sair</BtLogout>
+          <MenuLista>
+            <MenuItem onClick={() => irPara("/usuario/perfil")}>
+              Perfil
+            </MenuItem>
+
+            <MenuItem onClick={() => irPara("/usuario/seguranca")}>
+              Segurança
+            </MenuItem>
+
+            <MenuItem onClick={() => irPara("/usuario/compras")}>
+              Compras
+            </MenuItem>
+
+            <MenuItem onClick={() => irPara("/usuario/excluir")}>
+              Excluir conta
+            </MenuItem>
+          </MenuLista>
+
+          <Divider />
+
+          <BtLogout onClick={handleLogout}>
+            Sair da conta
+          </BtLogout>
         </BoxMenuUsuario>
       )}
     </div>

@@ -1,100 +1,125 @@
 import styled from "styled-components";
 
 export const SvgUsuario = styled.button`
-  color: white;
-  background-color: transparent;
-  outline: none;
+  background: transparent;
   border: none;
   cursor: pointer;
+  padding: 0;
 
-  svg{
-  color: white;
-  cursor: pointer;
-  height: 1.5rem;
-  width: 1.5rem;
-
-  /* Tablet grande */
-  @media (max-width: 1024px) {
-    height: 1.3rem;
-    width: 1.3rem;
-  }
-
-  /* Tablet médio */
-  @media (max-width: 768px) {
-    height: 1.3rem;
-    width: 1.3rem;
-  }
-
-  /* Celular */
-  @media (max-width: 480px) {
-    height: 1.2rem;
-    width: 1.2rem;
-  }
-  
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 export const BoxMenuUsuario = styled.div`
-  position: absolute; 
-  top: 3.8rem;
-  right: -4rem;
-  z-index: 1000;
-  height: 18rem;
-  width: 15rem;
-  background-color: #ffffffa9;
-`;
-
-export const BtLogout = styled.button`
   position: absolute;
-  bottom: 1rem;
-  left: 1rem;
+  top: 3.5rem;
+  right: 0;
+  z-index: 1000;
+
+  width: 16rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  overflow: hidden;
 
   display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2px;
-  text-align: center;
+  flex-direction: column;
 
-  background-color: rgb(99, 248, 0);
-  outline: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px 15px;
-  border-radius: 5px;
-  font-family: var(--fonte-secundaria);
+  animation: fadeIn 0.15s ease;
 
-  &:hover {
-    background-color: rgb(245, 66, 66);
-    transition: 0.5s;
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    right: -1rem;
+    width: 14rem;
   }
 `;
 
+export const TopoUsuario = styled.div`
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+`;
+
 export const NomeUsuario = styled.span`
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  color: black;
-  font-family: "Abel", sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #222;
+`;
+
+export const MenuLista = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+export const MenuItem = styled.button`
+  background: transparent;
+  border: none;
+  padding: 0.8rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #333;
+
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+`;
+
+export const Divider = styled.div`
+  height: 1px;
+  background: #eee;
+  margin: 0.25rem 0;
+`;
+
+export const BtLogout = styled.button`
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  margin: 0.75rem;
+  padding: 0.6rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+
+  transition: background 0.2s;
+
+  &:hover {
+    background: #d9363e;
+  }
 `;
 
 export const AvatarBox = styled.div`
-  width: 2rem;
-  height: 2rem;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  background-color: white;
-  color: black;
+  width: 2.2rem;
+  height: 2.2rem;
+  background: #f1f3f4;
+  color: #222;
   border-radius: 50%;
 
-  font-family: "Abel", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: bold;
 `;
 
 export const Avatar = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 2.2rem;
+  height: 2.2rem;
   border-radius: 50%;
+  object-fit: cover;
 `;
