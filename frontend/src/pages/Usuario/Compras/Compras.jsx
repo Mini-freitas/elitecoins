@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../../services/api";
 
 import HeaderPrincipal from "../../../components/Header/HeaderPrincipal";
 import Footer from "../../../components/Footer/Footer";
@@ -29,9 +29,7 @@ function Compras({ usuario, handleLogout }) {
 
     const buscarCompras = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:3000/compras/${usuario.id}`
-        );
+        const res = await api.get(`/compras/${usuario.id}`);
         setCompras(res.data);
       } catch (err) {
         console.error("Erro ao buscar compras:", err);
@@ -48,7 +46,7 @@ function Compras({ usuario, handleLogout }) {
     if (!window.confirm("Deseja cancelar esta compra?")) return;
 
     try {
-      await axios.post(`http://localhost:3000/api/compras/${id}/cancelar`);
+      await api.post(`/api/compras/${id}/cancelar`);
       setCompras((prev) =>
         prev.map((c) =>
           c.id === id ? { ...c, status: "EXPIRADA" } : c
@@ -138,19 +136,16 @@ function Compras({ usuario, handleLogout }) {
         </Header>
 
         <GridCompras>
-          {/* AGUARDANDO PAGAMENTO */}
           <BoxCompras>
             <h3>Aguardando pagamento</h3>
             {renderLista(aguardando, "AGUARDANDO_PAGAMENTO", "aguardando")}
           </BoxCompras>
 
-          {/* TRANSFERÊNCIA */}
           <BoxCompras>
             <h3>Transferência em andamento</h3>
             {renderLista(transferindo, "TRANSFERENCIA_ANDAMENTO", "transferindo")}
           </BoxCompras>
 
-          {/* CONCLUÍDAS */}
           <BoxCompras>
             <h3>Compras concluídas</h3>
             {renderLista(concluidas, "CONCLUIDA", "concluidas")}
