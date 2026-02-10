@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import api from "../../../services/api";
 
 import HeaderPrincipal from "../../../components/Header/HeaderPrincipal";
@@ -24,34 +24,33 @@ function Compras({ usuario, handleLogout }) {
     concluidas: false,
   });
 
+  // função de busca isolada
+  const buscarCompras = useCallback(async () => {
+    if (!usuario?.id) return;
+
+    try {
+      const res = await api.get(`/compras/${usuario.id}`);
+      setCompras(res.data);
+    } catch (err) {
+      console.error("Erro ao buscar compras:", err);
+    }
+  }, [usuario]);
+
   useEffect(() => {
     if (!usuario) return;
-
-    const buscarCompras = async () => {
-      try {
-        const res = await api.get(`/compras/${usuario.id}`);
-        setCompras(res.data);
-      } catch (err) {
-        console.error("Erro ao buscar compras:", err);
-      }
-    };
 
     buscarCompras();
 
     const intervalo = setInterval(buscarCompras, 5000);
     return () => clearInterval(intervalo);
-  }, [usuario]);
+  }, [usuario, buscarCompras]);
 
   const cancelarCompra = async (id) => {
     if (!window.confirm("Deseja cancelar esta compra?")) return;
 
     try {
       await api.post(`/api/compras/${id}/cancelar`);
-      setCompras((prev) =>
-        prev.map((c) =>
-          c.id === id ? { ...c, status: "EXPIRADA" } : c
-        )
-      );
+      buscarCompras(); // atualiza direto do servidor
     } catch (err) {
       alert("Não foi possível cancelar a compra");
       console.error(err);
