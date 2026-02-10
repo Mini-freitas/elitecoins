@@ -40,7 +40,7 @@ function Compras({ usuario, handleLogout }) {
 
     buscarCompras();
 
-    const intervalo = setInterval(buscarCompras, 10000);
+    const intervalo = setInterval(buscarCompras, 5000);
     return () => clearInterval(intervalo);
   }, [usuario]);
 
