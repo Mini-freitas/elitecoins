@@ -24,7 +24,6 @@ function Compras({ usuario, handleLogout }) {
     concluidas: false,
   });
 
-  // função de busca isolada
   const buscarCompras = useCallback(async () => {
     if (!usuario?.id) return;
 
@@ -40,7 +39,6 @@ function Compras({ usuario, handleLogout }) {
     if (!usuario) return;
 
     buscarCompras();
-
     const intervalo = setInterval(buscarCompras, 5000);
     return () => clearInterval(intervalo);
   }, [usuario, buscarCompras]);
@@ -50,23 +48,24 @@ function Compras({ usuario, handleLogout }) {
 
     try {
       await api.post(`/api/compras/${id}/cancelar`);
-      buscarCompras(); // atualiza direto do servidor
+      buscarCompras();
     } catch (err) {
       alert("Não foi possível cancelar a compra");
       console.error(err);
     }
   };
 
+  // NOVO FILTRO COM STATUS DO MERCADO PAGO
   const aguardando = compras.filter(
-    (c) => c.status === "AGUARDANDO_PAGAMENTO"
+    (c) => c.status === "pending" || c.status === "in_process"
   );
 
   const transferindo = compras.filter(
-    (c) => c.status === "TRANSFERENCIA_ANDAMENTO"
+    (c) => c.status === "approved"
   );
 
   const concluidas = compras.filter(
-    (c) => c.status === "CONCLUIDA"
+    (c) => c.concluidoEm // quando já finalizou no sistema
   );
 
   const renderLista = (lista, tipo, chaveEstado) => {
@@ -87,16 +86,18 @@ function Compras({ usuario, handleLogout }) {
 
             {tipo !== "CONCLUIDA" && (
               <StatusBadge status={c.status}>
-                {c.status === "AGUARDANDO_PAGAMENTO" && "Aguardando pagamento"}
-                {c.status === "TRANSFERENCIA_ANDAMENTO" && "Transferência em andamento"}
+                {c.status === "pending" && "Aguardando pagamento"}
+                {c.status === "in_process" && "Pagamento em análise"}
+                {c.status === "approved" && "Pagamento aprovado"}
               </StatusBadge>
             )}
 
-            {tipo === "AGUARDANDO_PAGAMENTO" && (
-              <BotaoCancelar onClick={() => cancelarCompra(c.id)}>
-                Cancelar compra
-              </BotaoCancelar>
-            )}
+            {tipo === "AGUARDANDO" &&
+              (c.status === "pending" || c.status === "in_process") && (
+                <BotaoCancelar onClick={() => cancelarCompra(c.id)}>
+                  Cancelar compra
+                </BotaoCancelar>
+              )}
 
             {tipo === "CONCLUIDA" && (
               <p>
@@ -137,12 +138,12 @@ function Compras({ usuario, handleLogout }) {
         <GridCompras>
           <BoxCompras>
             <h3>Aguardando pagamento</h3>
-            {renderLista(aguardando, "AGUARDANDO_PAGAMENTO", "aguardando")}
+            {renderLista(aguardando, "AGUARDANDO", "aguardando")}
           </BoxCompras>
 
           <BoxCompras>
             <h3>Transferência em andamento</h3>
-            {renderLista(transferindo, "TRANSFERENCIA_ANDAMENTO", "transferindo")}
+            {renderLista(transferindo, "TRANSFERINDO", "transferindo")}
           </BoxCompras>
 
           <BoxCompras>

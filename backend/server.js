@@ -993,10 +993,24 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
 
     const statusMp = paymentData.status;
 
+    // 🔒 valida status permitido
+    const statusPermitidos = [
+      "pending",
+      "approved",
+      "rejected",
+      "cancelled",
+      "in_process",
+      "expired",
+    ];
+
+    const statusFinal = statusPermitidos.includes(statusMp)
+      ? statusMp
+      : "pending";
+
     await prisma.compra.update({
       where: { id: compraId },
       data: {
-        status: statusMp, // salva direto no enum
+        status: statusFinal,
         mpPaymentId: paymentId.toString(),
         mpStatus: statusMp,
         pagoEm: statusMp === "approved" ? new Date() : null,
@@ -1004,7 +1018,7 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       },
     });
 
-    if (statusMp === "approved") {
+    if (statusFinal === "approved") {
       await concluirCompra(compraId);
     }
 
@@ -1014,6 +1028,7 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
     res.sendStatus(200);
   }
 });
+
 
 // =========================
 // CRON: EXPIRAR COMPRAS
