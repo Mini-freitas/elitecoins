@@ -83,10 +83,17 @@ export const StatusBadge = styled.span`
   color: #fff;
   margin-top: 0.25rem;
 
-  background-color: ${({ status }) =>
-    status === "AGUARDANDO_PAGAMENTO" ? "#fbbc05" :
-    status === "TRANSFERENCIA_ANDAMENTO" ? "#1a73e8" :
-    "#34a853"};
+  background-color: ${({ status }) => {
+    if (status === "pending") return "#fbbc05";
+    if (status === "in_process") return "#1a73e8";
+    if (status === "approved") return "#34a853";
+    if (status === "rejected") return "#ff4d4f";
+    if (status === "cancelled") return "#ff8c00";
+    if (status === "refunded") return "#00bcd4";
+    if (status === "charged_back") return "#9c27b0";
+    if (status === "expired") return "#757575";
+    return "#ccc"; // fallback
+  }};
 `;
 
 export const BotaoCancelar = styled.button`

@@ -1033,30 +1033,42 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
 // =========================
 // CRON: EXPIRAR COMPRAS
 // =========================
+// Define todos os status exatamente como no enum do Prisma
+const StatusCompra = {
+  pending: "pending",
+  approved: "approved",
+  in_process: "in_process",
+  rejected: "rejected",
+  cancelled: "cancelled",
+  refunded: "refunded",
+  charged_back: "charged_back",
+  expired: "expired",
+};
+
+// Cron rodando a cada 5 minutos
 cron.schedule("*/5 * * * *", async () => {
   try {
-    const limite = new Date(Date.now() - 30 * 60 * 1000);
+    const now = new Date();
 
-    const expiradas = await prisma.compra.updateMany({
+    // Atualiza apenas compras pendentes que passaram do tempo limite
+    const result = await prisma.compra.updateMany({
       where: {
-        status: "pending", // ✅ nome correto do enum
-        createdAt: { lt: limite },
+        status: StatusCompra.pending,
+        createdAt: {
+          lt: new Date(now.getTime() - 30 * 60 * 1000) // exemplo: compras com mais de 30 minutos
+        }
       },
       data: {
-        status: "expired", // ✅ nome correto do enum
-        expiradoEm: new Date(),
-      },
+        status: StatusCompra.expired,
+        expiradoEm: now
+      }
     });
 
-    if (expiradas.count > 0) {
-      console.log(`${expiradas.count} compras expiradas automaticamente`);
-    }
-  } catch (err) {
-    console.error("Erro no cron:", err);
+    console.log(`Cron: ${result.count} compras expiradas.`);
+  } catch (error) {
+    console.error("Erro no cron:", error);
   }
 });
-
-
 // =========================
 // CANCELAR COMPRA
 // =========================
