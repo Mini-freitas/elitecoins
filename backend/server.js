@@ -976,22 +976,43 @@ async function concluirCompra(compraId) {
 // =========================
 // WEBHOOK MERCADO PAGO
 // =========================
-// =========================
-// WEBHOOK MERCADO PAGO
-// =========================
 app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
-    console.log("Webhook recebido:", JSON.stringify(req.body, null, 2));
+    console.log("Webhook recebido:", req.body);
 
     let paymentId = null;
 
-    // formatos possíveis do MP
+    // Caso 1: webhook de payment
     if (req.body?.data?.id) {
       paymentId = req.body.data.id;
-    } else if (req.body?.id) {
+    }
+
+    // Caso 2: webhook antigo com id direto
+    if (!paymentId && req.body?.id) {
       paymentId = req.body.id;
-    } else if (req.query?.data_id) {
-      paymentId = req.query.data_id;
+    }
+
+    // Caso 3: merchant_order
+    if (!paymentId && req.body?.topic === "merchant_order") {
+      const orderId =
+        req.body?.resource?.split("/").pop() ||
+        req.body?.data?.id;
+
+      if (orderId) {
+        const merchantOrder = await fetch(
+          `https://api.mercadopago.com/merchant_orders/${orderId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+            },
+          }
+        ).then((r) => r.json());
+
+        const payment = merchantOrder?.payments?.[0];
+        if (payment?.id) {
+          paymentId = payment.id;
+        }
+      }
     }
 
     if (!paymentId) {
@@ -999,10 +1020,10 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       return res.sendStatus(200);
     }
 
+    console.log("paymentId identificado:", paymentId);
+
     const pagamento = new Payment(client);
     const paymentData = await pagamento.get({ id: paymentId });
-
-    console.log("Pagamento MP:", paymentData);
 
     const compraId = paymentData.metadata?.compraId;
 
@@ -1037,7 +1058,7 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       },
     });
 
-    console.log(`Compra ${compraId} atualizada para ${statusFinal}`);
+    console.log("Compra atualizada:", compraId, statusFinal);
 
     if (statusFinal === STATUS.APPROVED) {
       await concluirCompra(compraId);
