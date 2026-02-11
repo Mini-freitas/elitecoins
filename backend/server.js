@@ -823,12 +823,27 @@ app.put("/api/usuarios/:id", async (req, res) => {
   }
 });
 
+
 // =========================
 // CONFIGURAÇÃO MERCADO PAGO
 // =========================
 const client = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
 });
+
+// =========================
+// STATUS PADRONIZADOS
+// =========================
+const STATUS = {
+  PENDING: "pending",
+  APPROVED: "approved",
+  IN_PROCESS: "in_process",
+  REJECTED: "rejected",
+  CANCELLED: "cancelled",
+  REFUNDED: "refunded",
+  CHARGED_BACK: "charged_back",
+  EXPIRED: "expired",
+};
 
 // =========================
 // ROTA: CRIAR PAGAMENTO
@@ -849,14 +864,13 @@ app.post("/api/pagamento", async (req, res) => {
       return res.status(404).json({ erro: "Usuário não encontrado" });
     }
 
-    // cria compra
     const compra = await prisma.compra.create({
       data: {
         usuarioId,
         plataforma,
         quantia: Number(quantia),
         moeda: quantMoedas?.toString() || "FIFA",
-        status: "pending", // alinhado com enum do Prisma
+        status: STATUS.PENDING,
       },
     });
 
@@ -872,23 +886,18 @@ app.post("/api/pagamento", async (req, res) => {
             unit_price: Number(quantia),
           },
         ],
-
         payer: {
           email: usuario.email,
         },
-
         metadata: {
           compraId: compra.id,
         },
-
         notification_url: `${HOST_URL}/api/webhook-mercadopago`,
-
         back_urls: {
           success: `${HOST_URL}/pagamentoaprovado`,
           failure: `${HOST_URL}/pagamentofalhou`,
           pending: `${HOST_URL}/pagamentopendente`,
         },
-
         auto_return: "approved",
       },
     });
@@ -908,7 +917,7 @@ app.post("/api/pagamento", async (req, res) => {
 // =========================
 // ROTA: LISTAR COMPRAS
 // =========================
-app.get("/compras/:usuarioId", async (req, res) => {
+app.get("/api/compras/:usuarioId", async (req, res) => {
   try {
     const { usuarioId } = req.params;
 
@@ -933,9 +942,8 @@ async function concluirCompra(compraId) {
   });
 
   if (!compra) return;
-
-  // agora a compra é concluída quando o pagamento é approved
-  if (compra.status !== "approved") return;
+  if (compra.status !== STATUS.APPROVED) return;
+  if (compra.concluidoEm) return; // evita duplicação
 
   await prisma.credencial.create({
     data: {
@@ -966,30 +974,16 @@ async function concluirCompra(compraId) {
 }
 
 // =========================
-// STATUS PADRONIZADOS (IGUAL AO PRISMA)
-// =========================
-const STATUS = {
-  PENDING: "pending",
-  APPROVED: "approved",
-  IN_PROCESS: "in_process",
-  REJECTED: "rejected",
-  CANCELLED: "cancelled",
-  REFUNDED: "refunded",
-  CHARGED_BACK: "charged_back",
-  EXPIRED: "expired",
-};
-
-// =========================
 // WEBHOOK MERCADO PAGO
 // =========================
 app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
-    console.log("Webhook recebido:", req.body);
+    console.log("Webhook recebido:", req.body, req.query);
 
     const paymentId =
       req.body?.data?.id ||
-      req.body?.id ||
-      req.query?.data_id;
+      req.query["data.id"] ||
+      req.query?.id;
 
     if (!paymentId) {
       console.log("Webhook sem paymentId");
@@ -999,7 +993,10 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
     const pagamento = new Payment(client);
     const paymentData = await pagamento.get({ id: paymentId });
 
+    console.log("Pagamento MP:", paymentData);
+
     const compraId = paymentData.metadata?.compraId;
+
     if (!compraId) {
       console.log("Sem compraId no metadata");
       return res.sendStatus(200);
@@ -1053,7 +1050,7 @@ cron.schedule("*/5 * * * *", async () => {
       where: {
         status: STATUS.PENDING,
         createdAt: {
-          lt: new Date(now.getTime() - 30 * 60 * 1000), // 30 minutos
+          lt: new Date(now.getTime() - 30 * 60 * 1000),
         },
       },
       data: {

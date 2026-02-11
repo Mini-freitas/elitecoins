@@ -47,7 +47,8 @@ function Compras({ usuario, handleLogout }) {
     if (!window.confirm("Deseja cancelar esta compra?")) return;
 
     try {
-      await api.post(`/api/compras/${id}/cancelar`);
+      // REMOVIDO o /api daqui
+      await api.post(`/compras/${id}/cancelar`);
       buscarCompras();
     } catch (err) {
       alert("Não foi possível cancelar a compra");
@@ -55,17 +56,17 @@ function Compras({ usuario, handleLogout }) {
     }
   };
 
-  // NOVO FILTRO COM STATUS DO MERCADO PAGO
+  // FILTROS DE STATUS
   const aguardando = compras.filter(
     (c) => c.status === "pending" || c.status === "in_process"
   );
 
   const transferindo = compras.filter(
-    (c) => c.status === "approved"
+    (c) => c.status === "approved" && !c.concluidoEm
   );
 
   const concluidas = compras.filter(
-    (c) => c.concluidoEm // quando já finalizou no sistema
+    (c) => c.concluidoEm
   );
 
   const renderLista = (lista, tipo, chaveEstado) => {
@@ -89,6 +90,8 @@ function Compras({ usuario, handleLogout }) {
                 {c.status === "pending" && "Aguardando pagamento"}
                 {c.status === "in_process" && "Pagamento em análise"}
                 {c.status === "approved" && "Pagamento aprovado"}
+                {c.status === "expired" && "Pagamento expirado"}
+                {c.status === "cancelled" && "Compra cancelada"}
               </StatusBadge>
             )}
 
