@@ -10,6 +10,7 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
+import cron from "node-cron";
 
 
 dotenv.config();
@@ -855,7 +856,7 @@ app.post("/api/pagamento", async (req, res) => {
         plataforma,
         quantia: Number(quantia),
         moeda: quantMoedas?.toString() || "FIFA",
-        status: "pending",
+        status: "pending", // alinhado com enum do Prisma
       },
     });
 
@@ -933,11 +934,8 @@ async function concluirCompra(compraId) {
 
   if (!compra) return;
 
-  // só conclui se estiver approved
+  // agora a compra é concluída quando o pagamento é approved
   if (compra.status !== "approved") return;
-
-  // evita duplicação
-  if (compra.concluidoEm) return;
 
   await prisma.credencial.create({
     data: {
@@ -968,6 +966,20 @@ async function concluirCompra(compraId) {
 }
 
 // =========================
+// STATUS PADRONIZADOS (IGUAL AO PRISMA)
+// =========================
+const STATUS = {
+  PENDING: "pending",
+  APPROVED: "approved",
+  IN_PROCESS: "in_process",
+  REJECTED: "rejected",
+  CANCELLED: "cancelled",
+  REFUNDED: "refunded",
+  CHARGED_BACK: "charged_back",
+  EXPIRED: "expired",
+};
+
+// =========================
 // WEBHOOK MERCADO PAGO
 // =========================
 app.post("/api/webhook-mercadopago", async (req, res) => {
@@ -996,17 +1008,17 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
     const statusMp = paymentData.status;
 
     const statusPermitidos = [
-      "pending",
-      "approved",
-      "rejected",
-      "cancelled",
-      "in_process",
-      "expired",
+      STATUS.PENDING,
+      STATUS.APPROVED,
+      STATUS.REJECTED,
+      STATUS.CANCELLED,
+      STATUS.IN_PROCESS,
+      STATUS.EXPIRED,
     ];
 
     const statusFinal = statusPermitidos.includes(statusMp)
       ? statusMp
-      : "pending";
+      : STATUS.PENDING;
 
     await prisma.compra.update({
       where: { id: compraId },
@@ -1014,11 +1026,12 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
         status: statusFinal,
         mpPaymentId: paymentId.toString(),
         mpStatus: statusMp,
-        pagoEm: statusMp === "approved" ? new Date() : null,
+        pagoEm: statusMp === STATUS.APPROVED ? new Date() : null,
+        updatedAt: new Date(),
       },
     });
 
-    if (statusFinal === "approved") {
+    if (statusFinal === STATUS.APPROVED) {
       await concluirCompra(compraId);
     }
 
@@ -1026,6 +1039,34 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
   } catch (err) {
     console.error("Erro webhook MP:", err);
     res.sendStatus(200);
+  }
+});
+
+// =========================
+// CRON: EXPIRAR COMPRAS
+// =========================
+cron.schedule("*/5 * * * *", async () => {
+  try {
+    const now = new Date();
+
+    const result = await prisma.compra.updateMany({
+      where: {
+        status: STATUS.PENDING,
+        createdAt: {
+          lt: new Date(now.getTime() - 30 * 60 * 1000), // 30 minutos
+        },
+      },
+      data: {
+        status: STATUS.EXPIRED,
+        expiradoEm: now,
+      },
+    });
+
+    if (result.count > 0) {
+      console.log(`Cron: ${result.count} compras expiradas.`);
+    }
+  } catch (error) {
+    console.error("Erro no cron:", error);
   }
 });
 
@@ -1044,7 +1085,7 @@ app.post("/api/compras/:id/cancelar", async (req, res) => {
       return res.status(404).json({ erro: "Compra não encontrada" });
     }
 
-    if (compra.status !== "pending") {
+    if (compra.status !== STATUS.PENDING) {
       return res.status(400).json({
         erro: "Compra não pode ser cancelada",
       });
@@ -1053,7 +1094,7 @@ app.post("/api/compras/:id/cancelar", async (req, res) => {
     await prisma.compra.update({
       where: { id },
       data: {
-        status: "cancelled",
+        status: STATUS.CANCELLED,
         expiradoEm: new Date(),
       },
     });
