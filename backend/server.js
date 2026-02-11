@@ -974,32 +974,34 @@ async function concluirCompra(compraId) {
 }
 
 // =========================
-// WEBHOOK MERCADO PAGO
+// WEBHOOK MERCADO PAGO (trecho ajustado)
 // =========================
 app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
     console.log("Webhook recebido:", req.body);
 
     let paymentId = null;
+    let compraId = null;
 
     // =========================
-    // Identificando o paymentId
-    // =========================
-
     // Caso 1: webhook de payment (payment.created ou payment.updated)
+    // =========================
     if (req.body?.data?.id) {
       paymentId = req.body.data.id;
     }
 
+    // =========================
     // Caso 2: webhook antigo com id direto
+    // =========================
     if (!paymentId && req.body?.id) {
       paymentId = req.body.id;
     }
 
+    // =========================
     // Caso 3: merchant_order
+    // =========================
     if (!paymentId && req.body?.topic === "merchant_order") {
-      const orderId =
-        req.body?.resource?.split("/").pop() || req.body?.data?.id;
+      const orderId = req.body?.resource?.split("/").pop();
 
       if (orderId) {
         const merchantOrder = await fetch(
@@ -1009,13 +1011,28 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
               Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
             },
           }
-        ).then((r) => r.json());
+        ).then(r => r.json());
 
+        // Pega o primeiro pagamento aprovado (ou pendente)
         const payment = merchantOrder?.payments?.[0];
         if (payment?.id) {
           paymentId = payment.id;
         }
+
+        // Tenta pegar o metadata direto do merchant_order
+        if (merchantOrder?.metadata?.compraId) {
+          compraId = merchantOrder.metadata.compraId;
+        }
       }
+    }
+
+    // =========================
+    // Caso normal de payment
+    // =========================
+    if (!compraId && paymentId) {
+      const pagamento = new Payment(client);
+      const paymentData = await pagamento.get({ id: paymentId });
+      compraId = paymentData.metadata?.compraId;
     }
 
     if (!paymentId) {
@@ -1023,24 +1040,18 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       return res.sendStatus(200);
     }
 
-    console.log("paymentId identificado:", paymentId);
-
-    // =========================
-    // Buscando dados do pagamento no Mercado Pago
-    // =========================
-    const pagamento = new Payment(client); // ou a forma que você instancia o client MP
-    const paymentData = await pagamento.get({ id: paymentId });
-
-    const compraId = paymentData.metadata?.compraId;
-
     if (!compraId) {
       console.log("Sem compraId no metadata");
       return res.sendStatus(200);
     }
 
+    console.log("paymentId identificado:", paymentId, "compraId:", compraId);
+
     // =========================
-    // Definindo status final
+    // Atualizando status da compra
     // =========================
+    const pagamentoFinal = new Payment(client);
+    const paymentData = await pagamentoFinal.get({ id: paymentId });
     const statusMp = paymentData.status;
 
     const statusPermitidos = [
@@ -1056,9 +1067,6 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       ? statusMp
       : STATUS.PENDING;
 
-    // =========================
-    // Atualizando compra no banco
-    // =========================
     await prisma.compra.update({
       where: { id: compraId },
       data: {
@@ -1072,9 +1080,6 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
 
     console.log("Compra atualizada:", compraId, statusFinal);
 
-    // =========================
-    // Concluir compra se aprovada
-    // =========================
     if (statusFinal === STATUS.APPROVED) {
       await concluirCompra(compraId);
     }
