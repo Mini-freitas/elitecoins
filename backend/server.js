@@ -976,14 +976,23 @@ async function concluirCompra(compraId) {
 // =========================
 // WEBHOOK MERCADO PAGO
 // =========================
+// =========================
+// WEBHOOK MERCADO PAGO
+// =========================
 app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
-    console.log("Webhook recebido:", req.body, req.query);
+    console.log("Webhook recebido:", JSON.stringify(req.body, null, 2));
 
-    const paymentId =
-      req.body?.data?.id ||
-      req.query["data.id"] ||
-      req.query?.id;
+    let paymentId = null;
+
+    // formatos possíveis do MP
+    if (req.body?.data?.id) {
+      paymentId = req.body.data.id;
+    } else if (req.body?.id) {
+      paymentId = req.body.id;
+    } else if (req.query?.data_id) {
+      paymentId = req.query.data_id;
+    }
 
     if (!paymentId) {
       console.log("Webhook sem paymentId");
@@ -1028,6 +1037,8 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       },
     });
 
+    console.log(`Compra ${compraId} atualizada para ${statusFinal}`);
+
     if (statusFinal === STATUS.APPROVED) {
       await concluirCompra(compraId);
     }
@@ -1038,6 +1049,7 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
     res.sendStatus(200);
   }
 });
+
 
 // =========================
 // CRON: EXPIRAR COMPRAS
