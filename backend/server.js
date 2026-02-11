@@ -864,6 +864,7 @@ app.post("/api/pagamento", async (req, res) => {
       return res.status(404).json({ erro: "Usuário não encontrado" });
     }
 
+    // Cria registro de compra no banco
     const compra = await prisma.compra.create({
       data: {
         usuarioId,
@@ -874,6 +875,7 @@ app.post("/api/pagamento", async (req, res) => {
       },
     });
 
+    // Criação da preferência Mercado Pago
     const preference = new Preference(client);
 
     const response = await preference.create({
@@ -890,29 +892,36 @@ app.post("/api/pagamento", async (req, res) => {
           email: usuario.email,
         },
         metadata: {
-          compraId: compra.id,
+          compraId: compra.id, // Mantém o ID da compra
         },
-        notification_url: `${HOST_URL}/api/webhook-mercadopago`,
         back_urls: {
           success: `${HOST_URL}/pagamentoaprovado`,
           failure: `${HOST_URL}/pagamentofalhou`,
           pending: `${HOST_URL}/pagamentopendente`,
         },
         auto_return: "approved",
+        payment_methods: {
+          excluded_payment_types: [], // NÃO exclui nenhum tipo de pagamento
+          installments: 12,           // Permite até 12 parcelas no cartão
+          default_payment_method_id: null, // Deixa Mercado Pago decidir
+        },
       },
     });
 
+    // Atualiza a compra com o ID da preferência
     await prisma.compra.update({
       where: { id: compra.id },
       data: { mpPreferenceId: response.id.toString() },
     });
 
+    // Retorna init_point para redirecionamento do Checkout Pro
     res.json({ init_point: response.init_point });
   } catch (error) {
     console.error("Erro ao criar pagamento:", error);
     res.status(500).json({ erro: "Erro ao criar pagamento" });
   }
 });
+
 
 // =========================
 // ROTA: LISTAR COMPRAS
