@@ -982,7 +982,11 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
 
     let paymentId = null;
 
-    // Caso 1: webhook de payment
+    // =========================
+    // Identificando o paymentId
+    // =========================
+
+    // Caso 1: webhook de payment (payment.created ou payment.updated)
     if (req.body?.data?.id) {
       paymentId = req.body.data.id;
     }
@@ -995,8 +999,7 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
     // Caso 3: merchant_order
     if (!paymentId && req.body?.topic === "merchant_order") {
       const orderId =
-        req.body?.resource?.split("/").pop() ||
-        req.body?.data?.id;
+        req.body?.resource?.split("/").pop() || req.body?.data?.id;
 
       if (orderId) {
         const merchantOrder = await fetch(
@@ -1022,7 +1025,10 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
 
     console.log("paymentId identificado:", paymentId);
 
-    const pagamento = new Payment(client);
+    // =========================
+    // Buscando dados do pagamento no Mercado Pago
+    // =========================
+    const pagamento = new Payment(client); // ou a forma que você instancia o client MP
     const paymentData = await pagamento.get({ id: paymentId });
 
     const compraId = paymentData.metadata?.compraId;
@@ -1032,6 +1038,9 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       return res.sendStatus(200);
     }
 
+    // =========================
+    // Definindo status final
+    // =========================
     const statusMp = paymentData.status;
 
     const statusPermitidos = [
@@ -1047,6 +1056,9 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       ? statusMp
       : STATUS.PENDING;
 
+    // =========================
+    // Atualizando compra no banco
+    // =========================
     await prisma.compra.update({
       where: { id: compraId },
       data: {
@@ -1060,6 +1072,9 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
 
     console.log("Compra atualizada:", compraId, statusFinal);
 
+    // =========================
+    // Concluir compra se aprovada
+    // =========================
     if (statusFinal === STATUS.APPROVED) {
       await concluirCompra(compraId);
     }
@@ -1070,7 +1085,6 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
     res.sendStatus(200);
   }
 });
-
 
 // =========================
 // CRON: EXPIRAR COMPRAS
