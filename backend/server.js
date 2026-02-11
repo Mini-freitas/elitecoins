@@ -10,7 +10,6 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
-import cron from "node-cron";
 
 
 dotenv.config();
