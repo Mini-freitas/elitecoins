@@ -856,7 +856,7 @@ app.post("/api/pagamento", async (req, res) => {
         plataforma,
         quantia: Number(quantia),
         moeda: quantMoedas?.toString() || "FIFA",
-        status: "pending", // alinhado com enum do Prisma
+        status: "pending",
       },
     });
 
@@ -934,8 +934,11 @@ async function concluirCompra(compraId) {
 
   if (!compra) return;
 
-  // agora a compra é concluída quando o pagamento é approved
+  // só conclui se estiver approved
   if (compra.status !== "approved") return;
+
+  // evita duplicação
+  if (compra.concluidoEm) return;
 
   await prisma.credencial.create({
     data: {
@@ -993,7 +996,6 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
 
     const statusMp = paymentData.status;
 
-    // 🔒 valida status permitido
     const statusPermitidos = [
       "pending",
       "approved",
@@ -1014,7 +1016,6 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
         mpPaymentId: paymentId.toString(),
         mpStatus: statusMp,
         pagoEm: statusMp === "approved" ? new Date() : null,
-        updatedAt: new Date(),
       },
     });
 
@@ -1029,46 +1030,6 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
   }
 });
 
-
-// =========================
-// CRON: EXPIRAR COMPRAS
-// =========================
-// Define todos os status exatamente como no enum do Prisma
-const StatusCompra = {
-  pending: "pending",
-  approved: "approved",
-  in_process: "in_process",
-  rejected: "rejected",
-  cancelled: "cancelled",
-  refunded: "refunded",
-  charged_back: "charged_back",
-  expired: "expired",
-};
-
-// Cron rodando a cada 5 minutos
-cron.schedule("*/5 * * * *", async () => {
-  try {
-    const now = new Date();
-
-    // Atualiza apenas compras pendentes que passaram do tempo limite
-    const result = await prisma.compra.updateMany({
-      where: {
-        status: StatusCompra.pending,
-        createdAt: {
-          lt: new Date(now.getTime() - 30 * 60 * 1000) // exemplo: compras com mais de 30 minutos
-        }
-      },
-      data: {
-        status: StatusCompra.expired,
-        expiradoEm: now
-      }
-    });
-
-    console.log(`Cron: ${result.count} compras expiradas.`);
-  } catch (error) {
-    console.error("Erro no cron:", error);
-  }
-});
 // =========================
 // CANCELAR COMPRA
 // =========================
@@ -1104,6 +1065,7 @@ app.post("/api/compras/:id/cancelar", async (req, res) => {
     res.status(500).json({ erro: "Erro ao cancelar compra" });
   }
 });
+
 
 // ======================= INICIAR SERVIDOR =======================
 
