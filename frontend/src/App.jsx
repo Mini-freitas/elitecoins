@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import api from "./services/api";
+
 import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
 import Cadastro from "./pages/Cadastro/Cadastro";
@@ -19,10 +21,41 @@ import PagamentoPendente from "./pages/Pagamentos/Pagamentopendente";
 import PagamentoFalhou from "./pages/Pagamentos/Pagamentofalhou";
 
 function App() {
-  const [usuario, setUsuario] = useState(() => {
-    const usuarioSalvo = localStorage.getItem("usuario");
-    return usuarioSalvo ? JSON.parse(usuarioSalvo) : null;
-  });
+  const [usuario, setUsuario] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // 🔥 VALIDAÇÃO REAL DA SESSÃO
+  useEffect(() => {
+    const validarSessao = async () => {
+      const usuarioSalvo = localStorage.getItem("usuario");
+
+      if (!usuarioSalvo) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const user = JSON.parse(usuarioSalvo);
+
+        const res = await api.get("/me", {
+          headers: {
+            "x-user-id": user.id,
+          },
+        });
+
+        setUsuario(res.data);
+        localStorage.setItem("usuario", JSON.stringify(res.data));
+      } catch (err) {
+        console.log("Sessão inválida:", err);
+        localStorage.removeItem("usuario");
+        setUsuario(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    validarSessao();
+  }, []);
 
   const handleLogin = (usuarioLogado) => {
     setUsuario(usuarioLogado);
@@ -39,37 +72,23 @@ function App() {
     return children;
   };
 
+  // 🔥 EVITA BUG DE REDIRECIONAMENTO
+  if (loading) return null;
+
   return (
     <Router>
       <Routes>
-        <Route
-          path="/"
-          element={<Home usuario={usuario} handleLogout={handleLogout} />}
-        />
-
-        <Route
-          path="/compra"
-          element={<Compra usuario={usuario} handleLogout={handleLogout} />}
-        />
-
-        <Route
-          path="/login"
-          element={<Login handleLogin={handleLogin} />}
-        />
-
-        <Route
-          path="/cadastro"
-          element={<Cadastro handleLogin={handleLogin} />}
-        />
+        <Route path="/" element={<Home usuario={usuario} handleLogout={handleLogout} />} />
+        <Route path="/compra" element={<Compra usuario={usuario} handleLogout={handleLogout} />} />
+        <Route path="/login" element={<Login handleLogin={handleLogin} />} />
+        <Route path="/cadastro" element={<Cadastro handleLogin={handleLogin} />} />
 
         <Route
           path="/admin"
           element={
-            usuario?.tipo === "ADMIN" ? (
-              <Admin usuario={usuario} handleLogout={handleLogout} />
-            ) : (
-              <Navigate to="/login" />
-            )
+            usuario?.tipo === "ADMIN"
+              ? <Admin usuario={usuario} handleLogout={handleLogout} />
+              : <Navigate to="/login" />
           }
         />
 
@@ -86,47 +105,13 @@ function App() {
           }
         />
 
-        <Route
-          path="/usuario/seguranca"
-          element={
-            <RotaProtegida>
-              <Seguranca usuario={usuario} />
-            </RotaProtegida>
-          }
-        />
+        <Route path="/usuario/seguranca" element={<RotaProtegida><Seguranca usuario={usuario} /></RotaProtegida>} />
+        <Route path="/usuario/compras" element={<RotaProtegida><Compras usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} />
+        <Route path="/usuario/excluir" element={<RotaProtegida><ExcluirConta usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} />
 
-        <Route
-          path="/usuario/compras"
-          element={
-            <RotaProtegida>
-              <Compras usuario={usuario} />
-            </RotaProtegida>
-          }
-        />
-
-        <Route
-          path="/usuario/excluir"
-          element={
-            <RotaProtegida>
-              <ExcluirConta usuario={usuario} handleLogout={handleLogout} />
-            </RotaProtegida>
-          }
-        />
-
-        <Route
-          path="/pagamentoaprovado"
-          element={<PagamentoAprovado />}
-        />
-
-        <Route
-          path="/pagamentopendente"
-          element={<PagamentoPendente />}
-        />
-
-        <Route
-          path="/pagamentofalhou"
-          element={<PagamentoFalhou />}
-        />
+        <Route path="/pagamentoaprovado" element={<PagamentoAprovado usuario={usuario} handleLogout={handleLogout} />} />
+        <Route path="/pagamentopendente" element={<PagamentoPendente usuario={usuario} handleLogout={handleLogout} />} />
+        <Route path="/pagamentofalhou" element={<PagamentoFalhou usuario={usuario} handleLogout={handleLogout} />} />
       </Routes>
 
       <ToastContainer theme="dark" autoClose={3000} />

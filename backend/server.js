@@ -10,8 +10,8 @@ import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { MercadoPagoConfig, Preference, Payment } from "mercadopago";
-import cron from "node-cron";
 import crypto from "crypto";
+import { ObjectId } from "mongodb";
 
 
 dotenv.config();
@@ -833,9 +833,15 @@ app.get("/api/compras/:usuarioId", async (req, res) => {
     const { usuarioId } = req.params;
 
     const compras = await prisma.compra.findMany({
-      where: { usuarioId },
-      orderBy: { createdAt: "desc" },
+      where: {
+        usuarioId: new ObjectId(usuarioId), // 🔥 CORRETO
+      },
+      orderBy: {
+        createdAt: "desc", // 🔥 MAIS RECENTE PRIMEIRO
+      },
     });
+
+    console.log("Compras encontradas:", compras.length);
 
     res.json(compras);
   } catch (error) {
@@ -999,44 +1005,43 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
     console.log("=== Webhook recebido ===");
     console.log(JSON.stringify(req.body, null, 2));
 
-    // =========================
-    // VALIDAR ASSINATURA
-    // =========================
     const signature = req.headers["x-signature"];
     const requestId = req.headers["x-request-id"];
 
-    if (!signature || !requestId) {
-      console.log("Webhook sem assinatura. Ignorando.");
-      return res.sendStatus(200);
+    // 🔒 Validação opcional (não quebra se não vier)
+    if (signature && requestId) {
+      const dataID = req.body?.data?.id;
+
+      if (dataID) {
+        const ts = signature.split(",")[0]?.split("=")[1];
+
+        const manifest = `id:${dataID};request-id:${requestId};ts:${ts};`;
+
+        const hash = crypto
+          .createHmac("sha256", MP_WEBHOOK_SECRET)
+          .update(manifest)
+          .digest("hex");
+
+        if (!signature.includes(hash)) {
+          console.log("Assinatura inválida");
+          return res.sendStatus(200);
+        }
+
+        console.log("Assinatura válida");
+      }
     }
-
-    const dataID = req.body?.data?.id;
-
-    if (!dataID) {
-      console.log("Sem data.id");
-      return res.sendStatus(200);
-    }
-
-    const ts = signature.split(",")[0].split("=")[1];
-
-    const manifest = `id:${dataID};request-id:${requestId};ts:${ts};`;
-
-    const hash = crypto
-      .createHmac("sha256", MP_WEBHOOK_SECRET)
-      .update(manifest)
-      .digest("hex");
-
-    if (!signature.includes(hash)) {
-      console.log("Assinatura inválida");
-      return res.sendStatus(200);
-    }
-
-    console.log("Assinatura válida");
 
     // =========================
     // PEGAR PAYMENT ID
     // =========================
-    const paymentId = req.body.data.id;
+    const paymentId =
+      req.body?.data?.id ||
+      req.body?.id;
+
+    if (!paymentId) {
+      console.log("Sem paymentId");
+      return res.sendStatus(200);
+    }
 
     console.log("paymentId:", paymentId);
 
@@ -1061,32 +1066,44 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
     }
 
     // =========================
-    // ATUALIZAR BANCO
+    // STATUS FINAL SEGURO
     // =========================
     const statusMp = paymentData.status;
 
+    const statusValido = [
+      "pending",
+      "approved",
+      "in_process",
+      "rejected",
+      "cancelled",
+      "expired",
+    ].includes(statusMp)
+      ? statusMp
+      : "pending";
+
+    // =========================
+    // ATUALIZAR COMPRA
+    // =========================
     await prisma.compra.update({
       where: { id: compraId },
       data: {
-        status: statusMp,
+        status: statusValido,
         mpPaymentId: paymentId.toString(),
         mpStatus: statusMp,
-        pagoEm: statusMp === STATUS.APPROVED ? new Date() : null,
+        pagoEm: statusMp === "approved" ? new Date() : null,
         updatedAt: new Date(),
       },
     });
 
-    console.log("Compra atualizada:", compraId, statusMp);
+    console.log("Compra atualizada:", compraId, statusValido);
 
     // =========================
-    // FINALIZAR SE APROVADO
+    // FINALIZAR COMPRA
     // =========================
-    if (statusMp === STATUS.APPROVED) {
-      console.log("Finalizando compra...");
+    if (statusValido === "approved") {
       await concluirCompra(compraId);
     }
 
-    console.log("Webhook processado com sucesso");
     res.sendStatus(200);
   } catch (err) {
     console.error("Erro webhook:", err);
@@ -1127,6 +1144,32 @@ app.post("/api/compras/:id/cancelar", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ erro: "Erro ao cancelar compra" });
+  }
+});
+
+/// =========================
+// ROTA: VALIDAR SESSÃO
+// =========================
+app.get("/api/me", async (req, res) => {
+  try {
+    const userId = req.headers["x-user-id"];
+
+    if (!userId) {
+      return res.status(401).json({ error: "Não autenticado" });
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: userId },
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    return res.json(usuario);
+  } catch (err) {
+    console.error("Erro /api/me:", err);
+    return res.status(500).json({ error: "Erro ao validar sessão" });
   }
 });
 

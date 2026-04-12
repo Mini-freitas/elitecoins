@@ -27,7 +27,7 @@ function Compras({ usuario, handleLogout }) {
     concluidas: false,
   });
 
-  // 🔒 proteção real
+  // 🔒 Proteção
   useEffect(() => {
     if (!usuario) {
       navigate("/login");
@@ -39,7 +39,15 @@ function Compras({ usuario, handleLogout }) {
 
     try {
       const res = await api.get(`/compras/${usuario.id}`);
-      setCompras(res.data);
+
+      // 🔥 GARANTE ORDEM (mais recente primeiro)
+      const ordenadas = res.data.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      setCompras(ordenadas);
+
+      console.log("Compras carregadas:", ordenadas);
     } catch (err) {
       console.error("Erro ao buscar compras:", err);
     }
@@ -66,6 +74,9 @@ function Compras({ usuario, handleLogout }) {
     }
   };
 
+  // =========================
+  // FILTROS
+  // =========================
   const aguardando = compras.filter(
     (c) => c.status === "pending" || c.status === "in_process"
   );

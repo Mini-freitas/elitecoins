@@ -9,6 +9,8 @@ function Login({ handleLogin }) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const redirecionarUsuario = (usuario) => {
@@ -24,10 +26,17 @@ function Login({ handleLogin }) {
   // ===============================
   const loginLocal = async (e) => {
     e.preventDefault();
+
+    setErro("");
+    setLoading(true);
+
+    // 🔥 LIMPA SESSÃO ANTIGA (ESSENCIAL)
+    localStorage.removeItem("usuario");
+
     try {
       const res = await api.post("/login", { email, senha });
 
-      handleLogin(res.data.usuario); // ✅ já salva no localStorage via App
+      handleLogin(res.data.usuario);
 
       redirecionarUsuario(res.data.usuario);
     } catch (err) {
@@ -35,6 +44,8 @@ function Login({ handleLogin }) {
         err.response?.data?.error ||
           "Erro ao logar. Verifique suas credenciais."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,6 +53,12 @@ function Login({ handleLogin }) {
   // LOGIN GOOGLE
   // ===============================
   const loginGoogle = async (credentialResponse) => {
+    setErro("");
+    setLoading(true);
+
+    // 🔥 LIMPA SESSÃO ANTIGA
+    localStorage.removeItem("usuario");
+
     try {
       if (!credentialResponse?.credential) {
         setErro("Erro: credential não recebida do Google");
@@ -59,12 +76,14 @@ function Login({ handleLogin }) {
 
       const res = await api.post("/login-google", usuarioGoogle);
 
-      handleLogin(res.data.usuario); // ✅ já salva no localStorage
+      handleLogin(res.data.usuario);
 
       redirecionarUsuario(res.data.usuario);
     } catch (err) {
       console.error("Erro login Google:", err);
       setErro("Não foi possível logar com Google");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,8 +118,12 @@ function Login({ handleLogin }) {
           required
         />
 
-        <button className="buttonlogin" type="submit">
-          Entrar
+        <button
+          className="buttonlogin"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Entrando..." : "Entrar"}
         </button>
       </form>
 

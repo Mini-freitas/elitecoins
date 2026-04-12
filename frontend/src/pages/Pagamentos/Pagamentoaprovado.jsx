@@ -1,10 +1,16 @@
 import { useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-function PagamentoAprovado() {
+import MyGlobalStyle from '../../styles/globalStyles';
+import HeaderPrincipal from '../../components/Header/HeaderPrincipal';
+import Footer from '../../components/Footer/Footer';
+
+function PagamentoAprovado({ usuario, handleLogout }) {
   const location = useLocation();
+  const [usuarioLocal, setUsuarioLocal] = useState(usuario);
+
   const queryParams = new URLSearchParams(location.search);
 
-  // Parâmetros enviados pelo Mercado Pago
   const collectionId = queryParams.get("collection_id");
   const collectionStatus = queryParams.get("collection_status");
   const paymentId = queryParams.get("payment_id");
@@ -12,7 +18,18 @@ function PagamentoAprovado() {
   const paymentType = queryParams.get("payment_type");
   const merchantOrderId = queryParams.get("merchant_order_id");
 
-  console.log("Pagamento Aprovado - Query Params:", {
+  useEffect(() => {
+    const userSalvo = localStorage.getItem("usuario");
+
+    if (!userSalvo) {
+      window.location.href = "/login";
+      return;
+    }
+
+    setUsuarioLocal(JSON.parse(userSalvo));
+  }, []);
+
+  console.log("Pagamento Aprovado:", {
     collectionId,
     collectionStatus,
     paymentId,
@@ -22,20 +39,27 @@ function PagamentoAprovado() {
   });
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Pagamento Aprovado ✅</h1>
-      <p>Obrigado pela sua compra!</p>
-      <p>Status: {status}</p>
-      <p>ID do pagamento: {paymentId}</p>
-      <p>Tipo de pagamento: {paymentType}</p>
-      <p>ID da ordem do vendedor: {merchantOrderId}</p>
-      <button
-        onClick={() => (window.location.href = "/")}
-        style={{ padding: "10px 20px", fontSize: "16px", cursor: "pointer" }}
-      >
-        Voltar ao site
-      </button>
-    </div>
+    <>
+      <MyGlobalStyle />
+      <HeaderPrincipal usuario={usuarioLocal} handleLogout={handleLogout} />
+
+      <div style={{ textAlign: "center", marginTop: "100px" }}>
+        <h1>Pagamento Aprovado ✅</h1>
+        <p>Obrigado pela sua compra!</p>
+        <p>Status: {status}</p>
+        <p>ID: {paymentId}</p>
+        <p>Tipo: {paymentType}</p>
+
+        <button
+          onClick={() => (window.location.href = "/")}
+          style={{ padding: "10px 20px", cursor: "pointer" }}
+        >
+          Voltar ao site
+        </button>
+      </div>
+
+      <Footer usuario={usuarioLocal} handleLogout={handleLogout} />
+    </>
   );
 }
 
