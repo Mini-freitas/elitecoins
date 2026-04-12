@@ -833,23 +833,20 @@ app.get("/api/compras/:usuarioId", async (req, res) => {
     const { usuarioId } = req.params;
 
     const compras = await prisma.compra.findMany({
-      where: {
-        usuarioId: new ObjectId(usuarioId), // 🔥 CORRETO
-      },
+      where: { usuarioId },
+
+      // 🔥 ordem correta no backend (NÃO depende do frontend)
       orderBy: {
-        createdAt: "desc", // 🔥 MAIS RECENTE PRIMEIRO
+        createdAt: "desc",
       },
     });
 
-    console.log("Compras encontradas:", compras.length);
-
-    res.json(compras);
-  } catch (error) {
-    console.error("Erro ao buscar compras:", error);
-    res.status(500).json({ erro: "Erro ao buscar compras" });
+    return res.json(compras);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ erro: "Erro ao buscar compras" });
   }
 });
-
 
 
 // =========================
@@ -1000,25 +997,32 @@ async function concluirCompra(compraId) {
 // =========================
 // WEBHOOK MERCADO PAGO
 // =========================
+
 app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
     console.log("=== Webhook recebido ===");
-    console.log(JSON.stringify(req.body, null, 2));
 
     const signature = req.headers["x-signature"];
     const requestId = req.headers["x-request-id"];
 
-    // 🔒 Validação opcional (não quebra se não vier)
-    if (signature && requestId) {
-      const dataID = req.body?.data?.id;
+    const paymentId =
+      req.body?.data?.id || req.body?.id;
 
-      if (dataID) {
+    if (!paymentId) {
+      return res.sendStatus(200);
+    }
+
+    // =========================
+    // VERIFICAÇÃO SEGURA (opcional)
+    // =========================
+    if (signature && requestId && process.env.MP_WEBHOOK_TOKEN) {
+      try {
         const ts = signature.split(",")[0]?.split("=")[1];
 
-        const manifest = `id:${dataID};request-id:${requestId};ts:${ts};`;
+        const manifest = `id:${paymentId};request-id:${requestId};ts:${ts};`;
 
         const hash = crypto
-          .createHmac("sha256", MP_WEBHOOK_SECRET)
+          .createHmac("sha256", process.env.MP_WEBHOOK_TOKEN)
           .update(manifest)
           .digest("hex");
 
@@ -1026,36 +1030,17 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
           console.log("Assinatura inválida");
           return res.sendStatus(200);
         }
-
-        console.log("Assinatura válida");
+      } catch (err) {
+        console.log("Erro validação assinatura:", err.message);
       }
     }
 
     // =========================
-    // PEGAR PAYMENT ID
-    // =========================
-    const paymentId =
-      req.body?.data?.id ||
-      req.body?.id;
-
-    if (!paymentId) {
-      console.log("Sem paymentId");
-      return res.sendStatus(200);
-    }
-
-    console.log("paymentId:", paymentId);
-
-    // =========================
-    // BUSCAR PAGAMENTO
+    // BUSCA PAGAMENTO
     // =========================
     const pagamento = new Payment(client);
     const paymentData = await pagamento.get({ id: paymentId });
 
-    console.log("Status MP:", paymentData.status);
-
-    // =========================
-    // IDENTIFICAR COMPRA
-    // =========================
     const compraId =
       paymentData.metadata?.compraId ||
       paymentData.external_reference;
@@ -1065,29 +1050,28 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       return res.sendStatus(200);
     }
 
-    // =========================
-    // STATUS FINAL SEGURO
-    // =========================
     const statusMp = paymentData.status;
 
-    const statusValido = [
+    const statusPermitidos = [
       "pending",
-      "approved",
       "in_process",
+      "approved",
       "rejected",
       "cancelled",
       "expired",
-    ].includes(statusMp)
+    ];
+
+    const statusPagamento = statusPermitidos.includes(statusMp)
       ? statusMp
       : "pending";
 
     // =========================
-    // ATUALIZAR COMPRA
+    // ATUALIZA COMPRA
     // =========================
     await prisma.compra.update({
       where: { id: compraId },
       data: {
-        status: statusValido,
+        status: statusPagamento,
         mpPaymentId: paymentId.toString(),
         mpStatus: statusMp,
         pagoEm: statusMp === "approved" ? new Date() : null,
@@ -1095,19 +1079,19 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       },
     });
 
-    console.log("Compra atualizada:", compraId, statusValido);
+    console.log("Compra atualizada:", compraId, statusPagamento);
 
     // =========================
-    // FINALIZAR COMPRA
+    // FINALIZA SE APROVADO
     // =========================
-    if (statusValido === "approved") {
+    if (statusMp === "approved") {
       await concluirCompra(compraId);
     }
 
-    res.sendStatus(200);
+    return res.sendStatus(200);
   } catch (err) {
-    console.error("Erro webhook:", err);
-    res.sendStatus(200);
+    console.error("Webhook error:", err);
+    return res.sendStatus(200);
   }
 });
 

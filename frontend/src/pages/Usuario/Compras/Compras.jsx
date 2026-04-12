@@ -27,27 +27,30 @@ function Compras({ usuario, handleLogout }) {
     concluidas: false,
   });
 
-  // 🔒 Proteção
+  // =========================
+  // PROTEÇÃO
+  // =========================
   useEffect(() => {
     if (!usuario) {
       navigate("/login");
     }
   }, [usuario, navigate]);
 
+  // =========================
+  // BUSCAR COMPRAS
+  // =========================
   const buscarCompras = useCallback(async () => {
     if (!usuario?.id) return;
 
     try {
       const res = await api.get(`/compras/${usuario.id}`);
 
-      // 🔥 GARANTE ORDEM (mais recente primeiro)
+      // garante ordenação consistente (mais recente primeiro)
       const ordenadas = res.data.sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
 
       setCompras(ordenadas);
-
-      console.log("Compras carregadas:", ordenadas);
     } catch (err) {
       console.error("Erro ao buscar compras:", err);
     }
@@ -62,6 +65,9 @@ function Compras({ usuario, handleLogout }) {
     return () => clearInterval(intervalo);
   }, [usuario, buscarCompras]);
 
+  // =========================
+  // CANCELAR COMPRA
+  // =========================
   const cancelarCompra = async (id) => {
     if (!window.confirm("Deseja cancelar esta compra?")) return;
 
@@ -75,18 +81,27 @@ function Compras({ usuario, handleLogout }) {
   };
 
   // =========================
-  // FILTROS
+  // FILTROS (CORRETO)
   // =========================
   const aguardando = compras.filter(
-    (c) => c.status === "pending" || c.status === "in_process"
+    (c) =>
+      c.statusPagamento === "pending" ||
+      c.statusPagamento === "in_process"
   );
 
   const transferindo = compras.filter(
-    (c) => c.status === "approved" && !c.concluidoEm
+    (c) =>
+      c.statusPagamento === "approved" &&
+      !c.concluidoEm
   );
 
-  const concluidas = compras.filter((c) => c.concluidoEm);
+  const concluidas = compras.filter(
+    (c) => c.concluidoEm
+  );
 
+  // =========================
+  // RENDER LISTA
+  // =========================
   const renderLista = (lista, tipo, chaveEstado) => {
     const limite = 5;
     const mostrarTudo = verTudo[chaveEstado];
@@ -103,23 +118,27 @@ function Compras({ usuario, handleLogout }) {
             <p><strong>Plataforma:</strong> {c.plataforma}</p>
             <p><strong>Quantia:</strong> R$ {c.quantia}</p>
 
+            {/* STATUS PAGAMENTO */}
             {tipo !== "CONCLUIDA" && (
-              <StatusBadge status={c.status}>
-                {c.status === "pending" && "Aguardando pagamento"}
-                {c.status === "in_process" && "Pagamento em análise"}
-                {c.status === "approved" && "Pagamento aprovado"}
-                {c.status === "expired" && "Pagamento expirado"}
-                {c.status === "cancelled" && "Compra cancelada"}
+              <StatusBadge status={c.statusPagamento}>
+                {c.statusPagamento === "pending" && "Aguardando pagamento"}
+                {c.statusPagamento === "in_process" && "Pagamento em análise"}
+                {c.statusPagamento === "approved" && "Pagamento aprovado"}
+                {c.statusPagamento === "expired" && "Pagamento expirado"}
+                {c.statusPagamento === "cancelled" && "Compra cancelada"}
               </StatusBadge>
             )}
 
+            {/* BOTÃO CANCELAR */}
             {tipo === "AGUARDANDO" &&
-              (c.status === "pending" || c.status === "in_process") && (
+              (c.statusPagamento === "pending" ||
+                c.statusPagamento === "in_process") && (
                 <BotaoCancelar onClick={() => cancelarCompra(c.id)}>
                   Cancelar compra
                 </BotaoCancelar>
               )}
 
+            {/* DATA FINAL */}
             {tipo === "CONCLUIDA" && (
               <p>
                 <strong>Data:</strong>{" "}
@@ -157,16 +176,19 @@ function Compras({ usuario, handleLogout }) {
         </Header>
 
         <GridCompras>
+          {/* PENDENTES */}
           <BoxCompras>
             <h3>Aguardando pagamento</h3>
             {renderLista(aguardando, "AGUARDANDO", "aguardando")}
           </BoxCompras>
 
+          {/* APROVADAS / EM PROCESSO */}
           <BoxCompras>
             <h3>Transferência em andamento</h3>
             {renderLista(transferindo, "TRANSFERINDO", "transferindo")}
           </BoxCompras>
 
+          {/* FINALIZADAS */}
           <BoxCompras>
             <h3>Compras concluídas</h3>
             {renderLista(concluidas, "CONCLUIDA", "concluidas")}
