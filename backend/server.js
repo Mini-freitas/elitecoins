@@ -995,9 +995,6 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
 
     if (!paymentId) return res.sendStatus(200);
 
-    // =========================
-    // BUSCAR PAGAMENTO MP
-    // =========================
     const pagamento = new Payment(client);
     const paymentData = await pagamento.get({ id: paymentId });
 
@@ -1022,33 +1019,29 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       ? statusMp
       : "pending";
 
-    // =========================
-    // 🔥 ATUALIZA PAGAMENTO (CORRETO PRISMA)
-    // =========================
+    // 🔥 UPDATE ÚNICO E CONSISTENTE
     await prisma.compra.update({
       where: { id: compraId },
       data: {
-        statusPagamento, // ✅ CORRETO
+        statusPagamento,
         mpPaymentId: String(paymentId),
         mpStatus: statusMp,
         pagoEm: statusMp === "approved" ? new Date() : null,
+
+        // 🔥 só entra em processamento se aprovado
+        statusApiFifa:
+          statusMp === "approved"
+            ? "processando"
+            : "aguardando",
+
         updatedAt: new Date(),
       },
     });
 
     console.log("Compra atualizada:", compraId, statusPagamento);
 
-    // =========================
-    // 🔥 FLUXO FIFA (SEPARADO)
-    // =========================
+    // 🔥 FLUXO FIFA
     if (statusMp === "approved") {
-      await prisma.compra.update({
-        where: { id: compraId },
-        data: {
-          statusApiFifa: "processando",
-        },
-      });
-
       await concluirCompra(compraId);
     }
 

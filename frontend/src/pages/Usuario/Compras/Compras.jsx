@@ -29,8 +29,7 @@ function Compras({ usuario, handleLogout }) {
     if (!usuario?.id) return;
 
     const res = await api.get(`/compras/${usuario.id}`);
-
-    setCompras(res.data); // já vem ordenado do backend
+    setCompras(res.data);
   }, [usuario]);
 
   useEffect(() => {
@@ -40,7 +39,7 @@ function Compras({ usuario, handleLogout }) {
   }, [buscarCompras]);
 
   // =========================
-  // FILTROS CORRETOS
+  // FILTROS
   // =========================
   const pendentes = compras.filter(
     (c) =>
@@ -60,6 +59,26 @@ function Compras({ usuario, handleLogout }) {
     (c) => c.statusApiFifa === "concluido"
   );
 
+  // =========================
+  // LABEL STATUS (FIX UX)
+  // =========================
+  const labelStatus = (status) => {
+    switch (status) {
+      case "pending":
+        return "Pendente";
+      case "in_process":
+        return "Processando pagamento";
+      case "approved":
+        return "Pago";
+      case "rejected":
+        return "Rejeitado";
+      case "cancelled":
+        return "Cancelado";
+      default:
+        return "Desconhecido";
+    }
+  };
+
   const render = (lista) => {
     if (!lista.length) return <p>Nenhuma compra</p>;
 
@@ -68,11 +87,7 @@ function Compras({ usuario, handleLogout }) {
         <p>{c.plataforma}</p>
         <p>R$ {c.quantia}</p>
 
-        <span>
-          {c.statusPagamento === "pending" && "Pendente"}
-          {c.statusPagamento === "in_process" && "Processando pagamento"}
-          {c.statusPagamento === "approved" && "Pago"}
-        </span>
+        <span>{labelStatus(c.statusPagamento)}</span>
 
         <hr />
       </div>
@@ -111,5 +126,6 @@ function Compras({ usuario, handleLogout }) {
     </Comprassec>
   );
 }
+
 
 export default Compras;
