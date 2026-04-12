@@ -22,7 +22,15 @@ function App() {
   const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
-    const usuarioSalvo = localStorage.getItem("usuario"); // ✅ ALTERADO
+    // 🔥 FORÇA DOMÍNIO COM WWW (ESSENCIAL PRA NÃO PERDER SESSÃO)
+    if (window.location.hostname === "elitecoinsfc.com.br") {
+      window.location.href =
+        "https://www.elitecoinsfc.com.br" + window.location.pathname;
+      return;
+    }
+
+    // 🔐 Recupera usuário do localStorage
+    const usuarioSalvo = localStorage.getItem("usuario");
     if (usuarioSalvo) {
       setUsuario(JSON.parse(usuarioSalvo));
     }
@@ -30,12 +38,12 @@ function App() {
 
   const handleLogin = (usuarioLogado) => {
     setUsuario(usuarioLogado);
-    localStorage.setItem("usuario", JSON.stringify(usuarioLogado)); // ✅ ALTERADO
+    localStorage.setItem("usuario", JSON.stringify(usuarioLogado));
   };
 
   const handleLogout = () => {
     setUsuario(null);
-    localStorage.removeItem("usuario"); // ✅ ALTERADO
+    localStorage.removeItem("usuario");
   };
 
   const RotaProtegida = ({ children }) => {
@@ -46,17 +54,34 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home usuario={usuario} handleLogout={handleLogout} />} />
-        <Route path="/compra" element={<Compra usuario={usuario} handleLogout={handleLogout} />} />
-        <Route path="/login" element={<Login handleLogin={handleLogin} />} />
-        <Route path="/cadastro" element={<Cadastro handleLogin={handleLogin} />} />
+        <Route
+          path="/"
+          element={<Home usuario={usuario} handleLogout={handleLogout} />}
+        />
+
+        <Route
+          path="/compra"
+          element={<Compra usuario={usuario} handleLogout={handleLogout} />}
+        />
+
+        <Route
+          path="/login"
+          element={<Login handleLogin={handleLogin} />}
+        />
+
+        <Route
+          path="/cadastro"
+          element={<Cadastro handleLogin={handleLogin} />}
+        />
 
         <Route
           path="/admin"
           element={
-            usuario?.tipo === "ADMIN"
-              ? <Admin usuario={usuario} handleLogout={handleLogout} />
-              : <Navigate to="/login" />
+            usuario?.tipo === "ADMIN" ? (
+              <Admin usuario={usuario} handleLogout={handleLogout} />
+            ) : (
+              <Navigate to="/login" />
+            )
           }
         />
 
@@ -73,13 +98,47 @@ function App() {
           }
         />
 
-        <Route path="/usuario/seguranca" element={<RotaProtegida><Seguranca usuario={usuario} /></RotaProtegida>} />
-        <Route path="/usuario/compras" element={<RotaProtegida><Compras usuario={usuario} /></RotaProtegida>} />
-        <Route path="/usuario/excluir" element={<RotaProtegida><ExcluirConta usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} />
-      
-        <Route path="/pagamentoaprovado" element={<PagamentoAprovado />} />
-        <Route path="/pagamentopendente" element={<PagamentoPendente />} />
-        <Route path="/pagamentofalhou" element={<PagamentoFalhou />} />
+        <Route
+          path="/usuario/seguranca"
+          element={
+            <RotaProtegida>
+              <Seguranca usuario={usuario} />
+            </RotaProtegida>
+          }
+        />
+
+        <Route
+          path="/usuario/compras"
+          element={
+            <RotaProtegida>
+              <Compras usuario={usuario} />
+            </RotaProtegida>
+          }
+        />
+
+        <Route
+          path="/usuario/excluir"
+          element={
+            <RotaProtegida>
+              <ExcluirConta usuario={usuario} handleLogout={handleLogout} />
+            </RotaProtegida>
+          }
+        />
+
+        <Route
+          path="/pagamentoaprovado"
+          element={<PagamentoAprovado />}
+        />
+
+        <Route
+          path="/pagamentopendente"
+          element={<PagamentoPendente />}
+        />
+
+        <Route
+          path="/pagamentofalhou"
+          element={<PagamentoFalhou />}
+        />
       </Routes>
 
       <ToastContainer theme="dark" autoClose={3000} />
