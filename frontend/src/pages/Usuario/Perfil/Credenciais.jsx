@@ -48,9 +48,12 @@ function Credenciais({ usuario, handleLogin }) {
   // ===============================
   const handleInputChange = (e, campo, isNova = false) => {
     const valor = e.target.value;
+
     if (isNova) {
       setNovaCredencial((prev) => ({ ...prev, [campo]: valor }));
     } else {
+      if (editIndex === -1) return; // ✅ proteção
+
       const updated = [...credenciais];
       updated[editIndex] = { ...updated[editIndex], [campo]: valor };
       setCredenciais(updated);
@@ -84,11 +87,12 @@ function Credenciais({ usuario, handleLogin }) {
         persona: "",
       });
 
-      // BUSCAR NOVAMENTE
-      await buscarCredenciais();
-
-      // 🔥 ATUALIZA USUÁRIO GLOBAL COMO NO PERFIL
-      if (res.data.usuario) handleLogin(res.data.usuario);
+      // 🔥 Atualização inteligente
+      if (res.data.usuario) {
+        handleLogin(res.data.usuario);
+      } else {
+        await buscarCredenciais();
+      }
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.error || "Erro ao adicionar credencial");
@@ -107,7 +111,11 @@ function Credenciais({ usuario, handleLogin }) {
       setCredenciais(updated);
       setEditIndex(-1);
 
-      if (res.data.usuario) handleLogin(res.data.usuario);
+      if (res.data.usuario) {
+        handleLogin(res.data.usuario);
+      } else {
+        await buscarCredenciais();
+      }
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.error || "Erro ao atualizar credencial");
@@ -122,9 +130,12 @@ function Credenciais({ usuario, handleLogin }) {
 
     try {
       const res = await api.delete(`/credenciais/${id}`);
-      await buscarCredenciais();
 
-      if (res.data.usuario) handleLogin(res.data.usuario);
+      if (res.data.usuario) {
+        handleLogin(res.data.usuario);
+      } else {
+        await buscarCredenciais();
+      }
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.error || "Erro ao excluir credencial");
@@ -239,7 +250,10 @@ function Credenciais({ usuario, handleLogin }) {
               <EditButton type="button" onClick={() => setEditIndex(index)}>
                 Editar
               </EditButton>
-              <EditButton type="button" onClick={() => excluirCredencial(cred.id)}>
+              <EditButton
+                type="button"
+                onClick={() => excluirCredencial(cred.id)}
+              >
                 Excluir
               </EditButton>
             </>

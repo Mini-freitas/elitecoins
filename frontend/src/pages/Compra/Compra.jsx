@@ -1,10 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
+
 import MainCompra from '../../components/Main/MainCompra';
 import FooterCompra from '../../components/Footer/FooterCompra';
 import MyGlobalStyle from '../../styles/globalStyles';
 import HeaderPrincipal from '../../components/Header/HeaderPrincipal';
 
 const Compra = ({ usuario, handleLogout }) => {
+  const navigate = useNavigate();
+
+  // 🔒 proteção correta
+  useEffect(() => {
+    if (!usuario) {
+      navigate("/login");
+    }
+  }, [usuario, navigate]);
+
+  if (!usuario) return null;
+
   return (
     <>
       <MyGlobalStyle />
@@ -14,4 +27,5 @@ const Compra = ({ usuario, handleLogout }) => {
     </>
   );
 };
+
 export default Compra;

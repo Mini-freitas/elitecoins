@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../../services/api"; // ✅ corrigido
 
 import {
   Perfilsec,
@@ -24,16 +24,29 @@ import Credenciais from "./Credenciais";
 
 function Perfil({ usuario, handleLogout, handleLogin }) {
   const [editando, setEditando] = useState(false);
+  const [loading, setLoading] = useState(true); // ✅ NOVO
   const navigate = useNavigate();
 
-  // 🔒 Proteção de rota
+  // 🔒 Carregar usuário do localStorage corretamente
   useEffect(() => {
-    if (!usuario) navigate("/login");
-  }, [usuario, navigate]);
+    const usuarioSalvo = localStorage.getItem("usuario");
 
-  if (!usuario) return null;
+    if (usuarioSalvo && !usuario) {
+      handleLogin(JSON.parse(usuarioSalvo));
+    }
 
-  // 🔥 USUÁRIO = FONTE ÚNICA DA VERDADE (vem do backend)
+    setLoading(false);
+  }, []);
+
+  // 🔒 Proteção de rota segura
+  useEffect(() => {
+    if (!loading && !usuario) {
+      navigate("/login");
+    }
+  }, [usuario, loading, navigate]);
+
+  if (loading || !usuario) return null;
+
   const usuarioNormalizado = {
     id: usuario.id,
     nome: usuario.nome || "",
@@ -46,7 +59,6 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
     perfilEtapa: usuario.perfilEtapa ?? 1,
   };
 
-  // ✅ PROGRESSO 100% BASEADO NO perfilEtapa DO BACKEND
   const progresso = useMemo(() => {
     const etapa = usuarioNormalizado.perfilEtapa;
 
@@ -58,15 +70,13 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
     };
   }, [usuarioNormalizado.perfilEtapa]);
 
-  // 💾 Salvar perfil
   const handleSave = async (dadosAtualizados) => {
     try {
-      const res = await axios.put(
-        `http://localhost:3000/api/usuarios/${usuarioNormalizado.id}`,
+      const res = await api.put( // ✅ corrigido
+        `/usuarios/${usuarioNormalizado.id}`,
         dadosAtualizados
       );
 
-      // 🔥 Atualiza estado global + sessionStorage
       handleLogin(res.data);
       setEditando(false);
     } catch (err) {
@@ -94,7 +104,6 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
             </EditButton>
           </Header>
 
-          {/* PROGRESSO */}
           <ProgressWrapper>
             <ProgressBar>
               <span style={{ width: `${progresso.percentual}%` }} />
@@ -111,13 +120,11 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
             </ProgressStep>
           </ProgressWrapper>
 
-          {/* VOUCHERS */}
           <VoucherBox>
             <strong>Vouchers disponíveis:</strong>{" "}
             {usuarioNormalizado.vouchers}
           </VoucherBox>
 
-          {/* CTA */}
           {!progresso.perfil && (
             <CtaBox>
               <p>
@@ -130,7 +137,6 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
             </CtaBox>
           )}
 
-          {/* CONTEÚDO */}
           {editando ? (
             <PerfilForm
               usuario={usuarioNormalizado}
@@ -176,7 +182,6 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
           )}
         </Container>
 
-        {/* 🔥 Credenciais DEVEM atualizar o usuário via handleLogin */}
         <Credenciais
           usuario={usuarioNormalizado}
           handleLogin={handleLogin}

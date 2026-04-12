@@ -22,7 +22,7 @@ function App() {
   const [usuario, setUsuario] = useState(null);
 
   useEffect(() => {
-    const usuarioSalvo = sessionStorage.getItem("usuario");
+    const usuarioSalvo = localStorage.getItem("usuario"); // ✅ ALTERADO
     if (usuarioSalvo) {
       setUsuario(JSON.parse(usuarioSalvo));
     }
@@ -30,12 +30,12 @@ function App() {
 
   const handleLogin = (usuarioLogado) => {
     setUsuario(usuarioLogado);
-    sessionStorage.setItem("usuario", JSON.stringify(usuarioLogado));
+    localStorage.setItem("usuario", JSON.stringify(usuarioLogado)); // ✅ ALTERADO
   };
 
   const handleLogout = () => {
     setUsuario(null);
-    sessionStorage.removeItem("usuario");
+    localStorage.removeItem("usuario"); // ✅ ALTERADO
   };
 
   const RotaProtegida = ({ children }) => {
@@ -67,7 +67,7 @@ function App() {
               <Perfil
                 usuario={usuario}
                 handleLogout={handleLogout}
-                handleLogin={handleLogin} // 👈 ESSENCIAL
+                handleLogin={handleLogin}
               />
             </RotaProtegida>
           }
@@ -80,8 +80,6 @@ function App() {
         <Route path="/pagamentoaprovado" element={<PagamentoAprovado />} />
         <Route path="/pagamentopendente" element={<PagamentoPendente />} />
         <Route path="/pagamentofalhou" element={<PagamentoFalhou />} />
-
-     
       </Routes>
 
       <ToastContainer theme="dark" autoClose={3000} />

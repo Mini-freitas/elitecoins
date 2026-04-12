@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../../services/api";
 
 import HeaderPrincipal from "../../../components/Header/HeaderPrincipal";
@@ -17,12 +18,21 @@ import {
 } from "./styles";
 
 function Compras({ usuario, handleLogout }) {
+  const navigate = useNavigate();
+
   const [compras, setCompras] = useState([]);
   const [verTudo, setVerTudo] = useState({
     aguardando: false,
     transferindo: false,
     concluidas: false,
   });
+
+  // 🔒 proteção real
+  useEffect(() => {
+    if (!usuario) {
+      navigate("/login");
+    }
+  }, [usuario, navigate]);
 
   const buscarCompras = useCallback(async () => {
     if (!usuario?.id) return;
@@ -40,6 +50,7 @@ function Compras({ usuario, handleLogout }) {
 
     buscarCompras();
     const intervalo = setInterval(buscarCompras, 5000);
+
     return () => clearInterval(intervalo);
   }, [usuario, buscarCompras]);
 
@@ -47,7 +58,6 @@ function Compras({ usuario, handleLogout }) {
     if (!window.confirm("Deseja cancelar esta compra?")) return;
 
     try {
-      // REMOVIDO o /api daqui
       await api.post(`/compras/${id}/cancelar`);
       buscarCompras();
     } catch (err) {
@@ -56,7 +66,6 @@ function Compras({ usuario, handleLogout }) {
     }
   };
 
-  // FILTROS DE STATUS
   const aguardando = compras.filter(
     (c) => c.status === "pending" || c.status === "in_process"
   );
@@ -65,9 +74,7 @@ function Compras({ usuario, handleLogout }) {
     (c) => c.status === "approved" && !c.concluidoEm
   );
 
-  const concluidas = compras.filter(
-    (c) => c.concluidoEm
-  );
+  const concluidas = compras.filter((c) => c.concluidoEm);
 
   const renderLista = (lista, tipo, chaveEstado) => {
     const limite = 5;
