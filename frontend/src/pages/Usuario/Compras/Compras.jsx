@@ -19,151 +19,64 @@ import {
 
 function Compras({ usuario, handleLogout }) {
   const navigate = useNavigate();
-
   const [compras, setCompras] = useState([]);
-  const [verTudo, setVerTudo] = useState({
-    aguardando: false,
-    transferindo: false,
-    concluidas: false,
-  });
 
-  // =========================
-  // PROTEÇÃO
-  // =========================
   useEffect(() => {
-    if (!usuario) {
-      navigate("/login");
-    }
-  }, [usuario, navigate]);
+    if (!usuario) navigate("/login");
+  }, [usuario]);
 
-  // =========================
-  // BUSCAR COMPRAS
-  // =========================
   const buscarCompras = useCallback(async () => {
     if (!usuario?.id) return;
 
-    try {
-      const res = await api.get(`/compras/${usuario.id}`);
+    const res = await api.get(`/compras/${usuario.id}`);
 
-      // garante ordenação consistente (mais recente primeiro)
-      const ordenadas = res.data.sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-
-      setCompras(ordenadas);
-    } catch (err) {
-      console.error("Erro ao buscar compras:", err);
-    }
+    setCompras(res.data); // já vem ordenado do backend
   }, [usuario]);
 
   useEffect(() => {
-    if (!usuario) return;
-
     buscarCompras();
-    const intervalo = setInterval(buscarCompras, 5000);
-
-    return () => clearInterval(intervalo);
-  }, [usuario, buscarCompras]);
-
-  // =========================
-  // CANCELAR COMPRA
-  // =========================
-  const cancelarCompra = async (id) => {
-    if (!window.confirm("Deseja cancelar esta compra?")) return;
-
-    try {
-      await api.post(`/compras/${id}/cancelar`);
-      buscarCompras();
-    } catch (err) {
-      alert("Não foi possível cancelar a compra");
-      console.error(err);
-    }
-  };
+    const interval = setInterval(buscarCompras, 5000);
+    return () => clearInterval(interval);
+  }, [buscarCompras]);
 
   // =========================
-  // FILTROS (CORRETO)
+  // FILTROS CORRETOS
   // =========================
-  const aguardando = compras.filter(
+  const pendentes = compras.filter(
     (c) =>
       c.statusPagamento === "pending" ||
       c.statusPagamento === "in_process"
   );
 
-  const transferindo = compras.filter(
-    (c) =>
-      c.statusPagamento === "approved" &&
-      !c.concluidoEm
+  const aprovadas = compras.filter(
+    (c) => c.statusPagamento === "approved"
+  );
+
+  const processandoFifa = compras.filter(
+    (c) => c.statusApiFifa === "processando"
   );
 
   const concluidas = compras.filter(
-    (c) => c.concluidoEm
+    (c) => c.statusApiFifa === "concluido"
   );
 
-  // =========================
-  // RENDER LISTA
-  // =========================
-  const renderLista = (lista, tipo, chaveEstado) => {
-    const limite = 5;
-    const mostrarTudo = verTudo[chaveEstado];
-    const itens = mostrarTudo ? lista : lista.slice(0, limite);
+  const render = (lista) => {
+    if (!lista.length) return <p>Nenhuma compra</p>;
 
-    if (lista.length === 0) {
-      return <p>Nenhuma compra nesta etapa.</p>;
-    }
+    return lista.map((c) => (
+      <div key={c.id}>
+        <p>{c.plataforma}</p>
+        <p>R$ {c.quantia}</p>
 
-    return (
-      <>
-        {itens.map((c) => (
-          <CompraItem key={c.id}>
-            <p><strong>Plataforma:</strong> {c.plataforma}</p>
-            <p><strong>Quantia:</strong> R$ {c.quantia}</p>
+        <span>
+          {c.statusPagamento === "pending" && "Pendente"}
+          {c.statusPagamento === "in_process" && "Processando pagamento"}
+          {c.statusPagamento === "approved" && "Pago"}
+        </span>
 
-            {/* STATUS PAGAMENTO */}
-            {tipo !== "CONCLUIDA" && (
-              <StatusBadge status={c.statusPagamento}>
-                {c.statusPagamento === "pending" && "Aguardando pagamento"}
-                {c.statusPagamento === "in_process" && "Pagamento em análise"}
-                {c.statusPagamento === "approved" && "Pagamento aprovado"}
-                {c.statusPagamento === "expired" && "Pagamento expirado"}
-                {c.statusPagamento === "cancelled" && "Compra cancelada"}
-              </StatusBadge>
-            )}
-
-            {/* BOTÃO CANCELAR */}
-            {tipo === "AGUARDANDO" &&
-              (c.statusPagamento === "pending" ||
-                c.statusPagamento === "in_process") && (
-                <BotaoCancelar onClick={() => cancelarCompra(c.id)}>
-                  Cancelar compra
-                </BotaoCancelar>
-              )}
-
-            {/* DATA FINAL */}
-            {tipo === "CONCLUIDA" && (
-              <p>
-                <strong>Data:</strong>{" "}
-                {c.concluidoEm
-                  ? new Date(c.concluidoEm).toLocaleString()
-                  : "-"}
-              </p>
-            )}
-          </CompraItem>
-        ))}
-
-        {lista.length > limite && (
-          <VerMais
-            onClick={() =>
-              setVerTudo((prev) => ({
-                ...prev,
-                [chaveEstado]: !prev[chaveEstado],
-              }))
-            }
-          >
-            {mostrarTudo ? "Mostrar menos" : "Ver todas as compras"}
-          </VerMais>
-        )}
-      </>
-    );
+        <hr />
+      </div>
+    ));
   };
 
   return (
@@ -171,29 +84,27 @@ function Compras({ usuario, handleLogout }) {
       <HeaderPrincipal usuario={usuario} handleLogout={handleLogout} />
 
       <MainCompras>
-        <Header>
-          <h2>Minhas Compras</h2>
-        </Header>
+        <h2>Compras</h2>
 
-        <GridCompras>
-          {/* PENDENTES */}
-          <BoxCompras>
-            <h3>Aguardando pagamento</h3>
-            {renderLista(aguardando, "AGUARDANDO", "aguardando")}
-          </BoxCompras>
+        <BoxCompras>
+          <h3>Pagamentos</h3>
+          {render(pendentes)}
+        </BoxCompras>
 
-          {/* APROVADAS / EM PROCESSO */}
-          <BoxCompras>
-            <h3>Transferência em andamento</h3>
-            {renderLista(transferindo, "TRANSFERINDO", "transferindo")}
-          </BoxCompras>
+        <BoxCompras>
+          <h3>Aprovadas</h3>
+          {render(aprovadas)}
+        </BoxCompras>
 
-          {/* FINALIZADAS */}
-          <BoxCompras>
-            <h3>Compras concluídas</h3>
-            {renderLista(concluidas, "CONCLUIDA", "concluidas")}
-          </BoxCompras>
-        </GridCompras>
+        <BoxCompras>
+          <h3>API FIFA processando</h3>
+          {render(processandoFifa)}
+        </BoxCompras>
+
+        <BoxCompras>
+          <h3>Concluídas</h3>
+          {render(concluidas)}
+        </BoxCompras>
       </MainCompras>
 
       <Footer usuario={usuario} handleLogout={handleLogout} />

@@ -834,8 +834,6 @@ app.get("/api/compras/:usuarioId", async (req, res) => {
 
     const compras = await prisma.compra.findMany({
       where: { usuarioId },
-
-      // 🔥 ordem correta no backend (NÃO depende do frontend)
       orderBy: {
         createdAt: "desc",
       },
@@ -844,7 +842,7 @@ app.get("/api/compras/:usuarioId", async (req, res) => {
     return res.json(compras);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ erro: "Erro ao buscar compras" });
+    return res.status(500).json({ error: "Erro ao buscar compras" });
   }
 });
 
@@ -880,10 +878,6 @@ app.post("/api/pagamento", async (req, res) => {
   try {
     const { usuarioId, plataforma, quantia, quantMoedas } = req.body;
 
-    if (!usuarioId || !plataforma || !quantia) {
-      return res.status(400).json({ erro: "Dados inválidos" });
-    }
-
     const usuario = await prisma.usuario.findUnique({
       where: { id: usuarioId },
     });
@@ -898,7 +892,9 @@ app.post("/api/pagamento", async (req, res) => {
         plataforma,
         quantia: Number(quantia),
         moeda: quantMoedas?.toString() || "FIFA",
-        status: STATUS.PENDING,
+
+        statusPagamento: "pending",
+        statusApiFifa: "aguardando",
       },
     });
 
@@ -908,22 +904,16 @@ app.post("/api/pagamento", async (req, res) => {
       body: {
         items: [
           {
-            title: `Moedas FIFA - ${plataforma} (${quantMoedas})`,
+            title: `Moedas FIFA - ${plataforma}`,
             quantity: 1,
             currency_id: "BRL",
             unit_price: Number(quantia),
           },
         ],
-        payer: {
-          email: usuario.email,
-        },
+        payer: { email: usuario.email },
 
-        // 🔥 ligação segura
         external_reference: compra.id,
-
-        metadata: {
-          compraId: compra.id,
-        },
+        metadata: { compraId: compra.id },
 
         back_urls: {
           success: `${HOST_URL}/pagamentoaprovado`,
@@ -938,17 +928,16 @@ app.post("/api/pagamento", async (req, res) => {
     await prisma.compra.update({
       where: { id: compra.id },
       data: {
-        mpPreferenceId: response.id.toString(),
+        mpPreferenceId: response.id,
       },
     });
 
-    res.json({ init_point: response.init_point });
-  } catch (error) {
-    console.error("Erro ao criar pagamento:", error);
-    res.status(500).json({ erro: "Erro ao criar pagamento" });
+    return res.json({ init_point: response.init_point });
+  } catch (err) {
+    console.error("CRIAR PAGAMENTO ERROR:", err);
+    return res.status(500).json({ erro: "Erro ao criar pagamento" });
   }
 });
-
 // =========================
 // FINALIZAR COMPRA
 // =========================
@@ -997,46 +986,17 @@ async function concluirCompra(compraId) {
 // =========================
 // WEBHOOK MERCADO PAGO
 // =========================
-
 app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
     console.log("=== Webhook recebido ===");
 
-    const signature = req.headers["x-signature"];
-    const requestId = req.headers["x-request-id"];
-
     const paymentId =
       req.body?.data?.id || req.body?.id;
 
-    if (!paymentId) {
-      return res.sendStatus(200);
-    }
+    if (!paymentId) return res.sendStatus(200);
 
     // =========================
-    // VERIFICAÇÃO SEGURA (opcional)
-    // =========================
-    if (signature && requestId && process.env.MP_WEBHOOK_TOKEN) {
-      try {
-        const ts = signature.split(",")[0]?.split("=")[1];
-
-        const manifest = `id:${paymentId};request-id:${requestId};ts:${ts};`;
-
-        const hash = crypto
-          .createHmac("sha256", process.env.MP_WEBHOOK_TOKEN)
-          .update(manifest)
-          .digest("hex");
-
-        if (!signature.includes(hash)) {
-          console.log("Assinatura inválida");
-          return res.sendStatus(200);
-        }
-      } catch (err) {
-        console.log("Erro validação assinatura:", err.message);
-      }
-    }
-
-    // =========================
-    // BUSCA PAGAMENTO
+    // BUSCAR PAGAMENTO MP
     // =========================
     const pagamento = new Payment(client);
     const paymentData = await pagamento.get({ id: paymentId });
@@ -1045,10 +1005,7 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       paymentData.metadata?.compraId ||
       paymentData.external_reference;
 
-    if (!compraId) {
-      console.log("Sem compraId");
-      return res.sendStatus(200);
-    }
+    if (!compraId) return res.sendStatus(200);
 
     const statusMp = paymentData.status;
 
@@ -1066,13 +1023,13 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       : "pending";
 
     // =========================
-    // ATUALIZA COMPRA
+    // 🔥 ATUALIZA PAGAMENTO (CORRETO PRISMA)
     // =========================
     await prisma.compra.update({
       where: { id: compraId },
       data: {
-        status: statusPagamento,
-        mpPaymentId: paymentId.toString(),
+        statusPagamento, // ✅ CORRETO
+        mpPaymentId: String(paymentId),
         mpStatus: statusMp,
         pagoEm: statusMp === "approved" ? new Date() : null,
         updatedAt: new Date(),
@@ -1082,9 +1039,16 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
     console.log("Compra atualizada:", compraId, statusPagamento);
 
     // =========================
-    // FINALIZA SE APROVADO
+    // 🔥 FLUXO FIFA (SEPARADO)
     // =========================
     if (statusMp === "approved") {
+      await prisma.compra.update({
+        where: { id: compraId },
+        data: {
+          statusApiFifa: "processando",
+        },
+      });
+
       await concluirCompra(compraId);
     }
 
