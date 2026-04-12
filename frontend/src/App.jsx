@@ -19,22 +19,10 @@ import PagamentoPendente from "./pages/Pagamentos/Pagamentopendente";
 import PagamentoFalhou from "./pages/Pagamentos/Pagamentofalhou";
 
 function App() {
-  const [usuario, setUsuario] = useState(null);
-
-  useEffect(() => {
-    // 🔥 FORÇA DOMÍNIO COM WWW (ESSENCIAL PRA NÃO PERDER SESSÃO)
-    if (window.location.hostname === "elitecoinsfc.com.br") {
-      window.location.href =
-        "https://www.elitecoinsfc.com.br" + window.location.pathname;
-      return;
-    }
-
-    // 🔐 Recupera usuário do localStorage
+  const [usuario, setUsuario] = useState(() => {
     const usuarioSalvo = localStorage.getItem("usuario");
-    if (usuarioSalvo) {
-      setUsuario(JSON.parse(usuarioSalvo));
-    }
-  }, []);
+    return usuarioSalvo ? JSON.parse(usuarioSalvo) : null;
+  });
 
   const handleLogin = (usuarioLogado) => {
     setUsuario(usuarioLogado);
