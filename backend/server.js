@@ -873,18 +873,12 @@ const STATUS = {
 // =========================
 // CRIAR PAGAMENTO
 // =========================
-// =========================
-// CRIAR PAGAMENTO (100% OTIMIZADO)
-// =========================
 app.post("/api/pagamento", async (req, res) => {
   try {
     const { usuarioId, plataforma, quantia, quantMoedas } = req.body;
 
     console.log("📤 BODY:", req.body);
 
-    // =========================
-    // VALIDAÇÃO
-    // =========================
     if (!usuarioId || !plataforma || !quantia) {
       return res.status(400).json({ erro: "Dados inválidos" });
     }
@@ -902,7 +896,7 @@ app.post("/api/pagamento", async (req, res) => {
     }
 
     // =========================
-    // CRIAR COMPRA NO BANCO
+    // CRIA COMPRA
     // =========================
     const compra = await prisma.compra.create({
       data: {
@@ -910,23 +904,20 @@ app.post("/api/pagamento", async (req, res) => {
         plataforma,
         quantia: Number(quantia),
         moeda: quantMoedas?.toString() || "FIFA",
-        statusPagamento: "pending",
+        statusPagamento: STATUS.PENDING,
         statusApiFifa: "aguardando",
       },
     });
 
-    console.log("🧾 COMPRA CRIADA:", compra.id);
+    console.log("🧾 COMPRA:", compra.id);
 
-    // =========================
-    // CRIAR PREFERÊNCIA MP
-    // =========================
     const preference = new Preference(client);
 
     const response = await preference.create({
       body: {
         items: [
           {
-            id: compra.id, // 🔥 importante pro score
+            id: compra.id,
             title: `Moedas FIFA - ${plataforma}`,
             description: `Compra de ${quantMoedas} moedas FIFA para ${plataforma}`,
             category_id: "games",
@@ -949,7 +940,7 @@ app.post("/api/pagamento", async (req, res) => {
           usuarioId: usuario.id,
         },
 
-        // 🔥 ESSENCIAL PRA APROVAÇÃO
+        // 🔥 FUNDAMENTAL
         notification_url: `${process.env.HOST_URL}/api/webhook-mercadopago`,
 
         back_urls: {
@@ -962,11 +953,8 @@ app.post("/api/pagamento", async (req, res) => {
       },
     });
 
-    console.log("✅ PREFERENCE CRIADA:", response.id);
+    console.log("✅ PREFERENCE:", response.id);
 
-    // =========================
-    // SALVAR ID DA PREFERÊNCIA
-    // =========================
     await prisma.compra.update({
       where: { id: compra.id },
       data: {
@@ -987,6 +975,7 @@ app.post("/api/pagamento", async (req, res) => {
     });
   }
 });
+
 // =========================
 // FINALIZAR COMPRA
 // =========================
@@ -996,11 +985,11 @@ async function concluirCompra(compraId) {
   });
 
   if (!compra) return;
- 
+
   if (compra.statusPagamento !== STATUS.APPROVED) return;
 
   if (compra.concluidoEm) {
-    console.log("Compra já concluída:", compraId);
+    console.log("⚠️ Já concluída:", compraId);
     return;
   }
 
@@ -1030,47 +1019,45 @@ async function concluirCompra(compraId) {
     },
   });
 
-  console.log("Compra concluída:", compra.id);
+  console.log("🎉 COMPRA FINALIZADA:", compra.id);
 }
+
 // =========================
 // WEBHOOK MERCADO PAGO
 // =========================
 app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
-    console.log("=== Webhook recebido ===");
+    console.log("📩 WEBHOOK:", JSON.stringify(req.body));
 
     const paymentId = req.body?.data?.id || req.body?.id;
 
     if (!paymentId) return res.sendStatus(200);
 
     const pagamento = new Payment(client);
+
+    // 🔥 BUSCA REAL DO PAGAMENTO
     const paymentData = await pagamento.get({ id: paymentId });
+
+    console.log("💳 PAYMENT DATA:", paymentData.status);
 
     const compraId =
       paymentData.metadata?.compraId ||
       paymentData.external_reference;
 
-    if (!compraId) return res.sendStatus(200);
+    if (!compraId) {
+      console.log("❌ CompraId não encontrado");
+      return res.sendStatus(200);
+    }
 
     const statusMp = paymentData.status;
 
-    const statusPermitidos = [
-      "pending",
-      "in_process",
-      "approved",
-      "rejected",
-      "cancelled",
-      "expired",
-    ];
-
-    const statusPagamento = statusPermitidos.includes(statusMp)
-      ? statusMp
-      : "pending";
+    // 🔥 AQUI ESTAVA O PROBLEMA DO PIX
+    // PIX começa pending e depois vira approved
 
     await prisma.compra.update({
       where: { id: compraId },
       data: {
-        statusPagamento,
+        statusPagamento: statusMp,
         mpPaymentId: String(paymentId),
         mpStatus: statusMp,
         pagoEm: statusMp === "approved" ? new Date() : null,
@@ -1081,18 +1068,20 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       },
     });
 
-    console.log("Compra atualizada:", compraId, statusPagamento);
+    console.log("📦 STATUS ATUALIZADO:", compraId, statusMp);
 
+    // 🔥 FINALIZA SÓ QUANDO APROVADO
     if (statusMp === "approved") {
       await concluirCompra(compraId);
     }
 
     return res.sendStatus(200);
+
   } catch (err) {
-    console.error("Webhook error:", err);
+    console.error("🔥 WEBHOOK ERROR:", err);
     return res.sendStatus(200);
   }
-});
+}); 
 
 // =========================
 // CANCELAR COMPRA
