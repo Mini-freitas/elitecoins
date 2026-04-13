@@ -943,44 +943,82 @@ app.post("/api/pagamento", async (req, res) => {
 // =========================
 app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
+    console.log("\n==============================");
     console.log("📩 WEBHOOK:", req.body);
 
-    let paymentId = req.body?.data?.id || req.body?.id;
+    let paymentId = null;
 
-    // merchant_order fallback
-    if (req.body?.topic === "merchant_order") {
+    // =========================
+    // 1. PAYMENT NORMAL
+    // =========================
+    if (req.body?.data?.id) {
+      paymentId = req.body.data.id;
+    }
+
+    // =========================
+    // 2. FALLBACK (payment direto)
+    // =========================
+    if (!paymentId && req.body?.resource && typeof req.body.resource === "string") {
+      const match = req.body.resource.match(/(\d+)$/);
+      if (match) paymentId = match[1];
+    }
+
+    // =========================
+    // 3. MERCHANT ORDER (IMPORTANTE)
+    // =========================
+    if (!paymentId && req.body?.topic === "merchant_order") {
       const orderId = req.body.resource.split("/").pop();
 
-      const order = await fetch(
+      const orderRes = await fetch(
         `https://api.mercadopago.com/merchant_orders/${orderId}`,
         {
           headers: {
             Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
           },
         }
-      ).then(r => r.json());
+      );
+
+      const order = await orderRes.json();
 
       paymentId = order.payments?.[0]?.id;
     }
 
+    // =========================
+    // SEM PAYMENT ID
+    // =========================
     if (!paymentId) {
-      console.log("⚠️ Webhook ignorado (sem paymentId)");
+      console.log("⚠️ SEM PAYMENT ID - ignorado com segurança");
       return res.sendStatus(200);
     }
 
-    const payment = await fetch(
+    console.log("💳 PAYMENT ID FINAL:", paymentId);
+
+    // =========================
+    // BUSCAR PAGAMENTO
+    // =========================
+    const paymentRes = await fetch(
       `https://api.mercadopago.com/v1/payments/${paymentId}`,
       {
         headers: {
           Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
         },
       }
-    ).then(r => r.json());
+    );
+
+    const payment = await paymentRes.json();
+
+    console.log("💰 STATUS:", payment.status);
 
     const compraId = payment.external_reference;
 
-    if (!compraId) return res.sendStatus(200);
+    if (!compraId) {
+      console.log("❌ COMPRA ID NÃO ENCONTRADA");
+      return res.sendStatus(200);
+    }
 
+    // =========================
+    // ATUALIZA BANCO (IDEMPOTENTE)
+    // =========================
     await prisma.compra.update({
       where: { id: compraId },
       data: {
@@ -988,17 +1026,26 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
         mpPaymentId: String(payment.id),
         pagoEm: payment.status === "approved" ? new Date() : null,
         statusApiFifa:
-          payment.status === "approved" ? "processando" : "aguardando",
+          payment.status === "approved"
+            ? "processando"
+            : "aguardando",
       },
     });
 
+    console.log("📦 COMPRA ATUALIZADA:", compraId);
+
+    // =========================
+    // FINALIZA
+    // =========================
     if (payment.status === "approved") {
+      console.log("🎯 APROVADO - FINALIZANDO");
       await concluirCompra(compraId);
     }
 
     return res.sendStatus(200);
+
   } catch (err) {
-    console.error(err);
+    console.error("❌ WEBHOOK ERROR:", err);
     return res.sendStatus(200);
   }
 });
