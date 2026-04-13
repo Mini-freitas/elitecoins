@@ -1108,37 +1108,69 @@ async function concluirCompra(compraId) {
 } 
 
 // =========================
-// WEBHOOK MERCADO PAGO
+// WEBHOOK MERCADO PAGO (ROBUSTO)
 // =========================
 app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
-    console.log("📩 WEBHOOK:", JSON.stringify(req.body));
+    console.log("\n==============================");
+    console.log("📩 WEBHOOK RECEBIDO");
+    console.log("HEADERS:", req.headers);
+    console.log("BODY:", req.body);
 
-    const paymentId = req.body?.data?.id || req.body?.id;
+    let paymentId = null;
 
-    if (!paymentId) return res.sendStatus(200);
+    // =========================
+    // CASO 1: payment.updated
+    // =========================
+    if (req.body?.data?.id) {
+      paymentId = req.body.data.id;
+    }
+
+    // =========================
+    // CASO 2: payment topic
+    // =========================
+    if (!paymentId && req.body?.resource && typeof req.body.resource === "string") {
+      const match = req.body.resource.match(/\d+$/);
+      if (match) paymentId = match[0];
+    }
+
+    // =========================
+    // CASO 3: merchant_order (IGNORAR OU TRATAR)
+    // =========================
+    if (req.body?.topic === "merchant_order") {
+      console.log("⚠️ IGNORANDO merchant_order (não é payment direto)");
+      return res.sendStatus(200);
+    }
+
+    console.log("💳 PAYMENT ID EXTRAÍDO:", paymentId);
+
+    if (!paymentId) {
+      console.log("❌ PAYMENT ID NÃO ENCONTRADO");
+      return res.sendStatus(200);
+    }
 
     const pagamento = new Payment(client);
 
-    // 🔥 BUSCA REAL DO PAGAMENTO
+    console.log("🔎 BUSCANDO PAGAMENTO NO MP...");
+
     const paymentData = await pagamento.get({ id: paymentId });
 
-    console.log("💳 PAYMENT DATA:", paymentData.status);
+    console.log("💰 STATUS MP:", paymentData.status);
 
     const compraId =
       paymentData.metadata?.compraId ||
       paymentData.external_reference;
 
     if (!compraId) {
-      console.log("❌ CompraId não encontrado");
+      console.log("❌ COMPRA ID NÃO ENCONTRADO");
       return res.sendStatus(200);
     }
 
     const statusMp = paymentData.status;
 
-    // 🔥 AQUI ESTAVA O PROBLEMA DO PIX
-    // PIX começa pending e depois vira approved
-
+    // =========================
+    // ATUALIZA BANCO
+    // =========================
     await prisma.compra.update({
       where: { id: compraId },
       data: {
@@ -1147,18 +1179,21 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
         mpStatus: statusMp,
         pagoEm: statusMp === "approved" ? new Date() : null,
         statusApiFifa:
-          statusMp === "approved"
-            ? "processando"
-            : "aguardando",
+          statusMp === "approved" ? "processando" : "aguardando",
       },
     });
 
-    console.log("📦 STATUS ATUALIZADO:", compraId, statusMp);
+    console.log("📦 COMPRA ATUALIZADA:", compraId, statusMp);
 
-    // 🔥 FINALIZA SÓ QUANDO APROVADO
+    // =========================
+    // FINALIZA
+    // =========================
     if (statusMp === "approved") {
+      console.log("🎯 APROVADO - FINALIZANDO COMPRA");
       await concluirCompra(compraId);
     }
+
+    console.log("==============================\n");
 
     return res.sendStatus(200);
 
@@ -1166,7 +1201,7 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
     console.error("🔥 WEBHOOK ERROR:", err);
     return res.sendStatus(200);
   }
-}); 
+});
 
 // =========================
 // CANCELAR COMPRA
