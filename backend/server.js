@@ -871,15 +871,23 @@ const STATUS = {
 };
 
 // =========================
+// LOG GLOBAL (DEBUG SERVER)
+// =========================
+console.log("🔥 BACKEND INICIADO - PAGAMENTO SYSTEM ONLINE");
+
+// =========================
 // CRIAR PAGAMENTO
 // =========================
 app.post("/api/pagamento", async (req, res) => {
   try {
+    console.log("\n==============================");
+    console.log("📥 NOVA REQUISIÇÃO PAGAMENTO");
+    console.log("BODY:", req.body);
+
     const { usuarioId, plataforma, quantia, quantMoedas } = req.body;
 
-    console.log("📤 BODY:", req.body);
-
     if (!usuarioId || !plataforma || !quantia) {
+      console.log("❌ VALIDAÇÃO FALHOU");
       return res.status(400).json({ erro: "Dados inválidos" });
     }
 
@@ -887,17 +895,11 @@ app.post("/api/pagamento", async (req, res) => {
       where: { id: usuarioId },
     });
 
-    if (!usuario) {
-      return res.status(404).json({ erro: "Usuário não encontrado" });
-    }
+    console.log("👤 USUÁRIO:", usuario?.email || "NÃO ENCONTRADO");
 
-    if (!usuario.email) {
-      return res.status(400).json({ erro: "Usuário sem email" });
-    }
+    if (!usuario) return res.status(404).json({ erro: "Usuário não encontrado" });
+    if (!usuario.email) return res.status(400).json({ erro: "Usuário sem email" });
 
-    // =========================
-    // CRIA COMPRA
-    // =========================
     const compra = await prisma.compra.create({
       data: {
         usuarioId,
@@ -909,9 +911,11 @@ app.post("/api/pagamento", async (req, res) => {
       },
     });
 
-    console.log("🧾 COMPRA:", compra.id);
+    console.log("🧾 COMPRA CRIADA:", compra.id);
 
     const preference = new Preference(client);
+
+    console.log("⚙️ CRIANDO PREFERÊNCIA MERCADO PAGO...");
 
     const response = await preference.create({
       body: {
@@ -919,7 +923,7 @@ app.post("/api/pagamento", async (req, res) => {
           {
             id: compra.id,
             title: `Moedas FIFA - ${plataforma}`,
-            description: `Compra de ${quantMoedas} moedas FIFA para ${plataforma}`,
+            description: `Compra de ${quantMoedas} moedas FIFA (${plataforma})`,
             category_id: "games",
             quantity: 1,
             currency_id: "BRL",
@@ -940,7 +944,6 @@ app.post("/api/pagamento", async (req, res) => {
           usuarioId: usuario.id,
         },
 
-        // 🔥 FUNDAMENTAL
         notification_url: `${process.env.HOST_URL}/api/webhook-mercadopago`,
 
         back_urls: {
@@ -953,7 +956,8 @@ app.post("/api/pagamento", async (req, res) => {
       },
     });
 
-    console.log("✅ PREFERENCE:", response.id);
+    console.log("✅ PREFERÊNCIA CRIADA:", response.id);
+    console.log("🔗 INIT POINT:", response.init_point);
 
     await prisma.compra.update({
       where: { id: compra.id },
@@ -967,12 +971,85 @@ app.post("/api/pagamento", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("🔥 ERRO PAGAMENTO:", err.response?.data || err);
-
+    console.log("🔥 ERRO PAGAMENTO COMPLETO:");
+    console.log(err?.response?.data || err);
     return res.status(500).json({
       erro: "Erro ao criar pagamento",
-      detalhe: err.response?.data || err.message,
+      detalhe: err?.response?.data || err.message,
     });
+  }
+});
+
+// =========================
+// WEBHOOK MERCADO PAGO (DEBUG TOTAL)
+// =========================
+app.post("/api/webhook-mercadopago", async (req, res) => {
+  try {
+    console.log("\n==============================");
+    console.log("📩 WEBHOOK CHEGOU");
+    console.log("HEADERS:", req.headers);
+    console.log("BODY:", req.body);
+
+    const paymentId = req.body?.data?.id || req.body?.id;
+
+    console.log("💳 PAYMENT ID:", paymentId);
+
+    if (!paymentId) {
+      console.log("❌ SEM PAYMENT ID");
+      return res.sendStatus(200);
+    }
+
+    const pagamento = new Payment(client);
+
+    console.log("🔎 BUSCANDO PAGAMENTO NO MP...");
+
+    const paymentData = await pagamento.get({ id: paymentId });
+
+    console.log("💰 STATUS MP:", paymentData.status);
+    console.log("📦 FULL PAYMENT:", JSON.stringify(paymentData, null, 2));
+
+    const compraId =
+      paymentData.metadata?.compraId ||
+      paymentData.external_reference;
+
+    console.log("🧾 COMPRA ID:", compraId);
+
+    if (!compraId) {
+      console.log("❌ COMPRA ID NÃO ENCONTRADO");
+      return res.sendStatus(200);
+    }
+
+    const statusMp = paymentData.status;
+
+    console.log("📊 STATUS FINAL:", statusMp);
+
+    await prisma.compra.update({
+      where: { id: compraId },
+      data: {
+        statusPagamento: statusMp,
+        mpPaymentId: String(paymentId),
+        mpStatus: statusMp,
+        pagoEm: statusMp === "approved" ? new Date() : null,
+        statusApiFifa:
+          statusMp === "approved"
+            ? "processando"
+            : "aguardando",
+      },
+    });
+
+    console.log("📦 BANCO ATUALIZADO");
+
+    if (statusMp === "approved") {
+      console.log("🎯 APROVADO - FINALIZANDO COMPRA");
+      await concluirCompra(compraId);
+    }
+
+    return res.sendStatus(200);
+
+  } catch (err) {
+    console.log("🔥 ERRO WEBHOOK:");
+    console.log(err?.response?.data || err);
+    return res.sendStatus(200);
   }
 });
 
@@ -984,12 +1061,20 @@ async function concluirCompra(compraId) {
     where: { id: compraId },
   });
 
-  if (!compra) return;
+  console.log("🔄 CONCLUIR COMPRA:", compraId);
 
-  if (compra.statusPagamento !== STATUS.APPROVED) return;
+  if (!compra) {
+    console.log("❌ COMPRA NÃO ENCONTRADA");
+    return;
+  }
+
+  if (compra.statusPagamento !== STATUS.APPROVED) {
+    console.log("⚠️ STATUS NÃO APROVADO:", compra.statusPagamento);
+    return;
+  }
 
   if (compra.concluidoEm) {
-    console.log("⚠️ Já concluída:", compraId);
+    console.log("⚠️ JÁ CONCLUÍDA");
     return;
   }
 
@@ -1020,7 +1105,7 @@ async function concluirCompra(compraId) {
   });
 
   console.log("🎉 COMPRA FINALIZADA:", compra.id);
-}
+} 
 
 // =========================
 // WEBHOOK MERCADO PAGO
