@@ -878,12 +878,24 @@ app.post("/api/pagamento", async (req, res) => {
   try {
     const { usuarioId, plataforma, quantia, quantMoedas } = req.body;
 
+    console.log("BODY:", req.body);
+
+    if (!usuarioId || !plataforma || !quantia) {
+      return res.status(400).json({ erro: "Dados inválidos" });
+    }
+
     const usuario = await prisma.usuario.findUnique({
       where: { id: usuarioId },
     });
 
+    console.log("USUARIO:", usuario);
+
     if (!usuario) {
       return res.status(404).json({ erro: "Usuário não encontrado" });
+    }
+
+    if (!usuario.email) {
+      return res.status(400).json({ erro: "Usuário sem email" });
     }
 
     const compra = await prisma.compra.create({
@@ -892,13 +904,14 @@ app.post("/api/pagamento", async (req, res) => {
         plataforma,
         quantia: Number(quantia),
         moeda: quantMoedas?.toString() || "FIFA",
-
         statusPagamento: "pending",
         statusApiFifa: "aguardando",
       },
     });
 
     const preference = new Preference(client);
+
+    console.log("CRIANDO PREFERENCIA...");
 
     const response = await preference.create({
       body: {
@@ -925,6 +938,8 @@ app.post("/api/pagamento", async (req, res) => {
       },
     });
 
+    console.log("PREFERENCE CRIADA:", response.id);
+
     await prisma.compra.update({
       where: { id: compra.id },
       data: {
@@ -933,11 +948,17 @@ app.post("/api/pagamento", async (req, res) => {
     });
 
     return res.json({ init_point: response.init_point });
+
   } catch (err) {
-    console.error("CRIAR PAGAMENTO ERROR:", err);
-    return res.status(500).json({ erro: "Erro ao criar pagamento" });
+    console.error("🔥 ERRO REAL PAGAMENTO:", err.response?.data || err);
+
+    return res.status(500).json({
+      erro: "Erro ao criar pagamento",
+      detalhe: err.response?.data || err.message,
+    });
   }
 });
+
 // =========================
 // FINALIZAR COMPRA
 // =========================
@@ -948,7 +969,8 @@ async function concluirCompra(compraId) {
 
   if (!compra) return;
 
-  if (compra.status !== STATUS.APPROVED) return;
+  // 🔥 CORREÇÃO AQUI
+  if (compra.statusPagamento !== STATUS.APPROVED) return;
 
   if (compra.concluidoEm) {
     console.log("Compra já concluída:", compraId);
@@ -970,6 +992,7 @@ async function concluirCompra(compraId) {
     where: { id: compra.id },
     data: {
       concluidoEm: new Date(),
+      statusApiFifa: "concluido",
     },
   });
 
@@ -1019,7 +1042,6 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       ? statusMp
       : "pending";
 
-    // 🔥 UPDATE ÚNICO E CONSISTENTE
     await prisma.compra.update({
       where: { id: compraId },
       data: {
@@ -1027,20 +1049,16 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
         mpPaymentId: String(paymentId),
         mpStatus: statusMp,
         pagoEm: statusMp === "approved" ? new Date() : null,
-
-        // 🔥 só entra em processamento se aprovado
         statusApiFifa:
           statusMp === "approved"
             ? "processando"
             : "aguardando",
-
         updatedAt: new Date(),
       },
     });
 
     console.log("Compra atualizada:", compraId, statusPagamento);
 
-    // 🔥 FLUXO FIFA
     if (statusMp === "approved") {
       await concluirCompra(compraId);
     }
@@ -1067,7 +1085,8 @@ app.post("/api/compras/:id/cancelar", async (req, res) => {
       return res.status(404).json({ erro: "Compra não encontrada" });
     }
 
-    if (compra.status !== STATUS.PENDING) {
+    // 🔥 CORREÇÃO AQUI
+    if (compra.statusPagamento !== STATUS.PENDING) {
       return res.status(400).json({
         erro: "Compra não pode ser cancelada",
       });
@@ -1076,7 +1095,7 @@ app.post("/api/compras/:id/cancelar", async (req, res) => {
     await prisma.compra.update({
       where: { id },
       data: {
-        status: STATUS.CANCELLED,
+        statusPagamento: STATUS.CANCELLED,
         expiradoEm: new Date(),
       },
     });
@@ -1086,7 +1105,7 @@ app.post("/api/compras/:id/cancelar", async (req, res) => {
     console.error(err);
     res.status(500).json({ erro: "Erro ao cancelar compra" });
   }
-});
+}); 
 
 /// =========================
 // ROTA: VALIDAR SESSÃO
