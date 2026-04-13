@@ -24,7 +24,7 @@ function App() {
   const [usuario, setUsuario] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 VALIDAÇÃO REAL DA SESSÃO
+  // 🔥 VALIDAÇÃO CORRIGIDA E ROBUSTA
   useEffect(() => {
     const validarSessao = async () => {
       const usuarioSalvo = localStorage.getItem("usuario");
@@ -37,6 +37,14 @@ function App() {
       try {
         const user = JSON.parse(usuarioSalvo);
 
+        // 🔒 PROTEÇÃO CRÍTICA
+        if (!user?.id) {
+          localStorage.removeItem("usuario");
+          setUsuario(null);
+          setLoading(false);
+          return;
+        }
+
         const res = await api.get("/me", {
           headers: {
             "x-user-id": user.id,
@@ -44,11 +52,20 @@ function App() {
         });
 
         setUsuario(res.data);
+
+        // 🔄 atualiza dados no localStorage
         localStorage.setItem("usuario", JSON.stringify(res.data));
+
       } catch (err) {
-        console.log("Sessão inválida:", err);
-        localStorage.removeItem("usuario");
-        setUsuario(null);
+        // 🔥 SÓ DESLOGA SE FOR 401
+        if (err.response?.status === 401) {
+          console.log("Sessão inválida");
+
+          localStorage.removeItem("usuario");
+          setUsuario(null);
+        } else {
+          console.log("Erro ao validar sessão:", err);
+        }
       } finally {
         setLoading(false);
       }
@@ -72,7 +89,7 @@ function App() {
     return children;
   };
 
-  // 🔥 EVITA BUG DE REDIRECIONAMENTO
+  // 🔒 evita render antes da validação
   if (loading) return null;
 
   return (

@@ -1095,6 +1095,7 @@ app.get("/api/me", async (req, res) => {
   try {
     const userId = req.headers["x-user-id"];
 
+    // 🔒 valida header
     if (!userId) {
       return res.status(401).json({ error: "Não autenticado" });
     }
@@ -1103,8 +1104,9 @@ app.get("/api/me", async (req, res) => {
       where: { id: userId },
     });
 
+    // 🔥 CORREÇÃO: 401 e não 404
     if (!usuario) {
-      return res.status(404).json({ error: "Usuário não encontrado" });
+      return res.status(401).json({ error: "Sessão inválida" });
     }
 
     return res.json(usuario);
@@ -1113,7 +1115,6 @@ app.get("/api/me", async (req, res) => {
     return res.status(500).json({ error: "Erro ao validar sessão" });
   }
 });
-
 
 // ======================= INICIAR SERVIDOR =======================
 

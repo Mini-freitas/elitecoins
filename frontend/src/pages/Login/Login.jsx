@@ -30,11 +30,14 @@ function Login({ handleLogin }) {
     setErro("");
     setLoading(true);
 
-    // 🔥 LIMPA SESSÃO ANTIGA (ESSENCIAL)
     localStorage.removeItem("usuario");
 
     try {
       const res = await api.post("/login", { email, senha });
+
+      if (!res.data?.usuario?.id) {
+        throw new Error("Usuário inválido");
+      }
 
       handleLogin(res.data.usuario);
 
@@ -42,7 +45,7 @@ function Login({ handleLogin }) {
     } catch (err) {
       setErro(
         err.response?.data?.error ||
-          "Erro ao logar. Verifique suas credenciais."
+        "Erro ao logar. Verifique suas credenciais."
       );
     } finally {
       setLoading(false);
@@ -56,7 +59,6 @@ function Login({ handleLogin }) {
     setErro("");
     setLoading(true);
 
-    // 🔥 LIMPA SESSÃO ANTIGA
     localStorage.removeItem("usuario");
 
     try {
@@ -75,6 +77,10 @@ function Login({ handleLogin }) {
       };
 
       const res = await api.post("/login-google", usuarioGoogle);
+
+      if (!res.data?.usuario?.id) {
+        throw new Error("Usuário inválido");
+      }
 
       handleLogin(res.data.usuario);
 
@@ -95,8 +101,7 @@ function Login({ handleLogin }) {
 
       <h2 className="h2login">
         FAÇA SEU{" "}
-        <b style={{ color: "var(--cor-verde_cana)" }}>LOGIN</b> <br /> NA ELITE
-        COINS
+        <b style={{ color: "var(--cor-verde_cana)" }}>LOGIN</b> <br /> NA ELITE COINS
       </h2>
 
       <form className="formlogin" onSubmit={loginLocal}>
@@ -118,11 +123,7 @@ function Login({ handleLogin }) {
           required
         />
 
-        <button
-          className="buttonlogin"
-          type="submit"
-          disabled={loading}
-        >
+        <button className="buttonlogin" type="submit" disabled={loading}>
           {loading ? "Entrando..." : "Entrar"}
         </button>
       </form>
