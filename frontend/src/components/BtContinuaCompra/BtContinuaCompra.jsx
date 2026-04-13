@@ -20,6 +20,13 @@ const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }
   setIsLoading(true);
 
   try {
+    console.log("📤 Enviando dados:", {
+      usuarioId: usuario.id,
+      plataforma: cartaSelecionada,
+      quantia: valorTotal,
+      quantMoedas,
+    });
+
     const res = await api.post("/pagamento", {
       usuarioId: usuario.id,
       plataforma: cartaSelecionada,
@@ -27,14 +34,22 @@ const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }
       quantMoedas,
     });
 
+    console.log("📥 RESPOSTA BACKEND:", res.data);
+
     if (res.data.init_point) {
-      window.location.href = res.data.init_point;
+      console.log("✅ INIT POINT:", res.data.init_point);
+
+      // 🔥 TEMPORÁRIO (NÃO REDIRECIONA)
+      // window.location.href = res.data.init_point;
     } else {
-      console.error("Init point não recebido:", res.data);
+      console.error("❌ Init point não veio:", res.data);
     }
+
   } catch (err) {
-    console.error("Erro ao criar preferência:", err);
-    alert("O método automático está em manutenção.");
+    console.error("🔥 ERRO COMPLETO:", err);
+    console.error("🔥 RESPONSE:", err.response?.data);
+
+    alert("Erro ao criar pagamento (veja console)");
   } finally {
     setIsLoading(false);
   }
