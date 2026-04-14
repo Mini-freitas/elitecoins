@@ -73,16 +73,23 @@ function Compras({ usuario, handleLogout }) {
   };
 
   // =========================
-  // QUADROS (ESTADO ATUAL)
+  // 🔥 CONTINUAR PAGAMENTO
   // =========================
+  const continuarPagamento = async (id) => {
+    try {
+      const res = await api.get(`/pagamento/${id}`);
+      window.location.href = res.data.init_point;
+    } catch (err) {
+      alert("Erro ao retomar pagamento");
+      console.error(err);
+    }
+  };
 
-  // 🔥 HISTÓRICO COMPLETO DE PAGAMENTOS
+  // =========================
+  // QUADROS (ATUAL)
+  // =========================
   const pagamentos = compras;
-
-  // 🚫 AINDA NÃO IMPLEMENTADO
   const transferindo = [];
-
-  // 🚫 AINDA NÃO IMPLEMENTADO
   const concluidas = [];
 
   // =========================
@@ -149,18 +156,24 @@ function Compras({ usuario, handleLogout }) {
                 {new Date(c.createdAt).toLocaleString()}
               </p>
 
-              {/* STATUS (SÓ NO QUADRO 1) */}
+              {/* STATUS */}
               {tipo === "PAGAMENTO" && (
                 <StatusBadge style={{ color: status.color }}>
                   {status.text}
                 </StatusBadge>
               )}
 
-              {/* CANCELAR */}
+              {/* 🔥 BOTÃO CONTINUAR PAGAMENTO */}
               {tipo === "PAGAMENTO" && c.statusPagamento === "pending" && (
-                <BotaoCancelar onClick={() => cancelarCompra(c.id)}>
-                  Cancelar compra
-                </BotaoCancelar>
+                <>
+                  <button onClick={() => continuarPagamento(c.id)}>
+                    🔁 Continuar pagamento
+                  </button>
+
+                  <BotaoCancelar onClick={() => cancelarCompra(c.id)}>
+                    Cancelar compra
+                  </BotaoCancelar>
+                </>
               )}
             </CompraItem>
           );
@@ -195,19 +208,19 @@ function Compras({ usuario, handleLogout }) {
         </Header>
 
         <GridCompras>
-          {/* 1️⃣ PAGAMENTOS */}
+          {/* PAGAMENTOS */}
           <BoxCompras>
             <h3>Pagamentos</h3>
             {renderLista(pagamentos, "pagamentos", "PAGAMENTO")}
           </BoxCompras>
 
-          {/* 2️⃣ TRANSFERÊNCIA */}
+          {/* TRANSFERÊNCIA */}
           <BoxCompras>
             <h3>Transferência em andamento</h3>
             <p>Funcionalidade em breve...</p>
           </BoxCompras>
 
-          {/* 3️⃣ CONCLUÍDAS */}
+          {/* CONCLUÍDAS */}
           <BoxCompras>
             <h3>Compras concluídas</h3>
             <p>Funcionalidade em breve...</p>
