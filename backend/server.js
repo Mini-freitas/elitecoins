@@ -897,6 +897,7 @@ app.post("/api/pagamento", async (req, res) => {
             id: compra.id,
             title: `Moedas FIFA - ${plataforma}`,
             description: `Compra de ${quantMoedas} moedas FIFA`,
+            category_id: "digital_goods", // 🔥 ESSA LINHA RESOLVE
             quantity: 1,
             currency_id: "BRL",
             unit_price: Number(quantia),

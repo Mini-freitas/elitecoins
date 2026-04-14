@@ -73,20 +73,25 @@ function Compras({ usuario, handleLogout }) {
   };
 
   // =========================
-  // QUADROS
+  // QUADROS CORRIGIDOS
   // =========================
 
-  // 🔥 NOVO MODELO: tudo que NÃO foi concluído ainda entra aqui
+  // TODOS pagamentos (não concluídos)
   const pagamentos = compras.filter((c) => !c.concluidoEm);
 
+  // Apenas aprovados e em processamento
   const transferindo = compras.filter(
-    (c) => c.statusPagamento === "approved" && !c.concluidoEm
+    (c) =>
+      c.statusPagamento === "approved" &&
+      c.statusApiFifa === "processando" &&
+      !c.concluidoEm
   );
 
+  // Finalizados
   const concluidas = compras.filter((c) => c.concluidoEm);
 
   // =========================
-  // STATUS VISUAL DINÂMICO
+  // STATUS VISUAL
   // =========================
   const statusLabelPagamento = (c) => {
     switch (c.statusPagamento) {
@@ -114,7 +119,7 @@ function Compras({ usuario, handleLogout }) {
   };
 
   // =========================
-  // RENDER LISTA GENÉRICA
+  // RENDER LISTA
   // =========================
   const renderLista = (lista, chaveEstado, tipo) => {
     const limite = 5;
@@ -137,17 +142,28 @@ function Compras({ usuario, handleLogout }) {
               </p>
 
               <p>
-                <strong>Quantia:</strong> R$ {c.quantia}
+                <strong>Valor:</strong> R$ {c.quantia}
               </p>
 
-              {/* STATUS DINÂMICO */}
+              {/* 🔥 QUANTIDADE DE MOEDAS */}
+              <p>
+                <strong>Moedas:</strong> {c.moeda}
+              </p>
+
+              {/* 🔥 DATA DA COMPRA */}
+              <p>
+                <strong>Data:</strong>{" "}
+                {new Date(c.createdAt).toLocaleString()}
+              </p>
+
+              {/* STATUS */}
               {tipo === "PAGAMENTO" && (
                 <StatusBadge style={{ color: status.color }}>
                   {status.text}
                 </StatusBadge>
               )}
 
-              {/* BOTÃO CANCELAR SÓ NO PAGAMENTO */}
+              {/* CANCELAR */}
               {tipo === "PAGAMENTO" && c.statusPagamento === "pending" && (
                 <BotaoCancelar onClick={() => cancelarCompra(c.id)}>
                   Cancelar compra
@@ -157,7 +173,7 @@ function Compras({ usuario, handleLogout }) {
               {/* DATA FINAL */}
               {tipo === "CONCLUIDA" && (
                 <p>
-                  <strong>Data:</strong>{" "}
+                  <strong>Finalizado em:</strong>{" "}
                   {c.concluidoEm
                     ? new Date(c.concluidoEm).toLocaleString()
                     : "-"}
@@ -196,25 +212,19 @@ function Compras({ usuario, handleLogout }) {
         </Header>
 
         <GridCompras>
-          {/* =========================
-              1. PAGAMENTOS (ÚNICO QUADRO)
-          ========================= */}
+          {/* PAGAMENTOS */}
           <BoxCompras>
             <h3>Pagamentos</h3>
             {renderLista(pagamentos, "pagamentos", "PAGAMENTO")}
           </BoxCompras>
 
-          {/* =========================
-              2. TRANSFERÊNCIA
-          ========================= */}
+          {/* TRANSFERÊNCIA */}
           <BoxCompras>
             <h3>Transferência em andamento</h3>
             {renderLista(transferindo, "transferindo", "TRANSFERINDO")}
           </BoxCompras>
 
-          {/* =========================
-              3. CONCLUÍDAS
-          ========================= */}
+          {/* CONCLUÍDAS */}
           <BoxCompras>
             <h3>Compras concluídas</h3>
             {renderLista(concluidas, "concluidas", "CONCLUIDA")}
