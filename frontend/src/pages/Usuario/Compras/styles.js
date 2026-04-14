@@ -199,3 +199,30 @@ export const VerMais = styled.button`
     text-decoration: underline;
   }
 `;
+
+export const ListaScroll = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  overflow-y: auto;
+
+  /* 🔥 ALTURA FIXA DO CONTEÚDO */
+  max-height: 400px;
+
+  padding-right: 4px;
+
+  /* Scroll bonito */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+`;
