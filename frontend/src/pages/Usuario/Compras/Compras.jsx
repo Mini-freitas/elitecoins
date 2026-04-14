@@ -73,25 +73,17 @@ function Compras({ usuario, handleLogout }) {
   };
 
   // =========================
-  // QUADROS CORRETOS
+  // QUADROS (ESTADO ATUAL)
   // =========================
 
-  // 🔥 TODOS pagamentos (histórico completo)
+  // 🔥 HISTÓRICO COMPLETO DE PAGAMENTOS
   const pagamentos = compras;
 
-  // 🔥 APROVADOS EM PROCESSO (API FIFA)
-  const transferindo = compras.filter(
-    (c) =>
-      c.statusPagamento === "approved" &&
-      c.statusApiFifa !== "concluido"
-  );
+  // 🚫 AINDA NÃO IMPLEMENTADO
+  const transferindo = [];
 
-  // 🔥 FINALIZADOS
-  const concluidas = compras.filter(
-    (c) =>
-      c.statusPagamento === "approved" &&
-      c.statusApiFifa === "concluido"
-  );
+  // 🚫 AINDA NÃO IMPLEMENTADO
+  const concluidas = [];
 
   // =========================
   // STATUS PAGAMENTO
@@ -122,7 +114,7 @@ function Compras({ usuario, handleLogout }) {
   };
 
   // =========================
-  // RENDER
+  // RENDER LISTA
   // =========================
   const renderLista = (lista, chaveEstado, tipo) => {
     const limite = 5;
@@ -140,18 +132,24 @@ function Compras({ usuario, handleLogout }) {
 
           return (
             <CompraItem key={c.id}>
-              <p><strong>Plataforma:</strong> {c.plataforma}</p>
+              <p>
+                <strong>Plataforma:</strong> {c.plataforma}
+              </p>
 
-              <p><strong>Valor:</strong> R$ {c.quantia}</p>
+              <p>
+                <strong>Valor:</strong> R$ {c.quantia}
+              </p>
 
-              <p><strong>Moedas:</strong> {c.moeda}</p>
+              <p>
+                <strong>Moedas:</strong> {c.moeda}
+              </p>
 
               <p>
                 <strong>Data:</strong>{" "}
                 {new Date(c.createdAt).toLocaleString()}
               </p>
 
-              {/* STATUS SEMPRE NO QUADRO 1 */}
+              {/* STATUS (SÓ NO QUADRO 1) */}
               {tipo === "PAGAMENTO" && (
                 <StatusBadge style={{ color: status.color }}>
                   {status.text}
@@ -163,14 +161,6 @@ function Compras({ usuario, handleLogout }) {
                 <BotaoCancelar onClick={() => cancelarCompra(c.id)}>
                   Cancelar compra
                 </BotaoCancelar>
-              )}
-
-              {/* DATA FINAL */}
-              {tipo === "CONCLUIDA" && (
-                <p>
-                  <strong>Finalizado em:</strong>{" "}
-                  {new Date(c.concluidoEm).toLocaleString()}
-                </p>
               )}
             </CompraItem>
           );
@@ -205,22 +195,22 @@ function Compras({ usuario, handleLogout }) {
         </Header>
 
         <GridCompras>
-          {/* 1 - PAGAMENTOS */}
+          {/* 1️⃣ PAGAMENTOS */}
           <BoxCompras>
             <h3>Pagamentos</h3>
             {renderLista(pagamentos, "pagamentos", "PAGAMENTO")}
           </BoxCompras>
 
-          {/* 2 - TRANSFERÊNCIA */}
+          {/* 2️⃣ TRANSFERÊNCIA */}
           <BoxCompras>
             <h3>Transferência em andamento</h3>
-            {renderLista(transferindo, "transferindo", "TRANSFERINDO")}
+            <p>Funcionalidade em breve...</p>
           </BoxCompras>
 
-          {/* 3 - CONCLUÍDAS */}
+          {/* 3️⃣ CONCLUÍDAS */}
           <BoxCompras>
             <h3>Compras concluídas</h3>
-            {renderLista(concluidas, "concluidas", "CONCLUIDA")}
+            <p>Funcionalidade em breve...</p>
           </BoxCompras>
         </GridCompras>
       </MainCompras>
