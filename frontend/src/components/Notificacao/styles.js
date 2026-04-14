@@ -34,9 +34,6 @@ export const Badge = styled.span`
   top: -5px;
   right: -5px;
 
-  background: #00ffc4;
-  color: #000;
-
   height: 1rem;
   width: 1rem;
   border-radius: 50%;
@@ -49,6 +46,12 @@ export const Badge = styled.span`
   font-weight: bold;
 
   border: 1px solid white;
+
+  background: ${({ $naoVistas }) =>
+    $naoVistas > 0 ? "#00c853" : "transparent"};
+
+  color: ${({ $naoVistas }) =>
+    $naoVistas > 0 ? "white" : "transparent"};
 `;
 
 /* BOX PRINCIPAL (PROFISSIONAL) */
