@@ -68,6 +68,7 @@ export const ListaScroll = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  margin-top:.5rem;
 
   padding-right: 4px;
 
@@ -104,7 +105,7 @@ export const StatusBadge = styled.span`
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #fff;
+  color: #ffffff;
 
   background-color: ${({ status }) => {
     if (status === "pending") return "#c4c700";
