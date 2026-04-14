@@ -1166,12 +1166,18 @@ app.get("/api/me", async (req, res) => {
 // RETOMAR PAGAMENTO
 // =========================
 app.get("/api/pagamento/:compraId", async (req, res) => {
+  console.log("🔥 ROTA RETOMAR PAGAMENTO CHAMADA");
+
   try {
     const { compraId } = req.params;
+
+    console.log("ID RECEBIDO:", compraId);
 
     const compra = await prisma.compra.findUnique({
       where: { id: compraId },
     });
+
+    console.log("COMPRA:", compra);
 
     if (!compra) {
       return res.status(404).json({ erro: "Compra não encontrada" });
@@ -1181,7 +1187,6 @@ app.get("/api/pagamento/:compraId", async (req, res) => {
       return res.status(400).json({ erro: "Pagamento não iniciado" });
     }
 
-    // 🔥 monta link manual (funciona perfeitamente)
     const init_point = `https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=${compra.mpPreferenceId}`;
 
     return res.json({ init_point });
@@ -1191,6 +1196,8 @@ app.get("/api/pagamento/:compraId", async (req, res) => {
     return res.status(500).json({ erro: "Erro ao buscar pagamento" });
   }
 });
+
+
 // ======================= INICIAR SERVIDOR =======================
 
 app.listen(PORT, () => {
