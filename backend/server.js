@@ -939,59 +939,73 @@ app.post("/api/pagamento", async (req, res) => {
 });
 
 // =========================
-// WEBHOOK MERCADO PAGO (ÚNICO E CORRIGIDO)
+// WEBHOOK MERCADO PAGO (COM VALIDAÇÃO REAL)
 // =========================
 app.post("/api/webhook-mercadopago", async (req, res) => {
   try {
     console.log("\n==============================");
-    console.log("📩 WEBHOOK:", req.body);
+    console.log("📩 WEBHOOK RECEBIDO");
 
+    // =========================
+    // VALIDAR ASSINATURA (SEGURANÇA)
+    // =========================
+    const xSignature = req.headers["x-signature"];
+    const xRequestId = req.headers["x-request-id"];
+
+    if (!xSignature) {
+      console.log("❌ Sem assinatura - ignorado");
+      return res.sendStatus(200);
+    }
+
+    // Extrair ts e v1
+    const parts = xSignature.split(",");
+    let ts = null;
+    let hash = null;
+
+    for (let part of parts) {
+      const [key, value] = part.split("=");
+      if (key === "ts") ts = value;
+      if (key === "v1") hash = value;
+    }
+
+    const dataId = req.body?.data?.id || "";
+
+    const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+
+    const crypto = await import("crypto");
+
+    const assinaturaGerada = crypto
+      .createHmac("sha256", process.env.MP_WEBHOOK_TOKEN)
+      .update(manifest)
+      .digest("hex");
+
+    if (assinaturaGerada !== hash) {
+      console.log("❌ ASSINATURA INVÁLIDA");
+      return res.sendStatus(200);
+    }
+
+    console.log("✅ ASSINATURA VÁLIDA");
+
+    // =========================
+    // PEGAR PAYMENT ID
+    // =========================
     let paymentId = null;
 
-    // =========================
-    // 1. PAYMENT NORMAL
-    // =========================
     if (req.body?.data?.id) {
       paymentId = req.body.data.id;
     }
 
-    // =========================
-    // 2. FALLBACK (payment direto)
-    // =========================
-    if (!paymentId && req.body?.resource && typeof req.body.resource === "string") {
-      const match = req.body.resource.match(/(\d+)$/);
+    if (!paymentId && req.body?.resource) {
+      const match = req.body.resource.match(/(\\d+)$/);
       if (match) paymentId = match[1];
     }
 
-    // =========================
-    // 3. MERCHANT ORDER (IMPORTANTE)
-    // =========================
-    if (!paymentId && req.body?.topic === "merchant_order") {
-      const orderId = req.body.resource.split("/").pop();
-
-      const orderRes = await fetch(
-        `https://api.mercadopago.com/merchant_orders/${orderId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
-          },
-        }
-      );
-
-      const order = await orderRes.json();
-
-      paymentId = order.payments?.[0]?.id;
-    }
-
-    // =========================
-    // SEM PAYMENT ID
-    // =========================
     if (!paymentId) {
-      console.log("⚠️ SEM PAYMENT ID - ignorado com segurança");
+      console.log("⚠️ Sem paymentId");
       return res.sendStatus(200);
     }
 
-    console.log("💳 PAYMENT ID FINAL:", paymentId);
+    console.log("💳 PAYMENT ID:", paymentId);
 
     // =========================
     // BUSCAR PAGAMENTO
@@ -1012,12 +1026,12 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
     const compraId = payment.external_reference;
 
     if (!compraId) {
-      console.log("❌ COMPRA ID NÃO ENCONTRADA");
+      console.log("❌ Compra não encontrada");
       return res.sendStatus(200);
     }
 
     // =========================
-    // ATUALIZA BANCO (IDEMPOTENTE)
+    // ATUALIZAR BANCO
     // =========================
     await prisma.compra.update({
       where: { id: compraId },
@@ -1032,20 +1046,20 @@ app.post("/api/webhook-mercadopago", async (req, res) => {
       },
     });
 
-    console.log("📦 COMPRA ATUALIZADA:", compraId);
+    console.log("📦 Compra atualizada:", compraId);
 
     // =========================
-    // FINALIZA
+    // FINALIZAR COMPRA
     // =========================
     if (payment.status === "approved") {
-      console.log("🎯 APROVADO - FINALIZANDO");
+      console.log("🎯 PAGAMENTO APROVADO");
       await concluirCompra(compraId);
     }
 
     return res.sendStatus(200);
 
   } catch (err) {
-    console.error("❌ WEBHOOK ERROR:", err);
+    console.error("❌ ERRO WEBHOOK:", err);
     return res.sendStatus(200);
   }
 });
