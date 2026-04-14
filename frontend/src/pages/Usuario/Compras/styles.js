@@ -84,11 +84,11 @@ export const StatusBadge = styled.span`
   margin-top: 0.25rem;
 
   background-color: ${({ status }) => {
-    if (status === "pending") return "#fbbc05";
+    if (status === "pending") return "#c4c700";
     if (status === "in_process") return "#1a73e8";
     if (status === "approved") return "#34a853";
-    if (status === "rejected") return "#ff4d4f";
-    if (status === "cancelled") return "#ff8c00";
+    if (status === "rejected") return "#bd0b0b";
+    if (status === "cancelled") return "#bd0b0b";
     if (status === "refunded") return "#00bcd4";
     if (status === "charged_back") return "#9c27b0";
     if (status === "expired") return "#757575";
@@ -99,7 +99,7 @@ export const StatusBadge = styled.span`
 export const BotaoCancelar = styled.button`
   margin-top: 6px;
   padding: 6px 10px;
-  background: #ff4d4f;
+  background: #bd0b0b;
   border: none;
   color: white;
   border-radius: 6px;
