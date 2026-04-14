@@ -35,7 +35,7 @@ export const Badge = styled.span`
   top: -5px;
   right: -5px;
   color: rgb(255, 255, 255);
-  background-color: rgb(80, 80, 80);
+  background-color: rgb(0, 255, 204);
   height: 1rem;
   width: 1rem;
   border-radius: 50%;
@@ -45,6 +45,7 @@ export const Badge = styled.span`
   align-items: center;
   font-size: 0.8rem;
   cursor: pointer;
+  margin:.5rem;
 
   /* Tablet grande */
   @media (max-width: 1024px) {
