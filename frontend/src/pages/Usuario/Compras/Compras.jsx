@@ -98,25 +98,25 @@ function Compras({ usuario, handleLogout }) {
   const statusLabelPagamento = (c) => {
     switch (c.statusPagamento) {
       case "pending":
-        return { text: "Aguardando pagamento", backgroundcolor: "orange" };
+        return { text: "Aguardando pagamento", backgroundColor: "orange" };
 
       case "in_process":
-        return { text: "Pagamento em análise", backgroundcolor: "blue" };
+        return { text: "Pagamento em análise", backgroundColor: "blue" };
 
       case "approved":
-        return { text: "Pagamento aprovado", backgroundcolor: "green" };
+        return { text: "Pagamento aprovado", backgroundColor: "green" };
 
       case "rejected":
-        return { text: "Pagamento rejeitado", backgroundcolor: "red" };
+        return { text: "Pagamento rejeitado", backgroundColor: "red" };
 
       case "cancelled":
-        return { text: "Pagamento cancelado", backgroundcolor: "gray" };
+        return { text: "Pagamento cancelado", backgroundColor: "gray" };
 
       case "expired":
-        return { text: "Pagamento expirado", backgroundcolor: "red" };
+        return { text: "Pagamento expirado", backgroundColor: "red" };
 
       default:
-        return { text: "Desconhecido", backgroundcolor: "gray" };
+        return { text: "Desconhecido", backgroundColor: "gray" };
     }
   };
 
