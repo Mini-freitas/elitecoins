@@ -865,29 +865,75 @@ const STATUS = {
 // =========================
 app.post("/api/pagamento", async (req, res) => {
   try {
-    const { usuarioId, plataforma, quantia, quantMoedas } = req.body;
+    let { usuarioId, plataforma, quantia, quantMoedas } = req.body;
 
+    console.log("📥 DADOS RECEBIDOS:");
+    console.log("usuarioId:", usuarioId);
+    console.log("plataforma:", plataforma);
+    console.log("quantia:", quantia);
+    console.log("quantMoedas:", quantMoedas);
+
+    // =========================
+    // VALIDAÇÃO BÁSICA
+    // =========================
     if (!usuarioId || !plataforma || !quantia) {
       return res.status(400).json({ erro: "Dados inválidos" });
     }
 
+    // =========================
+    // PADRONIZAÇÃO DA PLATAFORMA
+    // =========================
+    const plataformasValidas = ["play", "xbox", "pc"];
+
+    plataforma = String(plataforma).toLowerCase().trim();
+
+    if (!plataformasValidas.includes(plataforma)) {
+      console.error("❌ Plataforma inválida recebida:", plataforma);
+      return res.status(400).json({ erro: "Plataforma inválida" });
+    }
+
+    // 👉 Se quiser salvar bonito no banco
+    const mapaPlataforma = {
+      play: "PlayStation",
+      xbox: "Xbox",
+      pc: "PC",
+    };
+
+    const plataformaFinal = mapaPlataforma[plataforma];
+
+    // =========================
+    // CORREÇÃO DO VALOR (CRÍTICO)
+    // =========================
+    const valorCorrigido = Number(parseFloat(quantia).toFixed(2));
+
+    // =========================
+    // BUSCAR USUÁRIO
+    // =========================
     const usuario = await prisma.usuario.findUnique({
       where: { id: usuarioId },
     });
 
-    if (!usuario) return res.status(404).json({ erro: "Usuário não encontrado" });
+    if (!usuario) {
+      return res.status(404).json({ erro: "Usuário não encontrado" });
+    }
 
+    // =========================
+    // CRIAR COMPRA
+    // =========================
     const compra = await prisma.compra.create({
       data: {
         usuarioId,
-        plataforma,
-        quantia: Number(quantia),
+        plataforma: plataformaFinal, // 🔥 AGORA PADRONIZADO
+        quantia: valorCorrigido,
         moeda: quantMoedas?.toString() || "FIFA",
         statusPagamento: STATUS.PENDING,
         statusApiFifa: "aguardando",
       },
     });
 
+    // =========================
+    // CRIAR PREFERÊNCIA MP
+    // =========================
     const preference = new Preference(client);
 
     const response = await preference.create({
@@ -895,12 +941,12 @@ app.post("/api/pagamento", async (req, res) => {
         items: [
           {
             id: compra.id,
-            title: `Moedas FIFA - ${plataforma}`,
+            title: `Moedas FIFA - ${plataformaFinal}`,
             description: `Compra de ${quantMoedas} moedas FIFA`,
-            category_id: "digital_goods", // 🔥 ESSA LINHA RESOLVE
+            category_id: "digital_goods",
             quantity: 1,
             currency_id: "BRL",
-            unit_price: Number(quantia),
+            unit_price: valorCorrigido,
           },
         ],
 
@@ -927,14 +973,18 @@ app.post("/api/pagamento", async (req, res) => {
       },
     });
 
+    // =========================
+    // SALVAR ID DO MP
+    // =========================
     await prisma.compra.update({
       where: { id: compra.id },
       data: { mpPreferenceId: response.id },
     });
 
     return res.json({ init_point: response.init_point });
+
   } catch (err) {
-    console.error(err?.response?.data || err);
+    console.error("❌ ERRO AO CRIAR PAGAMENTO:", err);
     return res.status(500).json({ erro: "Erro ao criar pagamento" });
   }
 });

@@ -80,11 +80,14 @@ const Calculadora = ({ cartaSelecionada, usuario }) => {
 
     const valorComDesconto = valorEmReal * (1 - desc / 100);
 
+    // 🔥 CORREÇÃO PRINCIPAL AQUI
+    const valorFinal = Number(valorComDesconto.toFixed(2));
+
     setQuantMoedas(moedas);
-    setValorTotal(valorComDesconto);
+    setValorTotal(valorFinal);
     setDesconto(desc);
   };
-
+  
   useEffect(() => {
     if (!cartaSelecionada) return;
 
