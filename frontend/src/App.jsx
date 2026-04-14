@@ -78,47 +78,87 @@ function App() {
   return (
     <Router>
       <Routes>
+
         <Route path="/" element={<Home usuario={usuario} handleLogout={handleLogout} />} />
         <Route path="/compra" element={<Compra usuario={usuario} handleLogout={handleLogout} />} />
         <Route path="/login" element={<Login handleLogin={handleLogin} />} />
         <Route path="/cadastro" element={<Cadastro handleLogin={handleLogin} />} />
 
-        <Route path="/admin" element={
-          usuario?.tipo === "ADMIN"
-            ? <Admin usuario={usuario} handleLogout={handleLogout} />
-            : <Navigate to="/login" />
-        } />
+        <Route
+          path="/admin"
+          element={
+            usuario?.tipo === "ADMIN"
+              ? <Admin usuario={usuario} handleLogout={handleLogout} />
+              : <Navigate to="/login" />
+          }
+        />
 
-        <Route path="/usuario/perfil" element={
-          <RotaProtegida>
-            <Perfil usuario={usuario} handleLogout={handleLogout} handleLogin={handleLogin} />
-          </RotaProtegida>
-        } />
+        <Route
+          path="/usuario/perfil"
+          element={
+            <RotaProtegida>
+              <Perfil
+                usuario={usuario}
+                handleLogout={handleLogout}
+                handleLogin={handleLogin}
+              />
+            </RotaProtegida>
+          }
+        />
 
-        <Route path="/usuario/seguranca" element={<RotaProtegida><Seguranca usuario={usuario} /></RotaProtegida>} />
-        <Route path="/usuario/compras" element={<RotaProtegida><Compras usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} />
-        <Route path="/usuario/excluir" element={<RotaProtegida><ExcluirConta usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} />
+        <Route
+          path="/usuario/seguranca"
+          element={<RotaProtegida><Seguranca usuario={usuario} /></RotaProtegida>}
+        />
+
+        <Route
+          path="/usuario/compras"
+          element={<RotaProtegida><Compras usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>}
+        />
+
+        <Route
+          path="/usuario/excluir"
+          element={<RotaProtegida><ExcluirConta usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>}
+        />
 
         <Route path="*" element={<Navigate to="/" />} />
+
       </Routes>
 
-      {/* 🔥 TOASTER GLOBAL (POPUPS BONITOS) */}
+      {/* 🔥 TOASTER GLOBAL (ESTILO PREMIUM CENTRALIZADO) */}
       <Toaster
-        position="top-right"
+        position="top-center"
         toastOptions={{
           duration: 3000,
+
           style: {
             background: "#111",
             color: "#fff",
+            fontSize: "16px",
+            padding: "16px 20px",
+            borderRadius: "12px",
+            fontWeight: "600",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
           },
+
           success: {
             style: {
-              background: "#16a34a",
+              background: "linear-gradient(135deg, #16a34a, #22c55e)",
+              color: "#fff",
             },
           },
+
           error: {
             style: {
-              background: "#dc2626",
+              background: "linear-gradient(135deg, #dc2626, #ef4444)",
+              color: "#fff",
+            },
+          },
+
+          loading: {
+            style: {
+              background: "linear-gradient(135deg, #2563eb, #3b82f6)",
+              color: "#fff",
             },
           },
         }}

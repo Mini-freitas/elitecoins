@@ -66,6 +66,38 @@ const MyGlobalStyle = createGlobalStyle`
   }
 }
 
+.Toastify__toast {
+  font-size: 16px;
+  padding: 18px 22px;
+  border-radius: 12px;
+  min-height: 60px;
+  font-weight: 600;
+}
+
+.Toastify__toast--success {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: white;
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3);
+}
+
+.Toastify__toast--error {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  color: white;
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+}
+
+.Toastify__toast--info {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: white;
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+}
+
+/* barra de progresso mais bonita */
+.Toastify__progress-bar {
+  height: 4px;
+  opacity: 0.8;
+}
+
 
   /******** estilo da barra de rolagem *********/
   ::-webkit-scrollbar-track {
