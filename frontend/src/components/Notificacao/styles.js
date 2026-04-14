@@ -68,21 +68,59 @@ export const Badge = styled.span`
   }
 `;
 export const BoxMenuNotificacao = styled.div`
-  position: absolute; 
-  top: 3.8rem;
-  right: -4rem;
+  position: absolute;
+  top: 3.5rem;
+  right: 0;
   z-index: 1000;
-  height: 18rem;
-  width: 15rem;
-  display:flex;
-  flex-direction:column;
-  justify-content:start;
-  align-itens:center;
-  background-color: #ffffffa9;
-  padding-top: 10px;
-  overflow-y: scroll;
-`;
 
+  width: 16rem;
+  height: 18rem;
+
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  overflow-y: auto;
+
+  animation: fadeIn 0.15s ease;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Scroll mais bonito (opcional mas recomendado) */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    right: -1rem;
+    width: 14rem;
+  }
+`;
 export const TituloBox = styled.h3`
   font-family: var(--fonte-secundaria);
   font-size: small;
