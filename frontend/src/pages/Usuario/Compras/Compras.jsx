@@ -15,15 +15,15 @@ import {
   BotaoCancelar,
   GridCompras,
   VerMais,
+  BotaoContinuar,
+  ListaScroll,
 } from "./styles";
 
 function Compras({ usuario, handleLogout }) {
   const navigate = useNavigate();
 
   const [compras, setCompras] = useState([]);
-  const [verTudo, setVerTudo] = useState({
-    pagamentos: false,
-  });
+  const [verTudo, setVerTudo] = useState(false);
 
   // =========================
   // PROTEÇÃO LOGIN
@@ -84,92 +84,32 @@ function Compras({ usuario, handleLogout }) {
   };
 
   // =========================
-  // TEXTO DO STATUS
+  // TEXTO STATUS
   // =========================
   const statusLabelPagamento = (status) => {
     switch (status) {
       case "pending":
         return "Aguardando pagamento";
-
       case "in_process":
         return "Pagamento em análise";
-
       case "approved":
         return "Pagamento aprovado";
-
       case "rejected":
         return "Pagamento rejeitado";
-
       case "cancelled":
         return "Pagamento cancelado";
-
       case "expired":
         return "Pagamento expirado";
-
       default:
         return "Desconhecido";
     }
   };
 
   // =========================
-  // RENDER LISTA
+  // LISTA
   // =========================
-  const renderLista = (lista) => {
-    const limite = 5;
-    const mostrarTudo = verTudo.pagamentos;
-    const itens = mostrarTudo ? lista : lista.slice(0, limite);
-
-    if (lista.length === 0) {
-      return <p>Nenhuma compra encontrada.</p>;
-    }
-
-    return (
-      <>
-        {itens.map((c) => (
-          <CompraItem key={c.id}>
-            <p><strong>Plataforma:</strong> {c.plataforma}</p>
-            <p><strong>Valor:</strong> R$ {c.quantia}</p>
-            <p><strong>Moedas:</strong> {c.moeda}</p>
-            <p>
-              <strong>Data:</strong>{" "}
-              {new Date(c.createdAt).toLocaleString()}
-            </p>
-
-            {/* ✅ STATUS CORRETO */}
-            <StatusBadge status={c.statusPagamento}>
-              {statusLabelPagamento(c.statusPagamento)}
-            </StatusBadge>
-
-            {/* BOTÕES */}
-            {c.statusPagamento === "pending" && (
-              <>
-                <button onClick={() => continuarPagamento(c.id)}>
-                  🔁 Continuar pagamento
-                </button>
-
-                <BotaoCancelar onClick={() => cancelarCompra(c.id)}>
-                  Cancelar compra
-                </BotaoCancelar>
-              </>
-            )}
-          </CompraItem>
-        ))}
-
-        {lista.length > limite && (
-          <VerMais
-            onClick={() =>
-              setVerTudo((prev) => ({
-                ...prev,
-                pagamentos: !prev.pagamentos,
-              }))
-            }
-          >
-            {mostrarTudo ? "Mostrar menos" : "Ver todas"}
-          </VerMais>
-        )}
-      </>
-    );
-  };
+  const limite = 5;
+  const lista = verTudo ? compras : compras.slice(0, limite);
 
   // =========================
   // UI
@@ -184,18 +124,60 @@ function Compras({ usuario, handleLogout }) {
         </Header>
 
         <GridCompras>
+          {/* PAGAMENTOS */}
           <BoxCompras>
             <h3>Pagamentos</h3>
-            {renderLista(compras)}
+
+            <ListaScroll>
+              {lista.length === 0 && <p>Nenhuma compra encontrada.</p>}
+
+              {lista.map((c) => (
+                <CompraItem key={c.id}>
+                  <p><strong>Plataforma:</strong> {c.plataforma}</p>
+                  <p><strong>Valor:</strong> R$ {c.quantia}</p>
+                  <p><strong>Moedas:</strong> {c.moeda}</p>
+
+                  <p>
+                    <strong>Data:</strong>{" "}
+                    {new Date(c.createdAt).toLocaleString()}
+                  </p>
+
+                  {/* STATUS */}
+                  <StatusBadge status={c.statusPagamento}>
+                    {statusLabelPagamento(c.statusPagamento)}
+                  </StatusBadge>
+
+                  {/* AÇÕES */}
+                  {c.statusPagamento === "pending" && (
+                    <>
+                      <BotaoContinuar onClick={() => continuarPagamento(c.id)}>
+                        🔁 Continuar pagamento
+                      </BotaoContinuar>
+
+                      <BotaoCancelar onClick={() => cancelarCompra(c.id)}>
+                        Cancelar compra
+                      </BotaoCancelar>
+                    </>
+                  )}
+                </CompraItem>
+              ))}
+            </ListaScroll>
+
+            {compras.length > limite && (
+              <VerMais onClick={() => setVerTudo(!verTudo)}>
+                {verTudo ? "Mostrar menos" : "Ver todas"}
+              </VerMais>
+            )}
           </BoxCompras>
 
+          {/* FUTURO */}
           <BoxCompras>
-            <h3>Transferência em andamento</h3>
+            <h3>Transferência</h3>
             <p>Em breve...</p>
           </BoxCompras>
 
           <BoxCompras>
-            <h3>Compras concluídas</h3>
+            <h3>Concluídas</h3>
             <p>Em breve...</p>
           </BoxCompras>
         </GridCompras>
