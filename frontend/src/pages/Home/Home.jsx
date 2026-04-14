@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
-
+import toast from "react-hot-toast";
 
 import MyGlobalStyle from '../../styles/globalStyles';
 import HeaderPrincipal from '../../components/Header/HeaderPrincipal';
@@ -18,30 +17,20 @@ function Home({ usuario, handleLogout }) {
     if (!status) return;
 
     if (status === "approved") {
-      toast.success("Pagamento aprovado com sucesso!", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-      });
+      toast.success("Pagamento aprovado com sucesso!");
     }
 
     if (status === "pending") {
-      toast.info("Pagamento em análise. Aguarde confirmação.", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
+      toast("Pagamento em análise...", {
+        icon: "⏳",
       });
     }
 
     if (status === "failed") {
-      toast.error("Pagamento não aprovado. Tente novamente.", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-      });
+      toast.error("Pagamento não aprovado.");
     }
 
-    // limpa URL depois (fica mais profissional)
+    // limpa URL (fica profissional)
     window.history.replaceState({}, document.title, "/");
   }, [location]);
 
@@ -50,7 +39,7 @@ function Home({ usuario, handleLogout }) {
       <MyGlobalStyle />
       <HeaderPrincipal usuario={usuario} handleLogout={handleLogout} />
       <MainPrincipal />
-      <Footer usuario={usuario} handleLogout={handleLogout}/>
+      <Footer usuario={usuario} handleLogout={handleLogout} />
     </>
   );
 }

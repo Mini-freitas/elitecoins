@@ -1,7 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { Toaster } from "react-hot-toast";
 
 import api from "./services/api";
 
@@ -20,9 +19,6 @@ function App() {
   const [usuario, setUsuario] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // =========================
-  // 🔒 VALIDAÇÃO DE SESSÃO
-  // =========================
   useEffect(() => {
     const validarSessao = async () => {
       const usuarioSalvo = localStorage.getItem("usuario");
@@ -43,9 +39,7 @@ function App() {
         }
 
         const res = await api.get("/me", {
-          headers: {
-            "x-user-id": user.id,
-          },
+          headers: { "x-user-id": user.id },
         });
 
         setUsuario(res.data);
@@ -55,8 +49,6 @@ function App() {
         if (err.response?.status === 401) {
           localStorage.removeItem("usuario");
           setUsuario(null);
-        } else {
-          console.log("Erro ao validar sessão:", err);
         }
       } finally {
         setLoading(false);
@@ -86,80 +78,51 @@ function App() {
   return (
     <Router>
       <Routes>
-
-        {/* HOME */}
-        <Route 
-          path="/" 
-          element={
-            <Home 
-              usuario={usuario} 
-              handleLogout={handleLogout} 
-            />
-          } 
-        />
-
-        {/* COMPRA */}
-        <Route 
-          path="/compra" 
-          element={
-            <Compra 
-              usuario={usuario} 
-              handleLogout={handleLogout} 
-            />
-          } 
-        />
-
-        {/* AUTH */}
+        <Route path="/" element={<Home usuario={usuario} handleLogout={handleLogout} />} />
+        <Route path="/compra" element={<Compra usuario={usuario} handleLogout={handleLogout} />} />
         <Route path="/login" element={<Login handleLogin={handleLogin} />} />
         <Route path="/cadastro" element={<Cadastro handleLogin={handleLogin} />} />
 
-        {/* ADMIN */}
-        <Route
-          path="/admin"
-          element={
-            usuario?.tipo === "ADMIN"
-              ? <Admin usuario={usuario} handleLogout={handleLogout} />
-              : <Navigate to="/login" />
-          }
-        />
+        <Route path="/admin" element={
+          usuario?.tipo === "ADMIN"
+            ? <Admin usuario={usuario} handleLogout={handleLogout} />
+            : <Navigate to="/login" />
+        } />
 
-        {/* USUÁRIO */}
-        <Route
-          path="/usuario/perfil"
-          element={
-            <RotaProtegida>
-              <Perfil
-                usuario={usuario}
-                handleLogout={handleLogout}
-                handleLogin={handleLogin}
-              />
-            </RotaProtegida>
-          }
-        />
+        <Route path="/usuario/perfil" element={
+          <RotaProtegida>
+            <Perfil usuario={usuario} handleLogout={handleLogout} handleLogin={handleLogin} />
+          </RotaProtegida>
+        } />
 
-        <Route 
-          path="/usuario/seguranca" 
-          element={<RotaProtegida><Seguranca usuario={usuario} /></RotaProtegida>} 
-        />
+        <Route path="/usuario/seguranca" element={<RotaProtegida><Seguranca usuario={usuario} /></RotaProtegida>} />
+        <Route path="/usuario/compras" element={<RotaProtegida><Compras usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} />
+        <Route path="/usuario/excluir" element={<RotaProtegida><ExcluirConta usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} />
 
-        <Route 
-          path="/usuario/compras" 
-          element={<RotaProtegida><Compras usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} 
-        />
-
-        <Route 
-          path="/usuario/excluir" 
-          element={<RotaProtegida><ExcluirConta usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} 
-        />
-
-        {/* 🔥 FALLBACK (qualquer rota desconhecida) */}
         <Route path="*" element={<Navigate to="/" />} />
-
       </Routes>
 
-      {/* 🔥 TOAST GLOBAL */}
-      <ToastContainer theme="dark" autoClose={3000} />
-
+      {/* 🔥 TOASTER GLOBAL (POPUPS BONITOS) */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: "#111",
+            color: "#fff",
+          },
+          success: {
+            style: {
+              background: "#16a34a",
+            },
+          },
+          error: {
+            style: {
+              background: "#dc2626",
+            },
+          },
+        }}
+      />
     </Router>
   );
 }
