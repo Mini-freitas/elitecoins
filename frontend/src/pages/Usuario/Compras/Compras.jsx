@@ -13,9 +13,9 @@ import {
   CompraItem,
   StatusBadge,
   BotaoCancelar,
+  BotaoContinuar,
   GridCompras,
   VerMais,
-  BotaoContinuar,
   ListaScroll,
 } from "./styles";
 
@@ -25,16 +25,10 @@ function Compras({ usuario, handleLogout }) {
   const [compras, setCompras] = useState([]);
   const [verTudo, setVerTudo] = useState(false);
 
-  // =========================
-  // PROTEÇÃO LOGIN
-  // =========================
   useEffect(() => {
     if (!usuario) navigate("/login");
   }, [usuario, navigate]);
 
-  // =========================
-  // BUSCAR COMPRAS
-  // =========================
   const buscarCompras = useCallback(async () => {
     if (!usuario?.id) return;
 
@@ -55,9 +49,6 @@ function Compras({ usuario, handleLogout }) {
     return () => clearInterval(intervalo);
   }, [usuario, buscarCompras]);
 
-  // =========================
-  // CANCELAR COMPRA
-  // =========================
   const cancelarCompra = async (id) => {
     if (!window.confirm("Deseja cancelar esta compra?")) return;
 
@@ -65,28 +56,20 @@ function Compras({ usuario, handleLogout }) {
       await api.post(`/compras/${id}/cancelar`);
       buscarCompras();
     } catch (err) {
-      alert("Não foi possível cancelar a compra");
-      console.error(err);
+      alert("Erro ao cancelar compra");
     }
   };
 
-  // =========================
-  // CONTINUAR PAGAMENTO
-  // =========================
   const continuarPagamento = async (id) => {
     try {
       const res = await api.get(`/pagamento/${id}`);
       window.location.href = res.data.init_point;
     } catch (err) {
       alert("Erro ao retomar pagamento");
-      console.error(err);
     }
   };
 
-  // =========================
-  // TEXTO STATUS
-  // =========================
-  const statusLabelPagamento = (status) => {
+  const statusLabel = (status) => {
     switch (status) {
       case "pending":
         return "Aguardando pagamento";
@@ -105,15 +88,9 @@ function Compras({ usuario, handleLogout }) {
     }
   };
 
-  // =========================
-  // LISTA
-  // =========================
   const limite = 5;
   const lista = verTudo ? compras : compras.slice(0, limite);
 
-  // =========================
-  // UI
-  // =========================
   return (
     <Comprassec>
       <HeaderPrincipal usuario={usuario} handleLogout={handleLogout} />
@@ -124,7 +101,6 @@ function Compras({ usuario, handleLogout }) {
         </Header>
 
         <GridCompras>
-          {/* PAGAMENTOS */}
           <BoxCompras>
             <h3>Pagamentos</h3>
 
@@ -142,12 +118,10 @@ function Compras({ usuario, handleLogout }) {
                     {new Date(c.createdAt).toLocaleString()}
                   </p>
 
-                  {/* STATUS */}
                   <StatusBadge status={c.statusPagamento}>
-                    {statusLabelPagamento(c.statusPagamento)}
+                    {statusLabel(c.statusPagamento)}
                   </StatusBadge>
 
-                  {/* AÇÕES */}
                   {c.statusPagamento === "pending" && (
                     <>
                       <BotaoContinuar onClick={() => continuarPagamento(c.id)}>
@@ -170,7 +144,6 @@ function Compras({ usuario, handleLogout }) {
             )}
           </BoxCompras>
 
-          {/* FUTURO */}
           <BoxCompras>
             <h3>Transferência</h3>
             <p>Em breve...</p>

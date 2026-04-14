@@ -35,9 +35,6 @@ export const Header = styled.div`
   }
 `;
 
-// =========================
-// GRID PRINCIPAL
-// =========================
 export const GridCompras = styled.div`
   width: 100%;
   max-width: 1200px;
@@ -46,17 +43,13 @@ export const GridCompras = styled.div`
   gap: 1.5rem;
 
   grid-template-columns: repeat(3, 1fr);
-
-  align-items: stretch; /* 🔥 altura igual */
+  align-items: stretch;
 
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
   }
 `;
 
-// =========================
-// BOX (ALTURA FIXA)
-// =========================
 export const BoxCompras = styled.div`
   padding: 1.5rem;
   background: #f1f3f4;
@@ -65,18 +58,10 @@ export const BoxCompras = styled.div`
   display: flex;
   flex-direction: column;
 
-  height: 420px; /* 🔥 ALTURA FIXA IGUAL */
-
-  h3 {
-    margin: 0 0 0.5rem 0;
-    font-size: 1.2rem;
-  }
+  height: 420px;
 `;
 
-// =========================
-// LISTA COM SCROLL
-// =========================
-export const ListaCompras = styled.div`
+export const ListaScroll = styled.div`
   flex: 1;
   overflow-y: auto;
 
@@ -86,24 +71,16 @@ export const ListaCompras = styled.div`
 
   padding-right: 4px;
 
-  /* SCROLL BONITO */
   &::-webkit-scrollbar {
     width: 6px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 6px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: #999;
+    background-color: #ccc;
+    border-radius: 4px;
   }
 `;
 
-// =========================
-// ITEM
-// =========================
 export const CompraItem = styled.div`
   background: white;
   padding: 0.75rem;
@@ -115,32 +92,19 @@ export const CompraItem = styled.div`
 
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 
-  transition: transform 0.15s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-  }
-
   p {
     margin: 0;
     font-size: 0.9rem;
   }
 `;
 
-// =========================
-// STATUS
-// =========================
 export const StatusBadge = styled.span`
   align-self: flex-start;
-
   padding: 0.25rem 0.6rem;
   border-radius: 12px;
-
   font-size: 0.75rem;
   font-weight: 600;
-
   color: #fff;
-  margin-top: 0.25rem;
 
   background-color: ${({ status }) => {
     if (status === "pending") return "#c4c700";
@@ -148,81 +112,56 @@ export const StatusBadge = styled.span`
     if (status === "approved") return "#34a853";
     if (status === "rejected") return "#bd0b0b";
     if (status === "cancelled") return "#bd0b0b";
-    if (status === "refunded") return "#00bcd4";
-    if (status === "charged_back") return "#9c27b0";
     if (status === "expired") return "#757575";
     return "#ccc";
   }};
 `;
 
-// =========================
-// BOTÃO CANCELAR
-// =========================
 export const BotaoCancelar = styled.button`
   margin-top: 6px;
   padding: 6px 10px;
-
   background: #bd0b0b;
   border: none;
-
   color: white;
   border-radius: 6px;
-
   cursor: pointer;
   font-size: 0.8rem;
   font-weight: bold;
-
-  transition: background 0.2s;
 
   &:hover {
     background: #d9363e;
   }
 `;
 
-// =========================
-// BOTÃO VER MAIS (FIXO)
-// =========================
+// 🔥 FALTAVA ESSE (ERRO DO BUILD)
+export const BotaoContinuar = styled.button`
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: #1a73e8;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+
+  &:hover {
+    background: #1666c1;
+  }
+`;
+
 export const VerMais = styled.button`
-  margin-top: auto; /* 🔥 fixa no final */
+  margin-top: auto;
   padding-top: 10px;
 
   background: transparent;
   border: none;
-
   color: #1a73e8;
   font-weight: bold;
-
   cursor: pointer;
   text-align: left;
 
   &:hover {
     text-decoration: underline;
-  }
-`;
-
-export const ListaScroll = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-
-  overflow-y: auto;
-
-  /* 🔥 ALTURA FIXA DO CONTEÚDO */
-  max-height: 400px;
-
-  padding-right: 4px;
-
-  /* Scroll bonito */
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    border-radius: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
   }
 `;
