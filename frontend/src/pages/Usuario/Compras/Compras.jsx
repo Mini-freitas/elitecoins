@@ -110,7 +110,13 @@ function Compras({ usuario, handleLogout }) {
               {lista.map((c) => (
                 <CompraItem key={c.id}>
                   <p><strong>Plataforma:</strong> {c.plataforma}</p>
-                  <p><strong>Valor:</strong> R$ {c.quantia}</p>
+                  <p>
+                    <strong>Valor:</strong>{" "}
+                    {Number(c.quantia).toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </p>
                   <p><strong>Moedas:</strong> {c.moeda}</p>
 
                   <p>
