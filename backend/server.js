@@ -963,11 +963,11 @@ app.post("/api/pagamento", async (req, res) => {
 
         notification_url: `${process.env.HOST_URL}/api/webhook-mercadopago`,
 
-        back_urls: {
-          success: `${process.env.HOST_URL}/pagamentoaprovado`,
-          failure: `${process.env.HOST_URL}/pagamentofalhou`,
-          pending: `${process.env.HOST_URL}/pagamentopendente`,
-        },
+     back_urls: {
+      success: `${process.env.HOST_URL}/?status=approved`,
+      failure: `${process.env.HOST_URL}/?status=failed`,
+      pending: `${process.env.HOST_URL}/?status=pending`,
+    },
 
         auto_return: "approved",
       },

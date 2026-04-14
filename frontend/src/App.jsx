@@ -16,15 +16,13 @@ import Seguranca from "./pages/Usuario/Seguranca";
 import Compras from "./pages/Usuario/Compras/Compras";
 import ExcluirConta from "./pages/Usuario/ExcluirConta";
 
-import PagamentoAprovado from "./pages/Pagamentos/Pagamentoaprovado";
-import PagamentoPendente from "./pages/Pagamentos/Pagamentopendente";
-import PagamentoFalhou from "./pages/Pagamentos/Pagamentofalhou";
-
 function App() {
   const [usuario, setUsuario] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 VALIDAÇÃO CORRIGIDA E ROBUSTA
+  // =========================
+  // 🔒 VALIDAÇÃO DE SESSÃO
+  // =========================
   useEffect(() => {
     const validarSessao = async () => {
       const usuarioSalvo = localStorage.getItem("usuario");
@@ -37,7 +35,6 @@ function App() {
       try {
         const user = JSON.parse(usuarioSalvo);
 
-        // 🔒 PROTEÇÃO CRÍTICA
         if (!user?.id) {
           localStorage.removeItem("usuario");
           setUsuario(null);
@@ -52,15 +49,10 @@ function App() {
         });
 
         setUsuario(res.data);
-
-        // 🔄 atualiza dados no localStorage
         localStorage.setItem("usuario", JSON.stringify(res.data));
 
       } catch (err) {
-        // 🔥 SÓ DESLOGA SE FOR 401
         if (err.response?.status === 401) {
-          console.log("Sessão inválida");
-
           localStorage.removeItem("usuario");
           setUsuario(null);
         } else {
@@ -89,17 +81,39 @@ function App() {
     return children;
   };
 
-  // 🔒 evita render antes da validação
   if (loading) return null;
 
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home usuario={usuario} handleLogout={handleLogout} />} />
-        <Route path="/compra" element={<Compra usuario={usuario} handleLogout={handleLogout} />} />
+
+        {/* HOME */}
+        <Route 
+          path="/" 
+          element={
+            <Home 
+              usuario={usuario} 
+              handleLogout={handleLogout} 
+            />
+          } 
+        />
+
+        {/* COMPRA */}
+        <Route 
+          path="/compra" 
+          element={
+            <Compra 
+              usuario={usuario} 
+              handleLogout={handleLogout} 
+            />
+          } 
+        />
+
+        {/* AUTH */}
         <Route path="/login" element={<Login handleLogin={handleLogin} />} />
         <Route path="/cadastro" element={<Cadastro handleLogin={handleLogin} />} />
 
+        {/* ADMIN */}
         <Route
           path="/admin"
           element={
@@ -109,6 +123,7 @@ function App() {
           }
         />
 
+        {/* USUÁRIO */}
         <Route
           path="/usuario/perfil"
           element={
@@ -122,16 +137,29 @@ function App() {
           }
         />
 
-        <Route path="/usuario/seguranca" element={<RotaProtegida><Seguranca usuario={usuario} /></RotaProtegida>} />
-        <Route path="/usuario/compras" element={<RotaProtegida><Compras usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} />
-        <Route path="/usuario/excluir" element={<RotaProtegida><ExcluirConta usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} />
+        <Route 
+          path="/usuario/seguranca" 
+          element={<RotaProtegida><Seguranca usuario={usuario} /></RotaProtegida>} 
+        />
 
-        <Route path="/pagamentoaprovado" element={<PagamentoAprovado usuario={usuario} handleLogout={handleLogout} />} />
-        <Route path="/pagamentopendente" element={<PagamentoPendente usuario={usuario} handleLogout={handleLogout} />} />
-        <Route path="/pagamentofalhou" element={<PagamentoFalhou usuario={usuario} handleLogout={handleLogout} />} />
+        <Route 
+          path="/usuario/compras" 
+          element={<RotaProtegida><Compras usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} 
+        />
+
+        <Route 
+          path="/usuario/excluir" 
+          element={<RotaProtegida><ExcluirConta usuario={usuario} handleLogout={handleLogout} /></RotaProtegida>} 
+        />
+
+        {/* 🔥 FALLBACK (qualquer rota desconhecida) */}
+        <Route path="*" element={<Navigate to="/" />} />
+
       </Routes>
 
+      {/* 🔥 TOAST GLOBAL */}
       <ToastContainer theme="dark" autoClose={3000} />
+
     </Router>
   );
 }
