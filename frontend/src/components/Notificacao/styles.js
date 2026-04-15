@@ -66,7 +66,6 @@ export const Badge = styled.span`
   align-items: center;
 
   font-size: 0.7rem;
-  font-weight: bold;
 
   border: 1px solid white;
 
