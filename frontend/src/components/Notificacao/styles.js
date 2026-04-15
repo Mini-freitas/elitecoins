@@ -2,26 +2,49 @@ import styled from "styled-components";
 
 /* CONTAINER DO SINO */
 export const Notificacaocontainer = styled.div`
-  position: relative;
+  position: relative; 
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.2rem; 
+
+  /* Tablet grande */
+  @media (max-width: 1024px) {
+    gap: 1rem;
+  }
+
+  /* Tablet médio */
+  @media (max-width: 768px) {
+    gap: 0.8rem;
+  }
+
+  /* Celular */
+  @media (max-width: 440px) {
+    gap: 0.6rem;
+  }
 `;
 
 /* ÍCONE (NÃO MEXI) */
 export const Icone = styled.svg`
-  color: white;
+   color: white;
   cursor: pointer;
   height: 1.5rem;
   width: 1.5rem;
 
+  /* Tablet grande */
   @media (max-width: 1024px) {
     height: 1.3rem;
     width: 1.3rem;
   }
 
+  /* Tablet médio */
   @media (max-width: 768px) {
     height: 1.1rem;
     width: 1.1rem;
   }
 
+  /* Celular */
   @media (max-width: 440px) {
     height: 1rem;
     width: 1rem;
@@ -48,10 +71,10 @@ export const Badge = styled.span`
   border: 1px solid white;
 
   background: ${({ $naoVistas }) =>
-    $naoVistas > 0 ? "#00c853" : "transparent"};
+    $naoVistas > 0 ? "#00c853" : " rgb(80, 80, 80)"};
 
   color: ${({ $naoVistas }) =>
-    $naoVistas > 0 ? "white" : "transparent"};
+    $naoVistas > 0 ? "rgb(255, 255, 255)" : "rgb(255, 255, 255)"};
 `;
 
 /* BOX PRINCIPAL (PROFISSIONAL) */
