@@ -25,9 +25,8 @@ export const Notificacaocontainer = styled.div`
   }
 `;
 
-/* ÍCONE (NÃO MEXI) */
 export const Icone = styled.svg`
-   color: white;
+  color: white;
   cursor: pointer;
   height: 1.5rem;
   width: 1.5rem;
@@ -46,10 +45,11 @@ export const Icone = styled.svg`
 
   /* Celular */
   @media (max-width: 440px) {
-    height: 1rem;
-    width: 1rem;
+    height: 1.1rem;
+    width: 1.1rem;
   }
 `;
+
 
 /* BADGE */
 export const Badge = styled.span`
@@ -64,8 +64,8 @@ export const Badge = styled.span`
   display: flex;
   justify-content: center;
   align-items: center;
-
-  font-size: 0.7rem;
+  font-family: var(--fonte-principal);
+  font-size: 0.8rem;
 
   border: 1px solid white;
 
@@ -74,6 +74,28 @@ export const Badge = styled.span`
 
   color: ${({ $naoVistas }) =>
     $naoVistas > 0 ? "rgb(255, 255, 255)" : "rgb(255, 255, 255)"};
+
+
+ /* Tablet grande */
+  @media (max-width: 1024px) {
+    height: 0.9rem;
+    width: 0.9rem;
+    font-size: 0.7rem;
+  }
+
+  /* Tablet médio */
+  @media (max-width: 768px) {
+    height: 0.8rem;
+    width: 0.8rem;
+    font-size: 0.65rem;
+  }
+
+  /* Celular */
+  @media (max-width: 480px) {
+    height: 0.7rem;
+    width: 0.7rem;
+    font-size: 0.5rem;
+  }
 `;
 
 /* BOX PRINCIPAL (PROFISSIONAL) */

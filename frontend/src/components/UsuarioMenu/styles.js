@@ -118,21 +118,22 @@ export const AvatarBox = styled.div`
 
   /* Tablet grande */
   @media (max-width: 1024px) {
-    height: 1.3rem;
-    width: 1.3rem;
+    height: 2rem;
+    width: 2rem;
   }
 
   /* Tablet médio */
   @media (max-width: 768px) {
-    height: 1.1rem;
-    width: 1.1rem;
+    height: 1.5rem;
+    width: 1.5rem;
   }
 
   /* Celular */
   @media (max-width: 440px) {
-    height: 1rem;
-    width: 1rem;
+    height: 1.3rem;
+    width: 1.3rem;
   }
+
 `;
 
 export const Avatar = styled.img`
