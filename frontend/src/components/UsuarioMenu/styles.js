@@ -141,4 +141,24 @@ export const Avatar = styled.img`
   height: 2.2rem;
   border-radius: 50%;
   object-fit: cover;
+  border: 1px solid white;
+
+  /* Tablet grande */
+  @media (max-width: 1024px) {
+    height: 2rem;
+    width: 2rem;
+  }
+
+  /* Tablet médio */
+  @media (max-width: 768px) {
+    height: 1.3rem;
+    width: 1.3rem;
+  }
+
+  /* Celular */
+  @media (max-width: 440px) {
+    height: .9rem;
+    width: .9rem;
+  }
+
 `;
