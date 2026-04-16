@@ -159,6 +159,7 @@ export const Avatar = styled.img`
   @media (max-width: 440px) {
     height: 1.1rem;
     width: 1.1rem;
+    margin-right:1rem;
   }
 
 `;
