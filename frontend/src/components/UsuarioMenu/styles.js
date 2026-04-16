@@ -157,8 +157,8 @@ export const Avatar = styled.img`
 
   /* Celular */
   @media (max-width: 440px) {
-    height: .9rem;
-    width: .9rem;
+    height: 1.1rem;
+    width: 1.1rem;
   }
 
 `;
