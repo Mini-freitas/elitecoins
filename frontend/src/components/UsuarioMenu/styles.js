@@ -157,8 +157,8 @@ export const Avatar = styled.img`
 
   /* Celular */
   @media (max-width: 440px) {
-    height: 1.1rem;
-    width: 1.1rem;
+    height: 1.2rem;
+    width: 1.2rem;
     margin-right:1rem;
   }
 
