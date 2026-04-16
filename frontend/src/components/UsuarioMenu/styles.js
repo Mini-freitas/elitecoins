@@ -124,14 +124,14 @@ export const AvatarBox = styled.div`
 
   /* Tablet médio */
   @media (max-width: 768px) {
-    height: 1.5rem;
-    width: 1.5rem;
+    height: 1.3rem;
+    width: 1.3rem;
   }
 
   /* Celular */
   @media (max-width: 440px) {
-    height: 1.1rem;
-    width: 1.1rem;
+    height: .9rem;
+    width: .9rem;
   }
 
 `;
