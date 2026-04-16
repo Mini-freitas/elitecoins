@@ -132,7 +132,7 @@ export const AvatarBox = styled.div`
   @media (max-width: 440px) {
     height: 1.2rem;
     width: 1.2rem;
-    margin-left:1rem;
+    margin-left:.5rem;
 
   }
 
