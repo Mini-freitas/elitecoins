@@ -130,8 +130,8 @@ export const AvatarBox = styled.div`
 
   /* Celular */
   @media (max-width: 440px) {
-    height: 1.2rem;
-    width: 1.2rem;
+    height: 1.3rem;
+    width: 1.3rem;
     margin-left:.4rem;
 
   }
@@ -143,7 +143,7 @@ export const Avatar = styled.img`
   height: 2.2rem;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid white;
+  border: 2px solid white;
 
   /* Tablet grande */
   @media (max-width: 1024px) {
@@ -159,8 +159,8 @@ export const Avatar = styled.img`
 
   /* Celular */
   @media (max-width: 440px) {
-    height: 1.2rem;
-    width: 1.2rem;
+    height: 1.3rem;
+    width: 1.3rem;
   }
 
 `;
