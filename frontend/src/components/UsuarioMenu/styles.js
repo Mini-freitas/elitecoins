@@ -130,8 +130,10 @@ export const AvatarBox = styled.div`
 
   /* Celular */
   @media (max-width: 440px) {
-    height: .9rem;
-    width: .9rem;
+    height: 1.2rem;
+    width: 1.2rem;
+    margin-left:1rem;
+
   }
 
 `;
@@ -159,7 +161,6 @@ export const Avatar = styled.img`
   @media (max-width: 440px) {
     height: 1.2rem;
     width: 1.2rem;
-    margin-right:1rem;
   }
 
 `;
