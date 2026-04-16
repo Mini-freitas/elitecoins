@@ -130,8 +130,8 @@ export const AvatarBox = styled.div`
 
   /* Celular */
   @media (max-width: 440px) {
-    height: 1.3rem;
-    width: 1.3rem;
+    height: 1.1rem;
+    width: 1.1rem;
   }
 
 `;
