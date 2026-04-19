@@ -38,6 +38,13 @@ enum StatusApiFifa {
   concluido
   erro
 }
+
+enum Plataforma {
+  PS
+  XB
+  PC
+}
+
 //////////////////////
 // MODELS
 //////////////////////
@@ -45,36 +52,29 @@ enum StatusApiFifa {
 model Usuario {
   id               String        @id @default(auto()) @map("_id") @db.ObjectId
 
-  // DADOS BÁSICOS
   nome             String
   email            String        @unique
 
-  // AUTENTICAÇÃO
   senha            String?
   provider         AuthProvider  @default(LOCAL)
   providerId       String?
   emailVerificado  Boolean       @default(false)
   tokenVerificacao String?
 
-  // PERFIL
   avatar           String?
   dataNascimento   DateTime?
   telefone         String?
 
-  // PROGRESSO DO PERFIL (1 a 3)
   perfilEtapa      Int           @default(1)
 
-  // VOUCHER
   voucherAtivo     Boolean       @default(false)
   voucherUsos      Int           @default(0)
   voucherMaxUsos   Int           @default(3)
 
-  // CONTROLE
   tipo             TipoUsuario   @default(COMUM)
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
-  // RELAÇÕES
   credenciais      Credencial[]
   notificacoes     Notificacao[]
   compras          Compra[]
@@ -86,8 +86,9 @@ model Credencial {
   orderID   String   @unique
   user      String
   pass      String
-  platform  String
+  platform  Plataforma
   ba        String
+
   limit     Int?
   sortMode  String?
   persona   String?
@@ -97,6 +98,8 @@ model Credencial {
 
   usuarioId String   @db.ObjectId
   usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+
+  compras Compra[]
 }
 
 model Banner {
@@ -138,13 +141,22 @@ model Compra {
   usuarioId   String   @db.ObjectId
   usuario     Usuario  @relation(fields: [usuarioId], references: [id])
 
-  plataforma  String
+  // 🔥 RELAÇÃO COM A CONTA FIFA CERTA
+  credencialId String?  @db.ObjectId
+  credencial   Credencial? @relation(fields: [credencialId], references: [id])
+
+  plataforma  Plataforma
   quantia     Float
   moeda       String
 
-  // 🔥 FLUXO SEPARADO CORRETO
   statusPagamento StatusPagamento @default(pending)
   statusApiFifa   StatusApiFifa   @default(aguardando)
+
+  // 🔥 CONTROLE DA API FIFA
+  fifaOrderId String?
+
+  // 🔥 DEBUG / AUDITORIA (OPCIONAL MAS ÚTIL)
+  fifaResponse String?
 
   // MERCADO PAGO
   mpPreferenceId String?
@@ -157,4 +169,7 @@ model Compra {
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([mpPreferenceId])
+  @@index([usuarioId])
 }

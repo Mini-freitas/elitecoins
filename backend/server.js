@@ -892,13 +892,13 @@ app.post("/api/pagamento", async (req, res) => {
       return res.status(400).json({ erro: "Plataforma inválida" });
     }
 
-    // 👉 Se quiser salvar bonito no banco
+
     const mapaPlataforma = {
-      play: "PlayStation",
-      xbox: "Xbox",
+      play: "PS",
+      xbox: "XB",
       pc: "PC",
     };
-
+    
     const plataformaFinal = mapaPlataforma[plataforma];
 
     // =========================
@@ -1125,35 +1125,108 @@ async function concluirCompra(compraId) {
 
   if (!compra) return;
 
+  // 🚫 só continua se aprovado
   if (compra.statusPagamento !== STATUS.APPROVED) return;
 
-  if (compra.concluidoEm) return;
+  // 🚫 evita duplicação
+  if (compra.fifaOrderId) {
+    console.log("⚠️ Já enviada pra FIFA");
+    return;
+  }
 
-  await prisma.credencial.create({
-    data: {
-      orderID: compra.id,
-      user: "usuario_exemplo",
-      pass: "senha_exemplo",
-      platform: compra.plataforma,
-      ba: "0",
-      usuarioId: compra.usuarioId,
-    },
+  // 🔍 BUSCAR CREDENCIAL REAL DO USUÁRIO
+  const credencial = await prisma.credencial.findFirst({
+    where: { usuarioId: compra.usuarioId },
   });
 
-  await prisma.compra.update({
-    where: { id: compra.id },
-    data: {
-      concluidoEm: new Date(),
-      statusApiFifa: "concluido",
-    },
+  if (!credencial) {
+    console.log("❌ Usuário sem credencial");
+
+    await prisma.compra.update({
+      where: { id: compra.id },
+      data: { statusApiFifa: "erro" },
+    });
+
+    return;
+  }
+
+  // 🔍 BUSCAR USUÁRIO
+  const usuario = await prisma.usuario.findUnique({
+    where: { id: compra.usuarioId },
   });
 
-  await prisma.notificacao.create({
-    data: {
-      usuarioId: compra.usuarioId,
-      mensagem: "Sua compra foi concluída com sucesso!",
-    },
-  });
+  try {
+    console.log("🚀 Enviando ordem para FIFA...");
+
+    const response = await fetch("https://futtransfer.top/orderAPI", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        customerName: usuario.nome,
+
+        user: credencial.user,
+        pass: credencial.pass,
+
+        ba: credencial.ba,
+        ba2: credencial.ba,
+        ba3: credencial.ba,
+        ba4: credencial.ba,
+        ba5: credencial.ba,
+
+        // ⚠️ AJUSTE AQUI (IMPORTANTE)
+        platform:
+          credencial.platform === "PlayStation"
+            ? "PS"
+            : credencial.platform === "Xbox"
+            ? "XB"
+            : "PC",
+
+        amount: Math.floor(compra.quantia / 1000),
+
+        apiUser: process.env.FIFA_API_USER,
+        apiKey: process.env.FIFA_API_KEY_MD5,
+
+        updateCustomer: "1",
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!data.orderID) {
+      throw new Error("Sem orderID");
+    }
+
+    console.log("✅ Ordem criada:", data.orderID);
+
+    // 💾 SALVA RESULTADO
+    await prisma.compra.update({
+      where: { id: compra.id },
+      data: {
+        fifaOrderId: data.orderID,
+        statusApiFifa: "processando",
+        concluidoEm: new Date(),
+      },
+    });
+
+    await prisma.notificacao.create({
+      data: {
+        usuarioId: compra.usuarioId,
+        mensagem: "Compra aprovada! Moedas em processamento.",
+      },
+    });
+
+  } catch (err) {
+    console.error("❌ Erro ao enviar para FIFA:", err);
+
+    await prisma.compra.update({
+      where: { id: compra.id },
+      data: {
+        statusApiFifa: "erro",
+      },
+    });
+  }
 }
 
 // =========================
