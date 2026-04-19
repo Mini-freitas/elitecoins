@@ -14,6 +14,7 @@ import crypto from "crypto";
 import { ObjectId } from "mongodb";
 
 
+
 dotenv.config();
 
 const app = express();
@@ -481,7 +482,10 @@ app.delete("/api/cupons/:id", async (req, res) => {
 
 // ======================= NOTIFICAÇÕES =======================
 
-// Criar notificação
+
+// ===============================
+// CRIAR NOTIFICAÇÃO
+// ===============================
 app.post("/api/notificacoes", async (req, res) => {
   try {
     const { usuarioId, mensagem } = req.body;
@@ -490,8 +494,26 @@ app.post("/api/notificacoes", async (req, res) => {
       return res.status(400).json({ error: "Dados incompletos" });
     }
 
+    // 🔥 VALIDA OBJECTID
+    if (!ObjectId.isValid(usuarioId)) {
+      return res.status(400).json({ error: "usuarioId inválido" });
+    }
+
+    // 🔥 GARANTE QUE O USUÁRIO EXISTE
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
     const novaNotificacao = await prisma.notificacao.create({
-      data: { usuarioId, mensagem, vista: false },
+      data: {
+        usuarioId,
+        mensagem,
+        vista: false,
+      },
     });
 
     res.json(novaNotificacao);
@@ -501,11 +523,18 @@ app.post("/api/notificacoes", async (req, res) => {
   }
 });
 
-// Listar notificações não vistas (ou todas se desejar)
+// ===============================
+// LISTAR NOTIFICAÇÕES
+// ===============================
 app.get("/api/notificacoes/:usuarioId", async (req, res) => {
   try {
     const { usuarioId } = req.params;
     const apenasNaoVistas = req.query.apenasNaoVistas === "true";
+
+    // 🔥 VALIDA OBJECTID
+    if (!ObjectId.isValid(usuarioId)) {
+      return res.status(400).json({ error: "usuarioId inválido" });
+    }
 
     const notificacoes = await prisma.notificacao.findMany({
       where: {
@@ -522,10 +551,17 @@ app.get("/api/notificacoes/:usuarioId", async (req, res) => {
   }
 });
 
-// Marcar notificação individual como vista
+// ===============================
+// MARCAR UMA NOTIFICAÇÃO COMO VISTA
+// ===============================
 app.put("/api/notificacoes/:id/vista", async (req, res) => {
   try {
     const { id } = req.params;
+
+    // 🔥 VALIDA OBJECTID
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
 
     const notif = await prisma.notificacao.update({
       where: { id },
@@ -539,14 +575,26 @@ app.put("/api/notificacoes/:id/vista", async (req, res) => {
   }
 });
 
-// ✅ Marcar TODAS as notificações do usuário como vistas
+// ===============================
+// MARCAR TODAS COMO VISTAS
+// ===============================
 app.put("/api/notificacoes/usuario/:usuarioId/vistas", async (req, res) => {
   try {
     const { usuarioId } = req.params;
 
+    // 🔥 VALIDA OBJECTID
+    if (!ObjectId.isValid(usuarioId)) {
+      return res.status(400).json({ error: "usuarioId inválido" });
+    }
+
     const resultado = await prisma.notificacao.updateMany({
-      where: { usuarioId, vista: false },
-      data: { vista: true },
+      where: {
+        usuarioId,
+        vista: false,
+      },
+      data: {
+        vista: true,
+      },
     });
 
     res.json({
@@ -555,11 +603,10 @@ app.put("/api/notificacoes/usuario/:usuarioId/vistas", async (req, res) => {
       mensagem: "Todas as notificações foram marcadas como vistas.",
     });
   } catch (err) {
-    console.error("❌ Erro ao marcar todas as notificações como vistas:", err);
+    console.error("❌ Erro ao marcar todas as notificações:", err);
     res.status(500).json({ error: "Erro ao marcar notificações como vistas" });
   }
 });
-
 
 /// ======================= CREDENCIAIS =======================
 
