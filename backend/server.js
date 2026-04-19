@@ -486,6 +486,11 @@ app.delete("/api/cupons/:id", async (req, res) => {
 // ===============================
 // CRIAR NOTIFICAÇÃO
 // ===============================
+import { ObjectId } from "mongodb";
+
+// =======================
+// CRIAR NOTIFICAÇÃO
+// =======================
 app.post("/api/notificacoes", async (req, res) => {
   try {
     const { usuarioId, mensagem } = req.body;
@@ -499,7 +504,7 @@ app.post("/api/notificacoes", async (req, res) => {
       return res.status(400).json({ error: "usuarioId inválido" });
     }
 
-    // 🔥 GARANTE QUE O USUÁRIO EXISTE
+    // 🔥 VERIFICA SE USUÁRIO EXISTE
     const usuario = await prisma.usuario.findUnique({
       where: { id: usuarioId },
     });
@@ -522,6 +527,7 @@ app.post("/api/notificacoes", async (req, res) => {
     res.status(500).json({ error: "Erro ao criar notificação" });
   }
 });
+
 
 // ===============================
 // LISTAR NOTIFICAÇÕES
@@ -551,8 +557,9 @@ app.get("/api/notificacoes/:usuarioId", async (req, res) => {
   }
 });
 
+
 // ===============================
-// MARCAR UMA NOTIFICAÇÃO COMO VISTA
+// MARCAR UMA COMO VISTA
 // ===============================
 app.put("/api/notificacoes/:id/vista", async (req, res) => {
   try {
@@ -570,10 +577,11 @@ app.put("/api/notificacoes/:id/vista", async (req, res) => {
 
     res.json(notif);
   } catch (err) {
-    console.error("❌ Erro ao marcar notificação como vista:", err);
+    console.error("❌ Erro ao marcar notificação:", err);
     res.status(500).json({ error: "Erro ao marcar notificação como vista" });
   }
 });
+
 
 // ===============================
 // MARCAR TODAS COMO VISTAS
@@ -603,7 +611,7 @@ app.put("/api/notificacoes/usuario/:usuarioId/vistas", async (req, res) => {
       mensagem: "Todas as notificações foram marcadas como vistas.",
     });
   } catch (err) {
-    console.error("❌ Erro ao marcar todas as notificações:", err);
+    console.error("❌ Erro ao marcar notificações:", err);
     res.status(500).json({ error: "Erro ao marcar notificações como vistas" });
   }
 });
