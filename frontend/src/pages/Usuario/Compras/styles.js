@@ -108,12 +108,23 @@ export const StatusBadge = styled.span`
   color: #ffffff;
 
   background-color: ${({ status }) => {
+// PAGAMENTO (Mercado Pago)
+    // ======================
     if (status === "pending") return "#c4c700";
     if (status === "in_process") return "#1a73e8";
     if (status === "approved") return "#34a853";
     if (status === "rejected") return "#bd0b0b";
     if (status === "cancelled") return "#bd0b0b";
     if (status === "expired") return "#757575";
+
+    // ======================
+    // TRANSFERÊNCIA (FIFA API)
+    // ======================
+    if (status === "aguardando") return "#9e9e9e";   // cinza
+    if (status === "processando") return "#1a73e8";   // azul (em andamento)
+    if (status === "concluido") return "#34a853";     // verde (sucesso)
+    if (status === "erro") return "#bd0b0b";          // vermelho (falha)
+
     return "#ccc";
   }};
 `;
