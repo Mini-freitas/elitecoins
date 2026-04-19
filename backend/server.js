@@ -482,12 +482,6 @@ app.delete("/api/cupons/:id", async (req, res) => {
 
 // ======================= NOTIFICAÇÕES =======================
 
-
-// ===============================
-// CRIAR NOTIFICAÇÃO
-// ===============================
-import { ObjectId } from "mongodb";
-
 // =======================
 // CRIAR NOTIFICAÇÃO
 // =======================
