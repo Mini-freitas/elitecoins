@@ -1175,7 +1175,7 @@ async function concluirCompra(compraId) {
   if (!compra) return;
 
   // 🚫 só continua se aprovado
-  if (compra.statusPagamento !== STATUS.APPROVED) return;
+  if (compra.statusPagamento !== "approved") return;
 
   // 🚫 evita duplicação
   if (compra.fifaOrderId) {
@@ -1183,7 +1183,7 @@ async function concluirCompra(compraId) {
     return;
   }
 
-  // 🔍 BUSCAR CREDENCIAL REAL DO USUÁRIO
+  // 🔍 BUSCAR CREDENCIAL
   const credencial = await prisma.credencial.findFirst({
     where: { usuarioId: compra.usuarioId },
   });
@@ -1224,15 +1224,11 @@ async function concluirCompra(compraId) {
         ba4: credencial.ba,
         ba5: credencial.ba,
 
-        // ⚠️ AJUSTE AQUI (IMPORTANTE)
-        platform:
-          credencial.platform === "PlayStation"
-            ? "PS"
-            : credencial.platform === "Xbox"
-            ? "XB"
-            : "PC",
+        // ✅ AGORA CORRETO (ENUM)
+        platform: credencial.platform,
 
-        amount: Math.floor(compra.quantia / 1000),
+        // ⚠️ IMPORTANTE: usa moeda, não quantia
+        amount: Number(compra.moeda),
 
         apiUser: process.env.FIFA_API_USER,
         apiKey: process.env.FIFA_API_KEY_MD5,
@@ -1249,20 +1245,19 @@ async function concluirCompra(compraId) {
 
     console.log("✅ Ordem criada:", data.orderID);
 
-    // 💾 SALVA RESULTADO
+    // 💾 SALVA
     await prisma.compra.update({
       where: { id: compra.id },
       data: {
         fifaOrderId: data.orderID,
         statusApiFifa: "processando",
-        concluidoEm: new Date(),
       },
     });
 
     await prisma.notificacao.create({
       data: {
         usuarioId: compra.usuarioId,
-        mensagem: "Compra aprovada! Moedas em processamento.",
+        mensagem: "🚀 Moedas em transferência...",
       },
     });
 

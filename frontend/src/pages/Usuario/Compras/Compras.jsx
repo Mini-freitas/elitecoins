@@ -69,27 +69,53 @@ function Compras({ usuario, handleLogout }) {
     }
   };
 
-  const statusLabel = (status) => {
+  const statusPagamentoLabel = (status) => {
     switch (status) {
       case "pending":
         return "Aguardando pagamento";
-      case "in_process":
-        return "Pagamento em análise";
       case "approved":
         return "Pagamento aprovado";
       case "rejected":
         return "Pagamento rejeitado";
       case "cancelled":
-        return "Pagamento cancelado";
-      case "expired":
-        return "Pagamento expirado";
+        return "Cancelado";
       default:
         return "Desconhecido";
     }
   };
 
+  const statusFifaLabel = (status) => {
+    switch (status) {
+      case "aguardando":
+        return "Aguardando envio";
+      case "processando":
+        return "Transferindo moedas...";
+      case "concluido":
+        return "Concluído";
+      case "erro":
+        return "Erro na entrega";
+      default:
+        return "Desconhecido";
+    }
+  };
+
+  // 🔥 DIVISÃO DOS BLOCOS
+  const pagamentos = compras;
+
+  const transferencias = compras.filter(
+    (c) =>
+      c.statusPagamento === "approved" &&
+      c.statusApiFifa !== "concluido"
+  );
+
+  const concluidas = compras.filter(
+    (c) =>
+      c.statusPagamento === "approved" &&
+      c.statusApiFifa === "concluido"
+  );
+
   const limite = 5;
-  const lista = verTudo ? compras : compras.slice(0, limite);
+  const lista = verTudo ? pagamentos : pagamentos.slice(0, limite);
 
   return (
     <Comprassec>
@@ -101,6 +127,8 @@ function Compras({ usuario, handleLogout }) {
         </Header>
 
         <GridCompras>
+
+          {/* PAGAMENTOS */}
           <BoxCompras>
             <h3>Pagamentos</h3>
 
@@ -110,32 +138,21 @@ function Compras({ usuario, handleLogout }) {
               {lista.map((c) => (
                 <CompraItem key={c.id}>
                   <p><strong>Plataforma:</strong> {c.plataforma}</p>
-                  <p>
-                    <strong>Valor:</strong>{" "}
-                    {Number(c.quantia).toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
+                  <p><strong>Valor:</strong> R$ {c.quantia}</p>
                   <p><strong>Moedas:</strong> {c.moeda}</p>
 
-                  <p>
-                    <strong>Data:</strong>{" "}
-                    {new Date(c.createdAt).toLocaleString()}
-                  </p>
-
                   <StatusBadge status={c.statusPagamento}>
-                    {statusLabel(c.statusPagamento)}
+                    {statusPagamentoLabel(c.statusPagamento)}
                   </StatusBadge>
 
                   {c.statusPagamento === "pending" && (
                     <>
                       <BotaoContinuar onClick={() => continuarPagamento(c.id)}>
-                        🔁 Continuar pagamento
+                        Continuar pagamento
                       </BotaoContinuar>
 
                       <BotaoCancelar onClick={() => cancelarCompra(c.id)}>
-                        Cancelar compra
+                        Cancelar
                       </BotaoCancelar>
                     </>
                   )}
@@ -143,22 +160,66 @@ function Compras({ usuario, handleLogout }) {
               ))}
             </ListaScroll>
 
-            {compras.length > limite && (
+            {pagamentos.length > limite && (
               <VerMais onClick={() => setVerTudo(!verTudo)}>
                 {verTudo ? "Mostrar menos" : "Ver todas"}
               </VerMais>
             )}
           </BoxCompras>
 
+          {/* TRANSFERÊNCIA */}
           <BoxCompras>
             <h3>Transferência</h3>
-            <p>Em breve...</p>
+
+            <ListaScroll>
+              {transferencias.length === 0 && (
+                <p>Nenhuma transferência em andamento.</p>
+              )}
+
+              {transferencias.map((c) => (
+                <CompraItem key={c.id}>
+                  <p><strong>Plataforma:</strong> {c.plataforma}</p>
+                  <p><strong>Moedas:</strong> {c.moeda}</p>
+
+                  <StatusBadge status={c.statusApiFifa}>
+                    {statusFifaLabel(c.statusApiFifa)}
+                  </StatusBadge>
+                </CompraItem>
+              ))}
+            </ListaScroll>
           </BoxCompras>
 
+          {/* CONCLUÍDAS */}
           <BoxCompras>
             <h3>Concluídas</h3>
-            <p>Em breve...</p>
+
+            <ListaScroll>
+              {concluidas.length === 0 && (
+                <p>Nenhuma compra concluída.</p>
+              )}
+
+              {concluidas.map((c) => (
+                <CompraItem key={c.id}>
+                  <p><strong>Cliente:</strong> {usuario.nome}</p>
+                  <p><strong>Plataforma:</strong> {c.plataforma}</p>
+                  <p><strong>Valor:</strong> R$ {c.quantia}</p>
+                  <p><strong>Moedas:</strong> {c.moeda}</p>
+
+                  <p>
+                    <strong>Finalizado:</strong>{" "}
+                    {c.concluidoEm
+                      ? new Date(c.concluidoEm).toLocaleString()
+                      : "-"}
+                  </p>
+
+                  <StatusBadge status="concluido">
+                    Entregue
+                  </StatusBadge>
+                </CompraItem>
+              ))}
+            </ListaScroll>
           </BoxCompras>
+
         </GridCompras>
       </MainCompras>
 
