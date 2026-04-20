@@ -1,36 +1,51 @@
-// BtContinuaCompra.jsx
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { BotaoContinuar } from "./styles";
+// src/components/BtContinuaCompra/BtContinuaCompra.jsx
+import React, { useState } from "react";
+import api from "../../services/api"; // ← usa api.js padronizado
+import { BotaoContinuar } from './styles';
 
 const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }) => {
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleClick = () => {
+ const handleClick = async () => {
     if (!usuario) {
-      alert("Você precisa estar logado!");
-      navigate("/login");
+      alert("Você precisa estar logado para continuar a compra!");
       return;
     }
 
     if (!cartaSelecionada || !valorTotal || !quantMoedas) {
-      alert("Selecione a plataforma e a quantidade.");
+      alert("Selecione a plataforma e a quantidade de moedas.");
       return;
     }
 
-    // 🔥 ENVIA DADOS PARA A PÁGINA DE COMPRA
-    navigate("/compra", {
-      state: {
-        valorTotal,
-        quantMoedas,
+    setIsLoading(true);
+
+    try {
+      // 🔥 GARANTE 2 CASAS DECIMAIS
+      const valorFormatado = Number(valorTotal.toFixed(2));
+
+      const res = await api.post("/pagamento", {
+        usuarioId: usuario.id,
         plataforma: cartaSelecionada,
-      },
-    });
+        quantia: valorFormatado,
+        quantMoedas,
+      });
+
+      if (res.data.init_point) {
+        window.location.href = res.data.init_point;
+      } else {
+        console.error("Init point não recebido:", res.data);
+      }
+    } catch (err) {
+      console.error("Erro ao criar preferência:", err);
+      alert("O método automático está em manutenção.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <BotaoContinuar onClick={handleClick}>
-      Continuar Compra
+    <BotaoContinuar onClick={handleClick} disabled={isLoading}>
+      {isLoading ? "Processando..." : "Continuar Compra"}
     </BotaoContinuar>
   );
 };
