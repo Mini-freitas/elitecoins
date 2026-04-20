@@ -14,6 +14,7 @@ import crypto from "crypto";
 import { ObjectId } from "mongodb";
 
 
+
 dotenv.config();
 
 const app = express();
@@ -481,7 +482,9 @@ app.delete("/api/cupons/:id", async (req, res) => {
 
 // ======================= NOTIFICAÇÕES =======================
 
-// Criar notificação
+// =======================
+// CRIAR NOTIFICAÇÃO
+// =======================
 app.post("/api/notificacoes", async (req, res) => {
   try {
     const { usuarioId, mensagem } = req.body;
@@ -490,8 +493,26 @@ app.post("/api/notificacoes", async (req, res) => {
       return res.status(400).json({ error: "Dados incompletos" });
     }
 
+    // 🔥 VALIDA OBJECTID
+    if (!ObjectId.isValid(usuarioId)) {
+      return res.status(400).json({ error: "usuarioId inválido" });
+    }
+
+    // 🔥 VERIFICA SE USUÁRIO EXISTE
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: usuarioId },
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
     const novaNotificacao = await prisma.notificacao.create({
-      data: { usuarioId, mensagem, vista: false },
+      data: {
+        usuarioId,
+        mensagem,
+        vista: false,
+      },
     });
 
     res.json(novaNotificacao);
@@ -501,11 +522,19 @@ app.post("/api/notificacoes", async (req, res) => {
   }
 });
 
-// Listar notificações não vistas (ou todas se desejar)
+
+// ===============================
+// LISTAR NOTIFICAÇÕES
+// ===============================
 app.get("/api/notificacoes/:usuarioId", async (req, res) => {
   try {
     const { usuarioId } = req.params;
     const apenasNaoVistas = req.query.apenasNaoVistas === "true";
+
+    // 🔥 VALIDA OBJECTID
+    if (!ObjectId.isValid(usuarioId)) {
+      return res.status(400).json({ error: "usuarioId inválido" });
+    }
 
     const notificacoes = await prisma.notificacao.findMany({
       where: {
@@ -522,10 +551,18 @@ app.get("/api/notificacoes/:usuarioId", async (req, res) => {
   }
 });
 
-// Marcar notificação individual como vista
+
+// ===============================
+// MARCAR UMA COMO VISTA
+// ===============================
 app.put("/api/notificacoes/:id/vista", async (req, res) => {
   try {
     const { id } = req.params;
+
+    // 🔥 VALIDA OBJECTID
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID inválido" });
+    }
 
     const notif = await prisma.notificacao.update({
       where: { id },
@@ -534,19 +571,32 @@ app.put("/api/notificacoes/:id/vista", async (req, res) => {
 
     res.json(notif);
   } catch (err) {
-    console.error("❌ Erro ao marcar notificação como vista:", err);
+    console.error("❌ Erro ao marcar notificação:", err);
     res.status(500).json({ error: "Erro ao marcar notificação como vista" });
   }
 });
 
-// ✅ Marcar TODAS as notificações do usuário como vistas
+
+// ===============================
+// MARCAR TODAS COMO VISTAS
+// ===============================
 app.put("/api/notificacoes/usuario/:usuarioId/vistas", async (req, res) => {
   try {
     const { usuarioId } = req.params;
 
+    // 🔥 VALIDA OBJECTID
+    if (!ObjectId.isValid(usuarioId)) {
+      return res.status(400).json({ error: "usuarioId inválido" });
+    }
+
     const resultado = await prisma.notificacao.updateMany({
-      where: { usuarioId, vista: false },
-      data: { vista: true },
+      where: {
+        usuarioId,
+        vista: false,
+      },
+      data: {
+        vista: true,
+      },
     });
 
     res.json({
@@ -555,11 +605,10 @@ app.put("/api/notificacoes/usuario/:usuarioId/vistas", async (req, res) => {
       mensagem: "Todas as notificações foram marcadas como vistas.",
     });
   } catch (err) {
-    console.error("❌ Erro ao marcar todas as notificações como vistas:", err);
+    console.error("❌ Erro ao marcar notificações:", err);
     res.status(500).json({ error: "Erro ao marcar notificações como vistas" });
   }
 });
-
 
 /// ======================= CREDENCIAIS =======================
 
@@ -583,8 +632,9 @@ app.get("/api/credenciais/:usuarioId", async (req, res) => {
   }
 });
 
+
 // ===============================
-// CRIAR CREDENCIAL (CORRIGIDO)
+// CRIAR CREDENCIAL
 // ===============================
 app.post("/api/credenciais", async (req, res) => {
   try {
@@ -606,21 +656,21 @@ app.post("/api/credenciais", async (req, res) => {
       });
     }
 
-    const totalAntes = await prisma.credencial.count({
+    const total = await prisma.credencial.count({
       where: { usuarioId },
     });
 
-    if (totalAntes >= 3) {
+    if (total >= 3) {
       return res.status(400).json({
-        error: "Você já atingiu o limite de 3 credenciais",
+        error: "Limite de 3 credenciais atingido",
       });
     }
 
     const novaCredencial = await prisma.credencial.create({
       data: {
         usuarioId,
-        orderID,
-        user,
+        orderID: String(orderID).trim(),
+        user: String(user).trim(),
         pass,
         platform,
         ba,
@@ -630,39 +680,34 @@ app.post("/api/credenciais", async (req, res) => {
       },
     });
 
-    // 🔥 RECONTA APÓS CRIAR
-    const totalDepois = await prisma.credencial.count({
-      where: { usuarioId },
-    });
-
     const usuario = await prisma.usuario.findUnique({
       where: { id: usuarioId },
+      include: { credenciais: true },
     });
 
     const perfilCompleto =
-      Boolean(usuario.nome) &&
-      Boolean(usuario.dataNascimento) &&
-      Boolean(usuario.telefone);
+      usuario.nome && usuario.dataNascimento && usuario.telefone;
 
-    let novaEtapa = 1;
-    if (perfilCompleto) novaEtapa = 2;
-    if (totalDepois > 0) novaEtapa = 3;
+    let etapa = 1;
+    if (perfilCompleto) etapa = 2;
+    if (usuario.credenciais.length > 0) etapa = 3;
 
     const usuarioAtualizado = await prisma.usuario.update({
       where: { id: usuarioId },
-      data: { perfilEtapa: novaEtapa },
+      data: { perfilEtapa: etapa },
     });
 
     return res.json({
       success: true,
       credencial: novaCredencial,
-      usuario: usuarioAtualizado, // 🔥 USUÁRIO COMPLETO
+      usuario: usuarioAtualizado,
     });
+
   } catch (err) {
     console.error("❌ Erro ao criar credencial:", err);
     return res.status(500).json({ error: "Erro ao criar credencial" });
   }
-});
+}); 
 
 // ===============================
 // ATUALIZAR CREDENCIAL
@@ -891,12 +936,14 @@ app.post("/api/pagamento", async (req, res) => {
       console.error("❌ Plataforma inválida recebida:", plataforma);
       return res.status(400).json({ erro: "Plataforma inválida" });
     }
-    
+
+
     const mapaPlataforma = {
       play: "PS",
       xbox: "XB",
       pc: "PC",
     };
+    
     const plataformaFinal = mapaPlataforma[plataforma];
 
     // =========================
@@ -1124,7 +1171,7 @@ async function concluirCompra(compraId) {
   if (!compra) return;
 
   // 🚫 só continua se aprovado
-  if (compra.statusPagamento !== STATUS.APPROVED) return;
+  if (compra.statusPagamento !== "approved") return;
 
   // 🚫 evita duplicação
   if (compra.fifaOrderId) {
@@ -1132,7 +1179,7 @@ async function concluirCompra(compraId) {
     return;
   }
 
-  // 🔍 BUSCAR CREDENCIAL REAL DO USUÁRIO
+  // 🔍 BUSCAR CREDENCIAL
   const credencial = await prisma.credencial.findFirst({
     where: { usuarioId: compra.usuarioId },
   });
@@ -1173,15 +1220,11 @@ async function concluirCompra(compraId) {
         ba4: credencial.ba,
         ba5: credencial.ba,
 
-        // ⚠️ AJUSTE AQUI (IMPORTANTE)
-        platform:
-          credencial.platform === "PlayStation"
-            ? "PS"
-            : credencial.platform === "Xbox"
-            ? "XB"
-            : "PC",
+        // ✅ AGORA CORRETO (ENUM)
+        platform: credencial.platform,
 
-        amount: Math.floor(compra.quantia / 1000),
+        // ⚠️ IMPORTANTE: usa moeda, não quantia
+        amount: Number(compra.moeda),
 
         apiUser: process.env.FIFA_API_USER,
         apiKey: process.env.FIFA_API_KEY_MD5,
@@ -1198,20 +1241,19 @@ async function concluirCompra(compraId) {
 
     console.log("✅ Ordem criada:", data.orderID);
 
-    // 💾 SALVA RESULTADO
+    // 💾 SALVA
     await prisma.compra.update({
       where: { id: compra.id },
       data: {
         fifaOrderId: data.orderID,
         statusApiFifa: "processando",
-        concluidoEm: new Date(),
       },
     });
 
     await prisma.notificacao.create({
       data: {
         usuarioId: compra.usuarioId,
-        mensagem: "Compra aprovada! Moedas em processamento.",
+        mensagem: "🚀 Moedas em transferência...",
       },
     });
 
