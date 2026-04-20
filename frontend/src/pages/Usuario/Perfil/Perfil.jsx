@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../../../services/api"; // ✅ corrigido
+import api from "../../../services/api";
 
 import {
   Perfilsec,
@@ -20,14 +20,15 @@ import {
 import PerfilForm from "./PerfilForm";
 import HeaderPrincipal from "../../../components/Header/HeaderPrincipal";
 import Footer from "../../../components/Footer/Footer";
-import Credenciais from "./Credenciais";
+// import Credenciais from "./Credenciais"; // 🔥 desativado por segurança
 
 function Perfil({ usuario, handleLogout, handleLogin }) {
   const [editando, setEditando] = useState(false);
-  const [loading, setLoading] = useState(true); // ✅ NOVO
+  const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
 
-  // 🔒 Carregar usuário do localStorage corretamente
+  // 🔒 Carrega usuário do localStorage
   useEffect(() => {
     const usuarioSalvo = localStorage.getItem("usuario");
 
@@ -38,28 +39,39 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
     setLoading(false);
   }, []);
 
-  // 🔒 Proteção de rota segura
+  // 🔒 Proteção de rota
   useEffect(() => {
     if (!loading && !usuario) {
       navigate("/login");
     }
   }, [usuario, loading, navigate]);
 
-  if (loading || !usuario) return null;
+  // ✅ NORMALIZAÇÃO SEGURA (ANTES DO RETURN)
+  const usuarioNormalizado = usuario
+    ? {
+        id: usuario.id,
+        nome: usuario.nome || "",
+        email: usuario.email || "",
+        avatar: usuario.avatar || null,
+        dataNascimento: usuario.dataNascimento || "",
+        telefone: usuario.telefone || "",
+        tipo: usuario.tipo || "COMUM",
+        vouchers: usuario.vouchers ?? 3,
+        perfilEtapa: usuario.perfilEtapa ?? 1,
+      }
+    : null;
 
-  const usuarioNormalizado = {
-    id: usuario.id,
-    nome: usuario.nome || "",
-    email: usuario.email || "",
-    avatar: usuario.avatar || null,
-    dataNascimento: usuario.dataNascimento || "",
-    telefone: usuario.telefone || "",
-    tipo: usuario.tipo || "COMUM",
-    vouchers: usuario.vouchers ?? 3,
-    perfilEtapa: usuario.perfilEtapa ?? 1,
-  };
-
+  // ✅ HOOK SEM QUEBRAR ORDEM
   const progresso = useMemo(() => {
+    if (!usuarioNormalizado) {
+      return {
+        conta: false,
+        perfil: false,
+        credenciais: false,
+        percentual: 0,
+      };
+    }
+
     const etapa = usuarioNormalizado.perfilEtapa;
 
     return {
@@ -68,11 +80,14 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
       credenciais: etapa >= 3,
       percentual: (etapa / 3) * 100,
     };
-  }, [usuarioNormalizado.perfilEtapa]);
+  }, [usuarioNormalizado?.perfilEtapa]);
+
+  // 🔥 AGORA PODE RETORNAR
+  if (loading || !usuario) return null;
 
   const handleSave = async (dadosAtualizados) => {
     try {
-      const res = await api.put( // ✅ corrigido
+      const res = await api.put(
         `/usuarios/${usuarioNormalizado.id}`,
         dadosAtualizados
       );
@@ -160,11 +175,13 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
               )}
 
               <InfoItem>
-                <strong>Nome:</strong> {usuarioNormalizado.nome || "—"}
+                <strong>Nome:</strong>{" "}
+                {usuarioNormalizado.nome || "—"}
               </InfoItem>
 
               <InfoItem>
-                <strong>Email:</strong> {usuarioNormalizado.email}
+                <strong>Email:</strong>{" "}
+                {usuarioNormalizado.email}
               </InfoItem>
 
               <InfoItem>
@@ -175,17 +192,22 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
               <InfoItem>
                 <strong>Data de nascimento:</strong>{" "}
                 {usuarioNormalizado.dataNascimento
-                  ? new Date(usuarioNormalizado.dataNascimento).toLocaleDateString()
+                  ? new Date(
+                      usuarioNormalizado.dataNascimento
+                    ).toLocaleDateString()
                   : "Não informada"}
               </InfoItem>
             </>
           )}
         </Container>
 
+        {/* 🔥 REATIVAR DEPOIS SE QUISER */}
+        {/* 
         <Credenciais
           usuario={usuarioNormalizado}
           handleLogin={handleLogin}
         />
+        */}
       </Mainperfil>
 
       <Footer
