@@ -635,6 +635,9 @@ app.get("/api/credenciais/:usuarioId", async (req, res) => {
 // ===============================
 // CRIAR CREDENCIAL (CORRIGIDO)
 // ===============================
+// ===============================
+// CRIAR CREDENCIAL
+// ===============================
 app.post("/api/credenciais", async (req, res) => {
   try {
     const {
@@ -655,21 +658,21 @@ app.post("/api/credenciais", async (req, res) => {
       });
     }
 
-    const totalAntes = await prisma.credencial.count({
+    const total = await prisma.credencial.count({
       where: { usuarioId },
     });
 
-    if (totalAntes >= 3) {
+    if (total >= 3) {
       return res.status(400).json({
-        error: "Você já atingiu o limite de 3 credenciais",
+        error: "Limite de 3 credenciais atingido",
       });
     }
 
     const novaCredencial = await prisma.credencial.create({
       data: {
         usuarioId,
-        orderID,
-        user,
+        orderID: String(orderID).trim(),
+        user: String(user).trim(),
         pass,
         platform,
         ba,
@@ -679,39 +682,34 @@ app.post("/api/credenciais", async (req, res) => {
       },
     });
 
-    // 🔥 RECONTA APÓS CRIAR
-    const totalDepois = await prisma.credencial.count({
-      where: { usuarioId },
-    });
-
     const usuario = await prisma.usuario.findUnique({
       where: { id: usuarioId },
+      include: { credenciais: true },
     });
 
     const perfilCompleto =
-      Boolean(usuario.nome) &&
-      Boolean(usuario.dataNascimento) &&
-      Boolean(usuario.telefone);
+      usuario.nome && usuario.dataNascimento && usuario.telefone;
 
-    let novaEtapa = 1;
-    if (perfilCompleto) novaEtapa = 2;
-    if (totalDepois > 0) novaEtapa = 3;
+    let etapa = 1;
+    if (perfilCompleto) etapa = 2;
+    if (usuario.credenciais.length > 0) etapa = 3;
 
     const usuarioAtualizado = await prisma.usuario.update({
       where: { id: usuarioId },
-      data: { perfilEtapa: novaEtapa },
+      data: { perfilEtapa: etapa },
     });
 
     return res.json({
       success: true,
       credencial: novaCredencial,
-      usuario: usuarioAtualizado, // 🔥 USUÁRIO COMPLETO
+      usuario: usuarioAtualizado,
     });
+
   } catch (err) {
     console.error("❌ Erro ao criar credencial:", err);
     return res.status(500).json({ error: "Erro ao criar credencial" });
   }
-});
+}); 
 
 // ===============================
 // ATUALIZAR CREDENCIAL
@@ -912,52 +910,58 @@ const STATUS = {
 // =========================
 // CRIAR PAGAMENTO
 // =========================
+// =========================
+// CRIAR PAGAMENTO (CORRIGIDO)
+// =========================
 app.post("/api/pagamento", async (req, res) => {
   try {
-    let { usuarioId, plataforma, quantia, quantMoedas } = req.body;
-
-    console.log("📥 DADOS RECEBIDOS:");
-    console.log("usuarioId:", usuarioId);
-    console.log("plataforma:", plataforma);
-    console.log("quantia:", quantia);
-    console.log("quantMoedas:", quantMoedas);
+    let { usuarioId, plataforma, quantia, quantMoedas, credencialId } = req.body;
 
     // =========================
-    // VALIDAÇÃO BÁSICA
+    // VALIDAÇÃO
     // =========================
     if (!usuarioId || !plataforma || !quantia) {
       return res.status(400).json({ erro: "Dados inválidos" });
     }
 
-    // =========================
-    // PADRONIZAÇÃO DA PLATAFORMA
-    // =========================
-    const plataformasValidas = ["play", "xbox", "pc"];
-
-    plataforma = String(plataforma).toLowerCase().trim();
-
-    if (!plataformasValidas.includes(plataforma)) {
-      console.error("❌ Plataforma inválida recebida:", plataforma);
-      return res.status(400).json({ erro: "Plataforma inválida" });
+    if (!credencialId) {
+      return res.status(400).json({
+        erro: "Credencial não selecionada",
+      });
     }
 
+    // =========================
+    // VALIDAR CREDENCIAL
+    // =========================
+    const credencial = await prisma.credencial.findUnique({
+      where: { id: credencialId },
+    });
 
-    const mapaPlataforma = {
+    if (!credencial || credencial.usuarioId !== usuarioId) {
+      return res.status(400).json({
+        erro: "Credencial inválida",
+      });
+    }
+
+    // =========================
+    // PADRONIZAÇÃO PLATAFORMA
+    // =========================
+    const mapa = {
       play: "PS",
       xbox: "XB",
       pc: "PC",
     };
-    
-    const plataformaFinal = mapaPlataforma[plataforma];
 
-    // =========================
-    // CORREÇÃO DO VALOR (CRÍTICO)
-    // =========================
+    plataforma = String(plataforma).toLowerCase().trim();
+
+    if (!mapa[plataforma]) {
+      return res.status(400).json({ erro: "Plataforma inválida" });
+    }
+
+    const plataformaFinal = mapa[plataforma];
+
     const valorCorrigido = Number(parseFloat(quantia).toFixed(2));
 
-    // =========================
-    // BUSCAR USUÁRIO
-    // =========================
     const usuario = await prisma.usuario.findUnique({
       where: { id: usuarioId },
     });
@@ -972,7 +976,8 @@ app.post("/api/pagamento", async (req, res) => {
     const compra = await prisma.compra.create({
       data: {
         usuarioId,
-        plataforma: plataformaFinal, // 🔥 AGORA PADRONIZADO
+        credencialId, // 🔥 ESSENCIAL
+        plataforma: plataformaFinal,
         quantia: valorCorrigido,
         moeda: quantMoedas?.toString() || "FIFA",
         statusPagamento: STATUS.PENDING,
@@ -981,7 +986,7 @@ app.post("/api/pagamento", async (req, res) => {
     });
 
     // =========================
-    // CRIAR PREFERÊNCIA MP
+    // MERCADO PAGO
     // =========================
     const preference = new Preference(client);
 
@@ -991,40 +996,23 @@ app.post("/api/pagamento", async (req, res) => {
           {
             id: compra.id,
             title: `Moedas FIFA - ${plataformaFinal}`,
-            description: `Compra de ${quantMoedas} moedas FIFA`,
-            category_id: "digital_goods",
             quantity: 1,
             currency_id: "BRL",
             unit_price: valorCorrigido,
           },
         ],
-
-        payer: {
-          email: usuario.email,
-        },
-
+        payer: { email: usuario.email },
         external_reference: compra.id,
-
-        metadata: {
-          compraId: compra.id,
-          usuarioId: usuario.id,
-        },
-
         notification_url: `${process.env.HOST_URL}/api/webhook-mercadopago`,
-
-     back_urls: {
-      success: `${process.env.HOST_URL}/?status=approved`,
-      failure: `${process.env.HOST_URL}/?status=failed`,
-      pending: `${process.env.HOST_URL}/?status=pending`,
-    },
-
+        back_urls: {
+          success: `${process.env.HOST_URL}/?status=approved`,
+          failure: `${process.env.HOST_URL}/?status=failed`,
+          pending: `${process.env.HOST_URL}/?status=pending`,
+        },
         auto_return: "approved",
       },
     });
 
-    // =========================
-    // SALVAR ID DO MP
-    // =========================
     await prisma.compra.update({
       where: { id: compra.id },
       data: { mpPreferenceId: response.id },
@@ -1033,7 +1021,7 @@ app.post("/api/pagamento", async (req, res) => {
     return res.json({ init_point: response.init_point });
 
   } catch (err) {
-    console.error("❌ ERRO AO CRIAR PAGAMENTO:", err);
+    console.error("❌ ERRO PAGAMENTO:", err);
     return res.status(500).json({ erro: "Erro ao criar pagamento" });
   }
 });
@@ -1173,40 +1161,27 @@ async function concluirCompra(compraId) {
   });
 
   if (!compra) return;
-
-  // 🚫 só continua se aprovado
   if (compra.statusPagamento !== "approved") return;
+  if (compra.fifaOrderId) return;
 
-  // 🚫 evita duplicação
-  if (compra.fifaOrderId) {
-    console.log("⚠️ Já enviada pra FIFA");
-    return;
-  }
-
-  // 🔍 BUSCAR CREDENCIAL
-  const credencial = await prisma.credencial.findFirst({
-    where: { usuarioId: compra.usuarioId },
+  // 🔥 USAR CREDENCIAL CORRETA
+  const credencial = await prisma.credencial.findUnique({
+    where: { id: compra.credencialId },
   });
 
   if (!credencial) {
-    console.log("❌ Usuário sem credencial");
-
     await prisma.compra.update({
       where: { id: compra.id },
       data: { statusApiFifa: "erro" },
     });
-
     return;
   }
 
-  // 🔍 BUSCAR USUÁRIO
   const usuario = await prisma.usuario.findUnique({
     where: { id: compra.usuarioId },
   });
 
   try {
-    console.log("🚀 Enviando ordem para FIFA...");
-
     const response = await fetch("https://futtransfer.top/orderAPI", {
       method: "POST",
       headers: {
@@ -1214,38 +1189,25 @@ async function concluirCompra(compraId) {
       },
       body: JSON.stringify({
         customerName: usuario.nome,
-
         user: credencial.user,
         pass: credencial.pass,
-
         ba: credencial.ba,
         ba2: credencial.ba,
         ba3: credencial.ba,
         ba4: credencial.ba,
         ba5: credencial.ba,
-
-        // ✅ AGORA CORRETO (ENUM)
         platform: credencial.platform,
-
-        // ⚠️ IMPORTANTE: usa moeda, não quantia
         amount: Number(compra.moeda),
-
         apiUser: process.env.FIFA_API_USER,
         apiKey: process.env.FIFA_API_KEY_MD5,
-
         updateCustomer: "1",
       }),
     });
 
     const data = await response.json();
 
-    if (!data.orderID) {
-      throw new Error("Sem orderID");
-    }
+    if (!data.orderID) throw new Error("Sem orderID");
 
-    console.log("✅ Ordem criada:", data.orderID);
-
-    // 💾 SALVA
     await prisma.compra.update({
       where: { id: compra.id },
       data: {
@@ -1254,21 +1216,12 @@ async function concluirCompra(compraId) {
       },
     });
 
-    await prisma.notificacao.create({
-      data: {
-        usuarioId: compra.usuarioId,
-        mensagem: "🚀 Moedas em transferência...",
-      },
-    });
-
   } catch (err) {
-    console.error("❌ Erro ao enviar para FIFA:", err);
+    console.error("❌ FIFA ERROR:", err);
 
     await prisma.compra.update({
       where: { id: compra.id },
-      data: {
-        statusApiFifa: "erro",
-      },
+      data: { statusApiFifa: "erro" },
     });
   }
 }
