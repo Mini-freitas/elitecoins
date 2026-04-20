@@ -6,8 +6,6 @@ import { useNavigate } from "react-router-dom";
 const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [credenciais, setCredenciais] = useState([]);
-  const [credencialSelecionada, setCredencialSelecionada] = useState("");
-  const [mostrarSelect, setMostrarSelect] = useState(false);
 
   const navigate = useNavigate();
 
@@ -41,12 +39,6 @@ const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }
       return;
     }
 
-    // 🔥 MAIS DE UMA CREDENCIAL → ABRIR SELECT
-    if (credenciais.length > 1 && !credencialSelecionada) {
-      setMostrarSelect(true);
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -57,7 +49,6 @@ const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }
         plataforma: cartaSelecionada,
         quantia: valorFormatado,
         quantMoedas,
-        credencialId: credencialSelecionada || credenciais[0].id, // 🔥 CRÍTICO
       });
 
       if (res.data.init_point) {
@@ -72,31 +63,9 @@ const BtContinuaCompra = ({ usuario, valorTotal, quantMoedas, cartaSelecionada }
   };
 
   return (
-    <>
-      {mostrarSelect && (
-        <div style={{ marginBottom: 10 }}>
-          <select
-            value={credencialSelecionada}
-            onChange={(e) => setCredencialSelecionada(e.target.value)}
-          >
-            <option value="">Selecione uma conta</option>
-            {credenciais.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.platform} - {c.user}
-              </option>
-            ))}
-          </select>
-
-          <button onClick={handleClick}>
-            Confirmar conta
-          </button>
-        </div>
-      )}
-
-      <BotaoContinuar onClick={handleClick} disabled={isLoading}>
-        {isLoading ? "Processando..." : "Continuar Compra"}
-      </BotaoContinuar>
-    </>
+    <BotaoContinuar onClick={handleClick} disabled={isLoading}>
+      {isLoading ? "Processando..." : "Continuar Compra"}
+    </BotaoContinuar>
   );
 };
 
