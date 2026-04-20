@@ -7,16 +7,6 @@ import MyGlobalStyle from '../../styles/globalStyles';
 import HeaderPrincipal from '../../components/Header/HeaderPrincipal';
 
 const Compra = ({ usuario, handleLogout }) => {
-  const navigate = useNavigate();
-
-  // 🔒 proteção correta
-  useEffect(() => {
-    if (!usuario) {
-      navigate("/login");
-    }
-  }, [usuario, navigate]);
-
-  if (!usuario) return null;
 
   return (
     <>
@@ -26,6 +16,6 @@ const Compra = ({ usuario, handleLogout }) => {
       <FooterCompra usuario={usuario} handleLogout={handleLogout} />
     </>
   );
-};
+}
 
 export default Compra;
