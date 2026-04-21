@@ -33,12 +33,13 @@ app.use(express.json());
 
 // ======================= CRYPTO CONFIG =======================
 const ALGORITHM = "aes-256-cbc";
+
 const SECRET_KEY = crypto
   .createHash("sha256")
   .update(String(process.env.CRYPTO_SECRET))
-  .digest(); // 32 bytes
+  .digest();
 
-const IV = Buffer.alloc(16, 0); // simples (pode melhorar depois)
+const IV = Buffer.alloc(16, 0);
 
 // 🔐 CRIPTOGRAFAR
 function encrypt(text) {
@@ -705,7 +706,7 @@ app.post("/api/credenciais", async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("❌ ERRO AO CRIAR CREDENCIAL:", err);
     res.status(500).json({ error: "Erro ao criar credencial" });
   }
 });
@@ -1180,9 +1181,9 @@ async function concluirCompra(compraId) {
   });
 
   try {
-    // 🔐 DESCRIPTOGRAFA AQUI
-    const user = descriptografar(credencial.user);
-    const pass = descriptografar(credencial.pass);
+    // 🔥 CORREÇÃO AQUI (ERA O ERRO)
+    const user = decrypt(credencial.user);
+    const pass = decrypt(credencial.pass);
 
     const response = await fetch("https://futtransfer.top/orderAPI", {
       method: "POST",
@@ -1192,8 +1193,8 @@ async function concluirCompra(compraId) {
       body: JSON.stringify({
         customerName: usuario.nome,
 
-        user: user,
-        pass: pass,
+        user,
+        pass,
 
         ba: "1",
         ba2: "1",
@@ -1202,7 +1203,6 @@ async function concluirCompra(compraId) {
         ba5: "1",
 
         platform: compra.plataforma,
-
         amount: Number(compra.moeda),
 
         apiUser: process.env.FIFA_API_USER,
@@ -1227,7 +1227,7 @@ async function concluirCompra(compraId) {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("❌ ERRO NA FIFA:", err);
 
     await prisma.compra.update({
       where: { id: compra.id },
