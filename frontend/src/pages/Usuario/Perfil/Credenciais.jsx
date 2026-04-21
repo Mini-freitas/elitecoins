@@ -20,6 +20,11 @@ function Credenciais({ usuario, handleLogin }) {
     pass: "",
   });
 
+  const [editCredencial, setEditCredencial] = useState({
+    user: "",
+    pass: "",
+  });
+
   // ===============================
   // BUSCAR
   // ===============================
@@ -37,20 +42,23 @@ function Credenciais({ usuario, handleLogin }) {
   }, [usuario]);
 
   // ===============================
-  // INPUT
+  // INPUT NOVO
   // ===============================
-  const handleChange = (e, campo, isNova = false) => {
-    const valor = e.target.value;
+  const handleChangeNova = (e, campo) => {
+    setNovaCredencial((prev) => ({
+      ...prev,
+      [campo]: e.target.value,
+    }));
+  };
 
-    if (isNova) {
-      setNovaCredencial((prev) => ({ ...prev, [campo]: valor }));
-    } else {
-      if (editIndex === -1) return;
-
-      const updated = [...credenciais];
-      updated[editIndex][campo] = valor;
-      setCredenciais(updated);
-    }
+  // ===============================
+  // INPUT EDIT
+  // ===============================
+  const handleChangeEdit = (e, campo) => {
+    setEditCredencial((prev) => ({
+      ...prev,
+      [campo]: e.target.value,
+    }));
   };
 
   // ===============================
@@ -72,7 +80,7 @@ function Credenciais({ usuario, handleLogin }) {
       setNovaCredencial({ user: "", pass: "" });
 
       if (res.data.usuario) {
-        handleLogin(res.data.usuario); // 🔥 atualiza etapa 3
+        handleLogin(res.data.usuario);
       } else {
         buscarCredenciais();
       }
@@ -83,12 +91,36 @@ function Credenciais({ usuario, handleLogin }) {
   };
 
   // ===============================
+  // INICIAR EDIÇÃO
+  // ===============================
+  const iniciarEdicao = (index) => {
+    setEditIndex(index);
+
+    // 🔥 NÃO USA cred.user (criptografado)
+    setEditCredencial({
+      user: "",
+      pass: "",
+    });
+  };
+
+  // ===============================
   // UPDATE
   // ===============================
   const atualizar = async (id) => {
+    if (!editCredencial.user || !editCredencial.pass) {
+      alert("Preencha usuário e senha");
+      return;
+    }
+
     try {
-      await api.put(`/credenciais/${id}`, credenciais[editIndex]);
+      await api.put(`/credenciais/${id}`, {
+        user: editCredencial.user,
+        pass: editCredencial.pass,
+      });
+
       setEditIndex(-1);
+      setEditCredencial({ user: "", pass: "" });
+
       buscarCredenciais();
     } catch (err) {
       console.error(err);
@@ -122,7 +154,7 @@ function Credenciais({ usuario, handleLogin }) {
         <h3>Conta FIFA</h3>
       </Header>
 
-      {/* 🔥 AVISO IMPORTANTE */}
+      {/* AVISO */}
       <div
         style={{
           background: "#fff3cd",
@@ -132,8 +164,8 @@ function Credenciais({ usuario, handleLogin }) {
           fontSize: 14,
         }}
       >
-        ⚠️ Informe o <strong>login e senha da sua conta FIFA</strong>.  
-        Esses dados serão usados para que nosso sistema entre na sua conta e entregue as moedas automaticamente.
+        ⚠️ Informe o <strong>login e senha da sua conta FIFA</strong>.
+        Esses dados serão usados para entrega automática.
       </div>
 
       {/* FORM */}
@@ -142,14 +174,14 @@ function Credenciais({ usuario, handleLogin }) {
           <Input
             placeholder="Login da conta FIFA"
             value={novaCredencial.user}
-            onChange={(e) => handleChange(e, "user", true)}
+            onChange={(e) => handleChangeNova(e, "user")}
           />
 
           <Input
             type="password"
             placeholder="Senha da conta FIFA"
             value={novaCredencial.pass}
-            onChange={(e) => handleChange(e, "pass", true)}
+            onChange={(e) => handleChangeNova(e, "pass")}
           />
 
           <Button type="button" onClick={adicionar}>
@@ -172,14 +204,16 @@ function Credenciais({ usuario, handleLogin }) {
           {editIndex === index ? (
             <>
               <Input
-                value={cred.user}
-                onChange={(e) => handleChange(e, "user")}
+                placeholder="Novo login"
+                value={editCredencial.user}
+                onChange={(e) => handleChangeEdit(e, "user")}
               />
 
               <Input
                 type="password"
-                value={cred.pass}
-                onChange={(e) => handleChange(e, "pass")}
+                placeholder="Nova senha"
+                value={editCredencial.pass}
+                onChange={(e) => handleChangeEdit(e, "pass")}
               />
 
               <Button onClick={() => atualizar(cred.id)}>
@@ -193,10 +227,14 @@ function Credenciais({ usuario, handleLogin }) {
           ) : (
             <>
               <InfoItem>
-                <strong>Login:</strong> {cred.user}
+                <strong>Conta salva</strong>
               </InfoItem>
 
-              <EditButton onClick={() => setEditIndex(index)}>
+              <InfoItem>
+                Login: ********
+              </InfoItem>
+
+              <EditButton onClick={() => iniciarEdicao(index)}>
                 Editar
               </EditButton>
 
