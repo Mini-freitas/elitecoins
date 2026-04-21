@@ -638,45 +638,21 @@ app.get("/api/credenciais/:usuarioId", async (req, res) => {
 // ===============================
 app.post("/api/credenciais", async (req, res) => {
   try {
-    const {
-      usuarioId,
-      orderID,
-      user,
-      pass,
-      platform,
-      ba,
-      limit,
-      sortMode,
-      persona,
-    } = req.body;
+    const { usuarioId, orderID, user, pass, ba } = req.body;
 
-    if (!usuarioId || !orderID || !user || !pass || !platform || !ba) {
+    if (!usuarioId || !orderID || !user || !pass || !ba) {
       return res.status(400).json({
         error: "Preencha todos os campos obrigatórios",
-      });
-    }
-
-    const total = await prisma.credencial.count({
-      where: { usuarioId },
-    });
-
-    if (total >= 3) {
-      return res.status(400).json({
-        error: "Limite de 3 credenciais atingido",
       });
     }
 
     const novaCredencial = await prisma.credencial.create({
       data: {
         usuarioId,
-        orderID: String(orderID).trim(),
-        user: String(user).trim(),
+        orderID,
+        user,
         pass,
-        platform,
         ba,
-        limit: limit || null,
-        sortMode: sortMode || null,
-        persona: persona || null,
       },
     });
 
@@ -685,29 +661,31 @@ app.post("/api/credenciais", async (req, res) => {
       include: { credenciais: true },
     });
 
-    const perfilCompleto =
-      usuario.nome && usuario.dataNascimento && usuario.telefone;
-
     let etapa = 1;
+
+    const perfilCompleto =
+      usuario.nome &&
+      usuario.telefone &&
+      usuario.dataNascimento;
+
     if (perfilCompleto) etapa = 2;
     if (usuario.credenciais.length > 0) etapa = 3;
 
-    const usuarioAtualizado = await prisma.usuario.update({
+    const atualizado = await prisma.usuario.update({
       where: { id: usuarioId },
       data: { perfilEtapa: etapa },
     });
 
-    return res.json({
-      success: true,
+    res.json({
       credencial: novaCredencial,
-      usuario: usuarioAtualizado,
+      usuario: atualizado,
     });
 
   } catch (err) {
-    console.error("❌ Erro ao criar credencial:", err);
-    return res.status(500).json({ error: "Erro ao criar credencial" });
+    console.error(err);
+    res.status(500).json({ error: "Erro ao criar credencial" });
   }
-}); 
+});
 
 // ===============================
 // ATUALIZAR CREDENCIAL
@@ -830,9 +808,7 @@ app.put("/api/usuarios/:id", async (req, res) => {
     });
 
     if (!usuario) {
-      return res.status(404).json({
-        erro: "Usuário não encontrado",
-      });
+      return res.status(404).json({ erro: "Usuário não encontrado" });
     }
 
     const perfilCompleto =
@@ -841,6 +817,7 @@ app.put("/api/usuarios/:id", async (req, res) => {
       Boolean(telefone);
 
     let novaEtapa = 1;
+
     if (perfilCompleto) novaEtapa = 2;
     if (usuario.credenciais.length > 0) novaEtapa = 3;
 
@@ -853,19 +830,13 @@ app.put("/api/usuarios/:id", async (req, res) => {
           ? new Date(dataNascimento)
           : usuario.dataNascimento,
         perfilEtapa: novaEtapa,
-        voucherAtivo:
-          perfilCompleto && !usuario.voucherAtivo
-            ? true
-            : usuario.voucherAtivo,
       },
     });
 
     return res.json(usuarioAtualizado);
   } catch (erro) {
-    console.error("❌ Erro ao atualizar perfil:", erro);
-    return res.status(500).json({
-      erro: "Erro interno ao atualizar perfil",
-    });
+    console.error(erro);
+    return res.status(500).json({ erro: "Erro ao atualizar perfil" });
   }
 });
 

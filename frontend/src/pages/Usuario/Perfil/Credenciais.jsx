@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
+
 import {
   Container,
   Header,
@@ -8,24 +9,18 @@ import {
   FormContainer,
   Input,
   Button,
-  Select,
 } from "./styles";
 
 function Credenciais({ usuario, handleLogin }) {
   const [credenciais, setCredenciais] = useState([]);
   const [editIndex, setEditIndex] = useState(-1);
+
   const [novaCredencial, setNovaCredencial] = useState({
     orderID: "",
     user: "",
     pass: "",
-    platform: "",
     ba: "",
-    limit: "",
-    sortMode: "",
-    persona: "",
   });
-
-  const platforms = ["PC", "XBOX", "PS"];
 
   // ===============================
   // BUSCAR CREDENCIAIS
@@ -52,20 +47,29 @@ function Credenciais({ usuario, handleLogin }) {
     if (isNova) {
       setNovaCredencial((prev) => ({ ...prev, [campo]: valor }));
     } else {
-      if (editIndex === -1) return; // ✅ proteção
+      if (editIndex === -1) return;
 
       const updated = [...credenciais];
-      updated[editIndex] = { ...updated[editIndex], [campo]: valor };
+      updated[editIndex] = {
+        ...updated[editIndex],
+        [campo]: valor,
+      };
+
       setCredenciais(updated);
     }
   };
 
   // ===============================
-  // ADICIONAR CREDENCIAL
+  // ADICIONAR
   // ===============================
   const adicionarCredencial = async () => {
-    if (!novaCredencial.platform) {
-      alert("Selecione uma plataforma.");
+    if (
+      !novaCredencial.orderID ||
+      !novaCredencial.user ||
+      !novaCredencial.pass ||
+      !novaCredencial.ba
+    ) {
+      alert("Preencha todos os campos obrigatórios");
       return;
     }
 
@@ -75,19 +79,15 @@ function Credenciais({ usuario, handleLogin }) {
         usuarioId: usuario.id,
       });
 
-      // LIMPAR FORM
+      // limpar form
       setNovaCredencial({
         orderID: "",
         user: "",
         pass: "",
-        platform: "",
         ba: "",
-        limit: "",
-        sortMode: "",
-        persona: "",
       });
 
-      // 🔥 Atualização inteligente
+      // 🔥 ATUALIZA USUÁRIO (ETAPA 3)
       if (res.data.usuario) {
         handleLogin(res.data.usuario);
       } else {
@@ -100,37 +100,38 @@ function Credenciais({ usuario, handleLogin }) {
   };
 
   // ===============================
-  // ATUALIZAR CREDENCIAL
+  // ATUALIZAR
   // ===============================
   const atualizarCredencial = async (id) => {
     try {
-      const res = await api.put(`/credenciais/${id}`, credenciais[editIndex]);
+      const res = await api.put(
+        `/credenciais/${id}`,
+        credenciais[editIndex]
+      );
 
       const updated = [...credenciais];
       updated[editIndex] = res.data.credencial;
+
       setCredenciais(updated);
       setEditIndex(-1);
 
-      if (res.data.usuario) {
-        handleLogin(res.data.usuario);
-      } else {
-        await buscarCredenciais();
-      }
+      await buscarCredenciais();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.error || "Erro ao atualizar credencial");
+      alert("Erro ao atualizar credencial");
     }
   };
 
   // ===============================
-  // EXCLUIR CREDENCIAL
+  // EXCLUIR
   // ===============================
   const excluirCredencial = async (id) => {
-    if (!window.confirm("Deseja realmente excluir esta credencial?")) return;
+    if (!window.confirm("Deseja excluir?")) return;
 
     try {
       const res = await api.delete(`/credenciais/${id}`);
 
+      // 🔥 atualiza etapa automaticamente
       if (res.data.usuario) {
         handleLogin(res.data.usuario);
       } else {
@@ -138,7 +139,7 @@ function Credenciais({ usuario, handleLogin }) {
       }
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.error || "Erro ao excluir credencial");
+      alert("Erro ao excluir credencial");
     }
   };
 
@@ -148,47 +149,48 @@ function Credenciais({ usuario, handleLogin }) {
         <h3>Minhas Credenciais</h3>
       </Header>
 
-      {/* FORMULÁRIO DE NOVA CREDENCIAL */}
+      {/* FORM */}
       {credenciais.length < 3 && (
         <FormContainer onSubmit={(e) => e.preventDefault()}>
           <Input
             placeholder="Order ID"
             value={novaCredencial.orderID}
-            onChange={(e) => handleInputChange(e, "orderID", true)}
+            onChange={(e) =>
+              handleInputChange(e, "orderID", true)
+            }
           />
+
           <Input
             placeholder="User"
             value={novaCredencial.user}
-            onChange={(e) => handleInputChange(e, "user", true)}
+            onChange={(e) =>
+              handleInputChange(e, "user", true)
+            }
           />
+
           <Input
             placeholder="Pass"
             value={novaCredencial.pass}
-            onChange={(e) => handleInputChange(e, "pass", true)}
+            onChange={(e) =>
+              handleInputChange(e, "pass", true)
+            }
           />
-          <Select
-            value={novaCredencial.platform}
-            onChange={(e) => handleInputChange(e, "platform", true)}
-          >
-            <option value="">Selecione Plataforma</option>
-            {platforms.map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </Select>
+
           <Input
             placeholder="BA"
             value={novaCredencial.ba}
-            onChange={(e) => handleInputChange(e, "ba", true)}
+            onChange={(e) =>
+              handleInputChange(e, "ba", true)
+            }
           />
+
           <Button type="button" onClick={adicionarCredencial}>
             Adicionar
           </Button>
         </FormContainer>
       )}
 
-      {/* LISTAGEM */}
+      {/* LISTA */}
       {credenciais.map((cred, index) => (
         <div
           key={cred.id}
@@ -203,35 +205,42 @@ function Credenciais({ usuario, handleLogin }) {
             <>
               <Input
                 value={cred.orderID}
-                onChange={(e) => handleInputChange(e, "orderID")}
+                onChange={(e) =>
+                  handleInputChange(e, "orderID")
+                }
               />
               <Input
                 value={cred.user}
-                onChange={(e) => handleInputChange(e, "user")}
+                onChange={(e) =>
+                  handleInputChange(e, "user")
+                }
               />
               <Input
                 value={cred.pass}
-                onChange={(e) => handleInputChange(e, "pass")}
+                onChange={(e) =>
+                  handleInputChange(e, "pass")
+                }
               />
-              <Select
-                value={cred.platform}
-                onChange={(e) => handleInputChange(e, "platform")}
-              >
-                {platforms.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </Select>
               <Input
                 value={cred.ba}
-                onChange={(e) => handleInputChange(e, "ba")}
+                onChange={(e) =>
+                  handleInputChange(e, "ba")
+                }
               />
 
-              <Button type="button" onClick={() => atualizarCredencial(cred.id)}>
+              <Button
+                type="button"
+                onClick={() =>
+                  atualizarCredencial(cred.id)
+                }
+              >
                 Salvar
               </Button>
-              <Button type="button" onClick={() => setEditIndex(-1)}>
+
+              <Button
+                type="button"
+                onClick={() => setEditIndex(-1)}
+              >
                 Cancelar
               </Button>
             </>
@@ -240,19 +249,23 @@ function Credenciais({ usuario, handleLogin }) {
               <InfoItem>
                 <strong>Order ID:</strong> {cred.orderID}
               </InfoItem>
+
               <InfoItem>
                 <strong>User:</strong> {cred.user}
               </InfoItem>
-              <InfoItem>
-                <strong>Plataforma:</strong> {cred.platform}
-              </InfoItem>
 
-              <EditButton type="button" onClick={() => setEditIndex(index)}>
-                Editar
-              </EditButton>
               <EditButton
                 type="button"
-                onClick={() => excluirCredencial(cred.id)}
+                onClick={() => setEditIndex(index)}
+              >
+                Editar
+              </EditButton>
+
+              <EditButton
+                type="button"
+                onClick={() =>
+                  excluirCredencial(cred.id)
+                }
               >
                 Excluir
               </EditButton>

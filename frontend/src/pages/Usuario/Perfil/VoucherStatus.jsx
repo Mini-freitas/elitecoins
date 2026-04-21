@@ -1,7 +1,6 @@
 function VoucherStatus({ usuario }) {
-  const disponiveis = usuario.voucherAtivo
-    ? usuario.voucherMaxUsos - usuario.voucherUsos
-    : 0;
+  const disponiveis =
+    usuario.perfilEtapa - (usuario.voucherUsos || 0);
 
   return (
     <div
@@ -13,11 +12,12 @@ function VoucherStatus({ usuario }) {
         background: "#f8f9fa",
       }}
     >
-      <strong>Voucher promocional</strong>
+      <strong>Seus vouchers 🎁</strong>
+
       <p>
         {disponiveis > 0
-          ? `Você possui ${disponiveis} voucher(s) disponível(is).`
-          : "Você não possui vouchers disponíveis no momento."}
+          ? `Você tem ${disponiveis} voucher(s) disponível(is)`
+          : "Nenhum voucher disponível"}
       </p>
     </div>
   );
