@@ -31,6 +31,31 @@ app.use(
 );
 app.use(express.json());
 
+// ======================= CRYPTO CONFIG =======================
+const ALGORITHM = "aes-256-cbc";
+const SECRET_KEY = crypto
+  .createHash("sha256")
+  .update(String(process.env.CRYPTO_SECRET))
+  .digest(); // 32 bytes
+
+const IV = Buffer.alloc(16, 0); // simples (pode melhorar depois)
+
+// 🔐 CRIPTOGRAFAR
+function encrypt(text) {
+  const cipher = crypto.createCipheriv(ALGORITHM, SECRET_KEY, IV);
+  let encrypted = cipher.update(text, "utf8", "hex");
+  encrypted += cipher.final("hex");
+  return encrypted;
+}
+
+// 🔓 DESCRIPTOGRAFAR
+function decrypt(text) {
+  const decipher = crypto.createDecipheriv(ALGORITHM, SECRET_KEY, IV);
+  let decrypted = decipher.update(text, "hex", "utf8");
+  decrypted += decipher.final("utf8");
+  return decrypted;
+}
+
 // ======================= EMAIL CONFIG =======================
 async function enviarEmailConfirmacao(email, token) {
   const transporter = nodemailer.createTransport({
@@ -638,21 +663,19 @@ app.get("/api/credenciais/:usuarioId", async (req, res) => {
 // ===============================
 app.post("/api/credenciais", async (req, res) => {
   try {
-    const { usuarioId, orderID, user, pass, ba } = req.body;
+    const { usuarioId, user, pass } = req.body;
 
-    if (!usuarioId || !orderID || !user || !pass || !ba) {
+    if (!usuarioId || !user || !pass) {
       return res.status(400).json({
-        error: "Preencha todos os campos obrigatórios",
+        error: "Informe user e pass",
       });
     }
 
     const novaCredencial = await prisma.credencial.create({
       data: {
         usuarioId,
-        orderID,
-        user,
-        pass,
-        ba,
+        user: encrypt(user),
+        pass: encrypt(pass),
       },
     });
 
@@ -687,14 +710,14 @@ app.post("/api/credenciais", async (req, res) => {
   }
 });
 
+
 // ===============================
 // ATUALIZAR CREDENCIAL
 // ===============================
 app.put("/api/credenciais/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { orderID, user, pass, platform, ba, limit, sortMode, persona } =
-      req.body;
+    const { user, pass } = req.body;
 
     const credencialExistente = await prisma.credencial.findUnique({
       where: { id },
@@ -709,14 +732,8 @@ app.put("/api/credenciais/:id", async (req, res) => {
     const credencialAtualizada = await prisma.credencial.update({
       where: { id },
       data: {
-        orderID: orderID || credencialExistente.orderID,
-        user: user || credencialExistente.user,
-        pass: pass || credencialExistente.pass,
-        platform: platform || credencialExistente.platform,
-        ba: ba || credencialExistente.ba,
-        limit: limit ?? credencialExistente.limit,
-        sortMode: sortMode ?? credencialExistente.sortMode,
-        persona: persona ?? credencialExistente.persona,
+        user: user ? encrypt(user) : credencialExistente.user,
+        pass: pass ? encrypt(pass) : credencialExistente.pass,
       },
     });
 
@@ -724,6 +741,7 @@ app.put("/api/credenciais/:id", async (req, res) => {
       success: true,
       credencial: credencialAtualizada,
     });
+
   } catch (err) {
     console.error("❌ Erro ao atualizar credencial:", err);
     return res.status(500).json({ error: "Erro ao atualizar credencial" });
@@ -1141,38 +1159,30 @@ async function concluirCompra(compraId) {
 
   if (!compra) return;
 
-  // 🚫 só continua se aprovado
   if (compra.statusPagamento !== "approved") return;
 
-  // 🚫 evita duplicação
-  if (compra.fifaOrderId) {
-    console.log("⚠️ Já enviada pra FIFA");
-    return;
-  }
+  if (compra.fifaOrderId) return;
 
-  // 🔍 BUSCAR CREDENCIAL
   const credencial = await prisma.credencial.findFirst({
     where: { usuarioId: compra.usuarioId },
   });
 
   if (!credencial) {
-    console.log("❌ Usuário sem credencial");
-
     await prisma.compra.update({
       where: { id: compra.id },
       data: { statusApiFifa: "erro" },
     });
-
     return;
   }
 
-  // 🔍 BUSCAR USUÁRIO
   const usuario = await prisma.usuario.findUnique({
     where: { id: compra.usuarioId },
   });
 
   try {
-    console.log("🚀 Enviando ordem para FIFA...");
+    // 🔐 DESCRIPTOGRAFA AQUI
+    const user = descriptografar(credencial.user);
+    const pass = descriptografar(credencial.pass);
 
     const response = await fetch("https://futtransfer.top/orderAPI", {
       method: "POST",
@@ -1182,19 +1192,17 @@ async function concluirCompra(compraId) {
       body: JSON.stringify({
         customerName: usuario.nome,
 
-        user: credencial.user,
-        pass: credencial.pass,
+        user: user,
+        pass: pass,
 
-        ba: credencial.ba,
-        ba2: credencial.ba,
-        ba3: credencial.ba,
-        ba4: credencial.ba,
-        ba5: credencial.ba,
+        ba: "1",
+        ba2: "1",
+        ba3: "1",
+        ba4: "1",
+        ba5: "1",
 
-        // ✅ AGORA CORRETO (ENUM)
-        platform: credencial.platform,
+        platform: compra.plataforma,
 
-        // ⚠️ IMPORTANTE: usa moeda, não quantia
         amount: Number(compra.moeda),
 
         apiUser: process.env.FIFA_API_USER,
@@ -1210,9 +1218,6 @@ async function concluirCompra(compraId) {
       throw new Error("Sem orderID");
     }
 
-    console.log("✅ Ordem criada:", data.orderID);
-
-    // 💾 SALVA
     await prisma.compra.update({
       where: { id: compra.id },
       data: {
@@ -1221,21 +1226,12 @@ async function concluirCompra(compraId) {
       },
     });
 
-    await prisma.notificacao.create({
-      data: {
-        usuarioId: compra.usuarioId,
-        mensagem: "🚀 Moedas em transferência...",
-      },
-    });
-
   } catch (err) {
-    console.error("❌ Erro ao enviar para FIFA:", err);
+    console.error(err);
 
     await prisma.compra.update({
       where: { id: compra.id },
-      data: {
-        statusApiFifa: "erro",
-      },
+      data: { statusApiFifa: "erro" },
     });
   }
 }

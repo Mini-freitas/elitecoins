@@ -16,21 +16,19 @@ function Credenciais({ usuario, handleLogin }) {
   const [editIndex, setEditIndex] = useState(-1);
 
   const [novaCredencial, setNovaCredencial] = useState({
-    orderID: "",
     user: "",
     pass: "",
-    ba: "",
   });
 
   // ===============================
-  // BUSCAR CREDENCIAIS
+  // BUSCAR
   // ===============================
   const buscarCredenciais = async () => {
     try {
       const res = await api.get(`/credenciais/${usuario.id}`);
       setCredenciais(res.data);
     } catch (err) {
-      console.error("Erro ao buscar credenciais:", err);
+      console.error(err);
     }
   };
 
@@ -39,9 +37,9 @@ function Credenciais({ usuario, handleLogin }) {
   }, [usuario]);
 
   // ===============================
-  // INPUT CHANGE
+  // INPUT
   // ===============================
-  const handleInputChange = (e, campo, isNova = false) => {
+  const handleChange = (e, campo, isNova = false) => {
     const valor = e.target.value;
 
     if (isNova) {
@@ -50,142 +48,112 @@ function Credenciais({ usuario, handleLogin }) {
       if (editIndex === -1) return;
 
       const updated = [...credenciais];
-      updated[editIndex] = {
-        ...updated[editIndex],
-        [campo]: valor,
-      };
-
+      updated[editIndex][campo] = valor;
       setCredenciais(updated);
     }
   };
 
   // ===============================
-  // ADICIONAR
+  // ADD
   // ===============================
-  const adicionarCredencial = async () => {
-    if (
-      !novaCredencial.orderID ||
-      !novaCredencial.user ||
-      !novaCredencial.pass ||
-      !novaCredencial.ba
-    ) {
-      alert("Preencha todos os campos obrigatórios");
+  const adicionar = async () => {
+    if (!novaCredencial.user || !novaCredencial.pass) {
+      alert("Preencha usuário e senha");
       return;
     }
 
     try {
       const res = await api.post("/credenciais", {
-        ...novaCredencial,
         usuarioId: usuario.id,
+        user: novaCredencial.user,
+        pass: novaCredencial.pass,
       });
 
-      // limpar form
-      setNovaCredencial({
-        orderID: "",
-        user: "",
-        pass: "",
-        ba: "",
-      });
+      setNovaCredencial({ user: "", pass: "" });
 
-      // 🔥 ATUALIZA USUÁRIO (ETAPA 3)
       if (res.data.usuario) {
-        handleLogin(res.data.usuario);
+        handleLogin(res.data.usuario); // 🔥 atualiza etapa 3
       } else {
-        await buscarCredenciais();
+        buscarCredenciais();
       }
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.error || "Erro ao adicionar credencial");
+      alert("Erro ao salvar credencial");
     }
   };
 
   // ===============================
-  // ATUALIZAR
+  // UPDATE
   // ===============================
-  const atualizarCredencial = async (id) => {
+  const atualizar = async (id) => {
     try {
-      const res = await api.put(
-        `/credenciais/${id}`,
-        credenciais[editIndex]
-      );
-
-      const updated = [...credenciais];
-      updated[editIndex] = res.data.credencial;
-
-      setCredenciais(updated);
+      await api.put(`/credenciais/${id}`, credenciais[editIndex]);
       setEditIndex(-1);
-
-      await buscarCredenciais();
+      buscarCredenciais();
     } catch (err) {
       console.error(err);
-      alert("Erro ao atualizar credencial");
+      alert("Erro ao atualizar");
     }
   };
 
   // ===============================
-  // EXCLUIR
+  // DELETE
   // ===============================
-  const excluirCredencial = async (id) => {
-    if (!window.confirm("Deseja excluir?")) return;
+  const excluir = async (id) => {
+    if (!window.confirm("Excluir credencial?")) return;
 
     try {
       const res = await api.delete(`/credenciais/${id}`);
 
-      // 🔥 atualiza etapa automaticamente
       if (res.data.usuario) {
         handleLogin(res.data.usuario);
       } else {
-        await buscarCredenciais();
+        buscarCredenciais();
       }
     } catch (err) {
       console.error(err);
-      alert("Erro ao excluir credencial");
+      alert("Erro ao excluir");
     }
   };
 
   return (
     <Container>
       <Header>
-        <h3>Minhas Credenciais</h3>
+        <h3>Conta FIFA</h3>
       </Header>
 
+      {/* 🔥 AVISO IMPORTANTE */}
+      <div
+        style={{
+          background: "#fff3cd",
+          padding: 12,
+          borderRadius: 8,
+          marginBottom: 16,
+          fontSize: 14,
+        }}
+      >
+        ⚠️ Informe o <strong>login e senha da sua conta FIFA</strong>.  
+        Esses dados serão usados para que nosso sistema entre na sua conta e entregue as moedas automaticamente.
+      </div>
+
       {/* FORM */}
-      {credenciais.length < 3 && (
+      {credenciais.length < 1 && (
         <FormContainer onSubmit={(e) => e.preventDefault()}>
           <Input
-            placeholder="Order ID"
-            value={novaCredencial.orderID}
-            onChange={(e) =>
-              handleInputChange(e, "orderID", true)
-            }
-          />
-
-          <Input
-            placeholder="User"
+            placeholder="Login da conta FIFA"
             value={novaCredencial.user}
-            onChange={(e) =>
-              handleInputChange(e, "user", true)
-            }
+            onChange={(e) => handleChange(e, "user", true)}
           />
 
           <Input
-            placeholder="Pass"
+            type="password"
+            placeholder="Senha da conta FIFA"
             value={novaCredencial.pass}
-            onChange={(e) =>
-              handleInputChange(e, "pass", true)
-            }
+            onChange={(e) => handleChange(e, "pass", true)}
           />
 
-          <Input
-            placeholder="BA"
-            value={novaCredencial.ba}
-            onChange={(e) =>
-              handleInputChange(e, "ba", true)
-            }
-          />
-
-          <Button type="button" onClick={adicionarCredencial}>
-            Adicionar
+          <Button type="button" onClick={adicionar}>
+            Salvar conta
           </Button>
         </FormContainer>
       )}
@@ -195,79 +163,45 @@ function Credenciais({ usuario, handleLogin }) {
         <div
           key={cred.id}
           style={{
-            marginBottom: "1rem",
-            padding: "1rem",
+            padding: 12,
             background: "#f0f0f0",
             borderRadius: 8,
+            marginBottom: 10,
           }}
         >
           {editIndex === index ? (
             <>
               <Input
-                value={cred.orderID}
-                onChange={(e) =>
-                  handleInputChange(e, "orderID")
-                }
-              />
-              <Input
                 value={cred.user}
-                onChange={(e) =>
-                  handleInputChange(e, "user")
-                }
-              />
-              <Input
-                value={cred.pass}
-                onChange={(e) =>
-                  handleInputChange(e, "pass")
-                }
-              />
-              <Input
-                value={cred.ba}
-                onChange={(e) =>
-                  handleInputChange(e, "ba")
-                }
+                onChange={(e) => handleChange(e, "user")}
               />
 
-              <Button
-                type="button"
-                onClick={() =>
-                  atualizarCredencial(cred.id)
-                }
-              >
+              <Input
+                type="password"
+                value={cred.pass}
+                onChange={(e) => handleChange(e, "pass")}
+              />
+
+              <Button onClick={() => atualizar(cred.id)}>
                 Salvar
               </Button>
 
-              <Button
-                type="button"
-                onClick={() => setEditIndex(-1)}
-              >
+              <Button onClick={() => setEditIndex(-1)}>
                 Cancelar
               </Button>
             </>
           ) : (
             <>
               <InfoItem>
-                <strong>Order ID:</strong> {cred.orderID}
+                <strong>Login:</strong> {cred.user}
               </InfoItem>
 
-              <InfoItem>
-                <strong>User:</strong> {cred.user}
-              </InfoItem>
-
-              <EditButton
-                type="button"
-                onClick={() => setEditIndex(index)}
-              >
+              <EditButton onClick={() => setEditIndex(index)}>
                 Editar
               </EditButton>
 
-              <EditButton
-                type="button"
-                onClick={() =>
-                  excluirCredencial(cred.id)
-                }
-              >
-                Excluir
+              <EditButton onClick={() => excluir(cred.id)}>
+                Remover
               </EditButton>
             </>
           )}

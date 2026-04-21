@@ -83,15 +83,8 @@ model Usuario {
 model Credencial {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
 
-  orderID   String   @unique
-  user      String
-  pass      String
-  platform  Plataforma
-  ba        String
-
-  limit     Int?
-  sortMode  String?
-  persona   String?
+  user      String   // 🔐 criptografado
+  pass      String   // 🔐 criptografado
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -99,7 +92,7 @@ model Credencial {
   usuarioId String   @db.ObjectId
   usuario   Usuario  @relation(fields: [usuarioId], references: [id])
 
-  compras Compra[]
+  compras   Compra[]
 }
 
 model Banner {
@@ -141,10 +134,6 @@ model Compra {
   usuarioId   String   @db.ObjectId
   usuario     Usuario  @relation(fields: [usuarioId], references: [id])
 
-  // 🔥 RELAÇÃO COM A CONTA FIFA CERTA
-  credencialId String?  @db.ObjectId
-  credencial   Credencial? @relation(fields: [credencialId], references: [id])
-
   plataforma  Plataforma
   quantia     Float
   moeda       String
@@ -152,13 +141,9 @@ model Compra {
   statusPagamento StatusPagamento @default(pending)
   statusApiFifa   StatusApiFifa   @default(aguardando)
 
-  // 🔥 CONTROLE DA API FIFA
   fifaOrderId String?
-
-  // 🔥 DEBUG / AUDITORIA (OPCIONAL MAS ÚTIL)
   fifaResponse String?
 
-  // MERCADO PAGO
   mpPreferenceId String?
   mpPaymentId    String?
   mpStatus       String?
