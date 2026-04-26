@@ -5,17 +5,22 @@ import {
   Container,
   Header,
   InfoItem,
+  EditButton,
   FormContainer,
   Input,
   Button,
-  EditButton,
 } from "./styles";
 
 function Credenciais({ usuario, handleLogin }) {
   const [credenciais, setCredenciais] = useState([]);
   const [editIndex, setEditIndex] = useState(-1);
 
-  const [form, setForm] = useState({
+  const [novaCredencial, setNovaCredencial] = useState({
+    user: "",
+    pass: "",
+  });
+
+  const [editCredencial, setEditCredencial] = useState({
     user: "",
     pass: "",
   });
@@ -28,7 +33,7 @@ function Credenciais({ usuario, handleLogin }) {
       const res = await api.get(`/credenciais/${usuario.id}`);
       setCredenciais(res.data);
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao buscar credenciais:", err);
     }
   };
 
@@ -37,28 +42,30 @@ function Credenciais({ usuario, handleLogin }) {
   }, [usuario]);
 
   // ===============================
-  // INPUT
+  // INPUT NOVO
   // ===============================
-  const handleChange = (e, campo) => {
-    setForm((prev) => ({
+  const handleChangeNova = (e, campo) => {
+    setNovaCredencial((prev) => ({
       ...prev,
       [campo]: e.target.value,
     }));
   };
 
   // ===============================
-  // RESET FORM
+  // INPUT EDIT
   // ===============================
-  const resetForm = () => {
-    setForm({ user: "", pass: "" });
-    setEditIndex(-1);
+  const handleChangeEdit = (e, campo) => {
+    setEditCredencial((prev) => ({
+      ...prev,
+      [campo]: e.target.value,
+    }));
   };
 
   // ===============================
   // ADD
   // ===============================
   const adicionar = async () => {
-    if (!form.user || !form.pass) {
+    if (!novaCredencial.user || !novaCredencial.pass) {
       alert("Preencha usuário e senha");
       return;
     }
@@ -66,42 +73,60 @@ function Credenciais({ usuario, handleLogin }) {
     try {
       const res = await api.post("/credenciais", {
         usuarioId: usuario.id,
-        user: form.user,
-        pass: form.pass,
+        user: novaCredencial.user,
+        pass: novaCredencial.pass,
       });
 
-      resetForm();
+      setNovaCredencial({ user: "", pass: "" });
 
-      if (res.data.usuario) {
+      // 🔥 evita erro se handleLogin não existir
+      if (handleLogin && res.data.usuario) {
         handleLogin(res.data.usuario);
       } else {
         buscarCredenciais();
       }
+
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao salvar credencial:", err);
       alert("Erro ao salvar credencial");
     }
+  };
+
+  // ===============================
+  // INICIAR EDIÇÃO
+  // ===============================
+  const iniciarEdicao = (index) => {
+    setEditIndex(index);
+
+    // 🔥 nunca usar valor criptografado
+    setEditCredencial({
+      user: "",
+      pass: "",
+    });
   };
 
   // ===============================
   // UPDATE
   // ===============================
   const atualizar = async (id) => {
-    if (!form.user || !form.pass) {
+    if (!editCredencial.user || !editCredencial.pass) {
       alert("Preencha usuário e senha");
       return;
     }
 
     try {
       await api.put(`/credenciais/${id}`, {
-        user: form.user,
-        pass: form.pass,
+        user: editCredencial.user,
+        pass: editCredencial.pass,
       });
 
-      resetForm();
+      setEditIndex(-1);
+      setEditCredencial({ user: "", pass: "" });
+
       buscarCredenciais();
+
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao atualizar:", err);
       alert("Erro ao atualizar");
     }
   };
@@ -115,33 +140,18 @@ function Credenciais({ usuario, handleLogin }) {
     try {
       const res = await api.delete(`/credenciais/${id}`);
 
-      if (res.data.usuario) {
+      if (handleLogin && res.data.usuario) {
         handleLogin(res.data.usuario);
       } else {
         buscarCredenciais();
       }
+
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao excluir:", err);
       alert("Erro ao excluir");
     }
   };
 
-  // ===============================
-  // EDIT MODE
-  // ===============================
-  const iniciarEdicao = (index) => {
-    setEditIndex(index);
-
-    // 🔐 nunca preencher (segurança)
-    setForm({
-      user: "",
-      pass: "",
-    });
-  };
-
-  // ===============================
-  // RENDER
-  // ===============================
   return (
     <Container>
       <Header>
@@ -159,43 +169,28 @@ function Credenciais({ usuario, handleLogin }) {
         }}
       >
         ⚠️ Informe o <strong>login e senha da sua conta FIFA</strong>.
-        Esses dados são criptografados e usados para entrega automática.
+        Esses dados serão usados para entrega automática.
       </div>
 
-      {/* FORM (SERVE PRA CRIAR E EDITAR) */}
-      {(credenciais.length === 0 || editIndex !== -1) && (
+      {/* FORM */}
+      {credenciais.length < 1 && (
         <FormContainer onSubmit={(e) => e.preventDefault()}>
           <Input
             placeholder="Login da conta FIFA"
-            value={form.user}
-            onChange={(e) => handleChange(e, "user")}
+            value={novaCredencial.user}
+            onChange={(e) => handleChangeNova(e, "user")}
           />
 
           <Input
             type="password"
             placeholder="Senha da conta FIFA"
-            value={form.pass}
-            onChange={(e) => handleChange(e, "pass")}
+            value={novaCredencial.pass}
+            onChange={(e) => handleChangeNova(e, "pass")}
           />
 
-          {editIndex !== -1 ? (
-            <>
-              <Button
-                type="button"
-                onClick={() => atualizar(credenciais[editIndex].id)}
-              >
-                Atualizar conta
-              </Button>
-
-              <Button type="button" onClick={resetForm}>
-                Cancelar
-              </Button>
-            </>
-          ) : (
-            <Button type="button" onClick={adicionar}>
-              Salvar conta
-            </Button>
-          )}
+          <Button type="button" onClick={adicionar}>
+            Salvar conta
+          </Button>
         </FormContainer>
       )}
 
@@ -210,19 +205,50 @@ function Credenciais({ usuario, handleLogin }) {
             marginBottom: 10,
           }}
         >
-          <InfoItem>
-            <strong>Conta cadastrada</strong>
-          </InfoItem>
+          {editIndex === index ? (
+            <>
+              <FormContainer>
+                <Input
+                  placeholder="Login da conta FIFA"
+                  value={editCredencial.user}
+                  onChange={(e) => handleChangeEdit(e, "user")}
+                />
 
-          <InfoItem>Login: ********</InfoItem>
+                <Input
+                  type="password"
+                  placeholder="Senha da conta FIFA"
+                  value={editCredencial.pass}
+                  onChange={(e) => handleChangeEdit(e, "pass")}
+                />
 
-          <EditButton onClick={() => iniciarEdicao(index)}>
-            Editar
-          </EditButton>
+                <Button onClick={() => atualizar(cred.id)}>
+                  Salvar
+                </Button>
 
-          <EditButton onClick={() => excluir(cred.id)}>
-            Remover
-          </EditButton>
+                <Button onClick={() => setEditIndex(-1)}>
+                  Cancelar
+                </Button>
+              </FormContainer>
+            </>
+          ) : (
+            <>
+              <InfoItem>
+                <strong>Conta salva</strong>
+              </InfoItem>
+
+              <InfoItem>
+                Login: ********
+              </InfoItem>
+
+              <EditButton onClick={() => iniciarEdicao(index)}>
+                Editar
+              </EditButton>
+
+              <EditButton onClick={() => excluir(cred.id)}>
+                Remover
+              </EditButton>
+            </>
+          )}
         </div>
       ))}
     </Container>
