@@ -1,186 +1,269 @@
-// src/pages/Usuario/Perfil/styles.js
-import styled from "styled-components";
+import React, { useEffect, useState } from "react";
+import api from "../../../services/api";
 
-export const Perfilsec = styled.div`
-  height: 100vh;
-  width: 100vw;
-  background-color: var(--cor-preto);
-  display: grid;
-  grid-template-areas: 
-    "h" 
-    "p"
-    "f";
-  grid-template-columns: 1fr;
-  grid-template-rows: 5rem 1fr 15rem; /* header 5rem, footer 15rem, resto pro main */
-  font-family: var(--fonte-principal);
-  overflow-x: hidden;
-  overflow-y: auto;
-`;
+function Credenciais({ usuario, handleLogin }) {
+  const [credenciais, setCredenciais] = useState([]);
+  const [editIndex, setEditIndex] = useState(-1);
 
-export const Mainperfil = styled.div`
-  grid-area: p;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* centraliza horizontalmente os containers */
-  justify-content: flex-start; /* começa do topo */
-  padding: 2rem 1rem;
-  gap: 2rem; /* espaço entre os containers */
-  width: 100%;
-`;
+  const [novaCredencial, setNovaCredencial] = useState({
+    user: "",
+    pass: "",
+  });
 
-export const Container = styled.div`
-  width: 60%; /* largura fixa para desktop */
-  max-width: 90%; /* responsivo para mobile */
-  padding: 20px;
-  background: #f9f9f9;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 12px; /* espaçamento entre itens dentro do container */
-`;
+  const [editCredencial, setEditCredencial] = useState({
+    user: "",
+    pass: "",
+  });
 
+  // ===============================
+  // BUSCAR
+  // ===============================
+  const buscarCredenciais = async () => {
+    try {
+      const res = await api.get(`/credenciais/${usuario.id}`);
+      setCredenciais(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-export const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-`;
+  useEffect(() => {
+    if (usuario?.id) buscarCredenciais();
+  }, [usuario]);
 
-export const InfoItem = styled.p`
-  font-size: 16px;
-  margin-bottom: 12px;
-`;
+  // ===============================
+  // INPUTS
+  // ===============================
+  const handleChangeNova = (e, campo) => {
+    setNovaCredencial((prev) => ({
+      ...prev,
+      [campo]: e.target.value,
+    }));
+  };
 
-export const FormContainer = styled.form`
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-`;
+  const handleChangeEdit = (e, campo) => {
+    setEditCredencial((prev) => ({
+      ...prev,
+      [campo]: e.target.value,
+    }));
+  };
 
-export const Input = styled.input`
-  padding:5px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-`;
+  // ===============================
+  // ADD
+  // ===============================
+  const adicionar = async () => {
+    if (!novaCredencial.user || !novaCredencial.pass) {
+      alert("Preencha usuário e senha");
+      return;
+    }
 
-export const Button = styled.button`
-  background-color: #00b050;
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
+    try {
+      const res = await api.post("/credenciais", {
+        usuarioId: usuario.id,
+        user: novaCredencial.user,
+        pass: novaCredencial.pass,
+      });
 
-  &:hover {
-    background-color: #009e48;
-  }
+      setNovaCredencial({ user: "", pass: "" });
 
-  &:disabled {
-    background-color: #7fc77f;
-    cursor: not-allowed;
-  }
-`;
+      if (res.data.usuario) {
+        handleLogin(res.data.usuario);
+      } else {
+        buscarCredenciais();
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao salvar credencial");
+    }
+  };
 
-export const Select = styled.select`
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background-color: white;
-  cursor: pointer;
-`;
+  // ===============================
+  // EDIT
+  // ===============================
+  const iniciarEdicao = (index) => {
+    setEditIndex(index);
+    setEditCredencial({ user: "", pass: "" });
+  };
 
+  const atualizar = async (id) => {
+    if (!editCredencial.user || !editCredencial.pass) {
+      alert("Preencha usuário e senha");
+      return;
+    }
 
-/* ===============================
-   BOTÕES
-=============================== */
+    try {
+      await api.put(`/credenciais/${id}`, {
+        user: editCredencial.user,
+        pass: editCredencial.pass,
+      });
 
-export const EditButton = styled.button`
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 500;
+      setEditIndex(-1);
+      setEditCredencial({ user: "", pass: "" });
 
-  background: ${({ $incomplete }) =>
-  $incomplete ? "#1a73e8" : "#e0e0e0"};
+      buscarCredenciais();
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao atualizar");
+    }
+  };
 
-  color: ${({ incomplete }) => (incomplete ? "#fff" : "#000")};
+  // ===============================
+  // DELETE
+  // ===============================
+  const excluir = async (id) => {
+    if (!window.confirm("Excluir credencial?")) return;
 
-  &:hover {
-    opacity: 0.9;
-  }
-`;
+    try {
+      const res = await api.delete(`/credenciais/${id}`);
 
-export const CompleteProfileButton = styled.button`
-  margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 24px;
-  border: none;
-  background: #1a73e8;
-  color: #fff;
-  font-weight: 500;
-  cursor: pointer;
+      if (res.data.usuario) {
+        handleLogin(res.data.usuario);
+      } else {
+        buscarCredenciais();
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao excluir");
+    }
+  };
 
-  &:hover {
-    background: #1558b0;
-  }
-`;
+  // ===============================
+  // STYLES INLINE
+  // ===============================
+  const container = {
+    width: "60%",
+    maxWidth: "90%",
+    padding: 20,
+    background: "#f9f9f9",
+    borderRadius: 12,
+    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+  };
 
-/* ===============================
-   PROGRESSO
-=============================== */
+  const input = {
+    padding: 8,
+    borderRadius: 8,
+    border: "1px solid #ccc",
+    fontSize: 14,
+  };
 
-export const ProgressWrapper = styled.div`
-  margin: 1.5rem 0;
-`;
+  const button = {
+    backgroundColor: "#00b050",
+    color: "#fff",
+    border: "none",
+    padding: 12,
+    borderRadius: 8,
+    cursor: "pointer",
+    fontWeight: "bold",
+  };
 
-export const ProgressBar = styled.div`
-  height: 8px;
-  background: #e0e0e0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 0.75rem;
+  const editButton = {
+    padding: "6px 12px",
+    borderRadius: 8,
+    border: "none",
+    cursor: "pointer",
+    background: "#e0e0e0",
+    marginRight: 8,
+  };
 
-  span {
-    display: block;
-    height: 100%;
-    background: #1a73e8;
-    transition: width 0.3s ease;
-  }
-`;
+  // ===============================
+  // RENDER
+  // ===============================
+  return (
+    <div style={container}>
+      <h3>Conta FIFA</h3>
 
-export const ProgressStep = styled.span`
-  font-size: 0.8rem;
-  margin-right: 1rem;
-  color: ${({ $active }) => ($active ? "#1a73e8" : "#9e9e9e")};
+      <div
+        style={{
+          background: "#fff3cd",
+          padding: 12,
+          borderRadius: 8,
+          marginBottom: 16,
+          fontSize: 14,
+        }}
+      >
+        ⚠️ Informe o <strong>login e senha da sua conta FIFA</strong>.
+      </div>
 
-  font-weight: ${({ active }) => (active ? "600" : "400")};
-`;
+      {/* FORM */}
+      {credenciais.length < 1 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <input
+            style={input}
+            placeholder="Login da conta FIFA"
+            value={novaCredencial.user}
+            onChange={(e) => handleChangeNova(e, "user")}
+          />
 
-/* ===============================
-   CTA / VOUCHER
-=============================== */
+          <input
+            style={input}
+            type="password"
+            placeholder="Senha da conta FIFA"
+            value={novaCredencial.pass}
+            onChange={(e) => handleChangeNova(e, "pass")}
+          />
 
-export const VoucherBox = styled.div`
-  margin: 1rem 0;
-  padding: 0.75rem 1rem;
-  background: #f1f3f4;
-  border-radius: 8px;
-  font-size: 0.9rem;
-`;
+          <button style={button} onClick={adicionar}>
+            Salvar conta
+          </button>
+        </div>
+      )}
 
-export const CtaBox = styled.div`
-  margin: 1.5rem 0;
-  padding: 1.25rem;
-  background: #e8f0fe;
-  border-radius: 12px;
+      {/* LISTA */}
+      {credenciais.map((cred, index) => (
+        <div
+          key={cred.id}
+          style={{
+            padding: 12,
+            background: "#f0f0f0",
+            borderRadius: 8,
+          }}
+        >
+          {editIndex === index ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <input
+                style={input}
+                placeholder="Novo login"
+                value={editCredencial.user}
+                onChange={(e) => handleChangeEdit(e, "user")}
+              />
 
-  p {
-    margin: 0;
-    font-size: 0.9rem;
-  }
-`;
+              <input
+                style={input}
+                type="password"
+                placeholder="Nova senha"
+                value={editCredencial.pass}
+                onChange={(e) => handleChangeEdit(e, "pass")}
+              />
+
+              <button style={button} onClick={() => atualizar(cred.id)}>
+                Salvar
+              </button>
+
+              <button style={button} onClick={() => setEditIndex(-1)}>
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <>
+              <p><strong>Conta salva</strong></p>
+              <p>Login: ********</p>
+
+              <button style={editButton} onClick={() => iniciarEdicao(index)}>
+                Editar
+              </button>
+
+              <button style={editButton} onClick={() => excluir(cred.id)}>
+                Remover
+              </button>
+            </>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default Credenciais;

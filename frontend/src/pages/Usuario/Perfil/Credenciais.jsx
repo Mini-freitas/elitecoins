@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
 
+import {
+  Container,
+  Header,
+  InfoItem,
+  EditButton,
+  FormContainer,
+  Input,
+  Button,
+} from "./styles";
+
 function Credenciais({ usuario, handleLogin }) {
   const [credenciais, setCredenciais] = useState([]);
   const [editIndex, setEditIndex] = useState(-1);
@@ -15,9 +25,6 @@ function Credenciais({ usuario, handleLogin }) {
     pass: "",
   });
 
-  // ===============================
-  // BUSCAR
-  // ===============================
   const buscarCredenciais = async () => {
     try {
       const res = await api.get(`/credenciais/${usuario.id}`);
@@ -31,9 +38,6 @@ function Credenciais({ usuario, handleLogin }) {
     if (usuario?.id) buscarCredenciais();
   }, [usuario]);
 
-  // ===============================
-  // INPUTS
-  // ===============================
   const handleChangeNova = (e, campo) => {
     setNovaCredencial((prev) => ({
       ...prev,
@@ -48,9 +52,6 @@ function Credenciais({ usuario, handleLogin }) {
     }));
   };
 
-  // ===============================
-  // ADD
-  // ===============================
   const adicionar = async () => {
     if (!novaCredencial.user || !novaCredencial.pass) {
       alert("Preencha usuário e senha");
@@ -77,9 +78,6 @@ function Credenciais({ usuario, handleLogin }) {
     }
   };
 
-  // ===============================
-  // EDIT
-  // ===============================
   const iniciarEdicao = (index) => {
     setEditIndex(index);
     setEditCredencial({ user: "", pass: "" });
@@ -107,9 +105,6 @@ function Credenciais({ usuario, handleLogin }) {
     }
   };
 
-  // ===============================
-  // DELETE
-  // ===============================
   const excluir = async (id) => {
     if (!window.confirm("Excluir credencial?")) return;
 
@@ -127,53 +122,11 @@ function Credenciais({ usuario, handleLogin }) {
     }
   };
 
-  // ===============================
-  // STYLES INLINE
-  // ===============================
-  const container = {
-    width: "60%",
-    maxWidth: "90%",
-    padding: 20,
-    background: "#f9f9f9",
-    borderRadius: 12,
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-    display: "flex",
-    flexDirection: "column",
-    gap: 12,
-  };
-
-  const input = {
-    padding: 8,
-    borderRadius: 8,
-    border: "1px solid #ccc",
-    fontSize: 14,
-  };
-
-  const button = {
-    backgroundColor: "#00b050",
-    color: "#fff",
-    border: "none",
-    padding: 12,
-    borderRadius: 8,
-    cursor: "pointer",
-    fontWeight: "bold",
-  };
-
-  const editButton = {
-    padding: "6px 12px",
-    borderRadius: 8,
-    border: "none",
-    cursor: "pointer",
-    background: "#e0e0e0",
-    marginRight: 8,
-  };
-
-  // ===============================
-  // RENDER
-  // ===============================
   return (
-    <div style={container}>
-      <h3>Conta FIFA</h3>
+    <Container>
+      <Header>
+        <h3>Conta FIFA</h3>
+      </Header>
 
       <div
         style={{
@@ -187,31 +140,27 @@ function Credenciais({ usuario, handleLogin }) {
         ⚠️ Informe o <strong>login e senha da sua conta FIFA</strong>.
       </div>
 
-      {/* FORM */}
       {credenciais.length < 1 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <input
-            style={input}
+        <FormContainer>
+          <Input
             placeholder="Login da conta FIFA"
             value={novaCredencial.user}
             onChange={(e) => handleChangeNova(e, "user")}
           />
 
-          <input
-            style={input}
+          <Input
             type="password"
             placeholder="Senha da conta FIFA"
             value={novaCredencial.pass}
             onChange={(e) => handleChangeNova(e, "pass")}
           />
 
-          <button style={button} onClick={adicionar}>
+          <Button type="button" onClick={adicionar}>
             Salvar conta
-          </button>
-        </div>
+          </Button>
+        </FormContainer>
       )}
 
-      {/* LISTA */}
       {credenciais.map((cred, index) => (
         <div
           key={cred.id}
@@ -222,47 +171,48 @@ function Credenciais({ usuario, handleLogin }) {
           }}
         >
           {editIndex === index ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <input
-                style={input}
+            <>
+              <Input
                 placeholder="Novo login"
                 value={editCredencial.user}
                 onChange={(e) => handleChangeEdit(e, "user")}
               />
 
-              <input
-                style={input}
+              <Input
                 type="password"
                 placeholder="Nova senha"
                 value={editCredencial.pass}
                 onChange={(e) => handleChangeEdit(e, "pass")}
               />
 
-              <button style={button} onClick={() => atualizar(cred.id)}>
+              <Button onClick={() => atualizar(cred.id)}>
                 Salvar
-              </button>
+              </Button>
 
-              <button style={button} onClick={() => setEditIndex(-1)}>
+              <Button onClick={() => setEditIndex(-1)}>
                 Cancelar
-              </button>
-            </div>
+              </Button>
+            </>
           ) : (
             <>
-              <p><strong>Conta salva</strong></p>
-              <p>Login: ********</p>
+              <InfoItem>
+                <strong>Conta salva</strong>
+              </InfoItem>
 
-              <button style={editButton} onClick={() => iniciarEdicao(index)}>
+              <InfoItem>Login: ********</InfoItem>
+
+              <EditButton onClick={() => iniciarEdicao(index)}>
                 Editar
-              </button>
+              </EditButton>
 
-              <button style={editButton} onClick={() => excluir(cred.id)}>
+              <EditButton onClick={() => excluir(cred.id)}>
                 Remover
-              </button>
+              </EditButton>
             </>
           )}
         </div>
       ))}
-    </div>
+    </Container>
   );
 }
 
