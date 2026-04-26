@@ -20,6 +20,17 @@ import {
 } from "./styles";
 
 function Compras({ usuario, handleLogout }) {
+
+  // ===============================
+  // SCROLL TO TOP (FALTAVA ISSO)
+  // ===============================
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   const navigate = useNavigate();
 
   const [compras, setCompras] = useState([]);

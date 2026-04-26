@@ -2,14 +2,27 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import MyGlobalStyle from '../../styles/globalStyles';
-import HeaderPrincipal from '../../components/Header/HeaderPrincipal';
-import MainPrincipal from '../../components/Main/MainPrincipal';
-import Footer from '../../components/Footer/Footer';
+import MyGlobalStyle from "../../styles/globalStyles";
+import HeaderPrincipal from "../../components/Header/HeaderPrincipal";
+import MainPrincipal from "../../components/Main/MainPrincipal";
+import Footer from "../../components/Footer/Footer";
 
 function Home({ usuario, handleLogout }) {
   const location = useLocation();
 
+  // ===============================
+  // SCROLL TO TOP (FALTAVA ISSO)
+  // ===============================
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  // ===============================
+  // STATUS DO PAGAMENTO
+  // ===============================
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const status = params.get("status");
@@ -37,9 +50,19 @@ function Home({ usuario, handleLogout }) {
   return (
     <>
       <MyGlobalStyle />
-      <HeaderPrincipal usuario={usuario} handleLogout={handleLogout} />
+
+      <HeaderPrincipal
+        usuario={usuario}
+        handleLogout={handleLogout}
+      />
+
       <MainPrincipal />
-      <Footer usuario={usuario} handleLogout={handleLogout} scrollToTop={scrollToTop}/>
+
+      <Footer
+        usuario={usuario}
+        handleLogout={handleLogout}
+        scrollToTop={scrollToTop}
+      />
     </>
   );
 }

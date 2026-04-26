@@ -29,6 +29,16 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
   const navigate = useNavigate();
 
   // ===============================
+  // SCROLL TO TOP (FALTAVA ISSO)
+  // ===============================
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  // ===============================
   // LOAD USUARIO
   // ===============================
   useEffect(() => {
@@ -131,13 +141,9 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
 
             <EditButton
               $cancel={editando}
-              onClick={() => {
-                if (editando) {
-                  handleCancelEdit();
-                } else {
-                  setEditando(true);
-                }
-              }}
+              onClick={() =>
+                editando ? handleCancelEdit() : setEditando(true)
+              }
             >
               {editando ? "Cancelar" : "Editar Perfil"}
             </EditButton>
@@ -201,11 +207,13 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
               )}
 
               <InfoItem>
-                <strong>Nome:</strong> {usuarioNormalizado.nome || "—"}
+                <strong>Nome:</strong>{" "}
+                {usuarioNormalizado.nome || "—"}
               </InfoItem>
 
               <InfoItem>
-                <strong>Email:</strong> {usuarioNormalizado.email}
+                <strong>Email:</strong>{" "}
+                {usuarioNormalizado.email}
               </InfoItem>
 
               <InfoItem>

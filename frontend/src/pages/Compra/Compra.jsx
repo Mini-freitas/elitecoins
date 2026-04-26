@@ -8,6 +8,17 @@ import HeaderPrincipal from '../../components/Header/HeaderPrincipal';
 
 const Compra = ({ usuario, handleLogout }) => {
 
+  // ===============================
+  // SCROLL TO TOP (FALTAVA ISSO)
+  // ===============================
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+
   return (
     <>
       <MyGlobalStyle />
