@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FormContainer, Input, Button } from "./styles";
 
 function PerfilForm({ usuario, onSave }) {
@@ -8,6 +8,31 @@ function PerfilForm({ usuario, onSave }) {
     usuario.dataNascimento ? usuario.dataNascimento.split("T")[0] : ""
   );
 
+  // 🔥 guarda estado original para reset
+  const [original, setOriginal] = useState({
+    nome: usuario.nome || "",
+    telefone: usuario.telefone || "",
+    dataNascimento: usuario.dataNascimento
+      ? usuario.dataNascimento.split("T")[0]
+      : "",
+  });
+
+  // se trocar usuário, sincroniza
+  useEffect(() => {
+    const base = {
+      nome: usuario.nome || "",
+      telefone: usuario.telefone || "",
+      dataNascimento: usuario.dataNascimento
+        ? usuario.dataNascimento.split("T")[0]
+        : "",
+    };
+
+    setNome(base.nome);
+    setTelefone(base.telefone);
+    setDataNascimento(base.dataNascimento);
+    setOriginal(base);
+  }, [usuario]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -16,6 +41,15 @@ function PerfilForm({ usuario, onSave }) {
       telefone,
       dataNascimento,
     });
+
+    setOriginal({ nome, telefone, dataNascimento });
+  };
+
+  // 🔴 CANCELAR ALTERAÇÃO
+  const handleCancel = () => {
+    setNome(original.nome);
+    setTelefone(original.telefone);
+    setDataNascimento(original.dataNascimento);
   };
 
   return (
@@ -43,6 +77,14 @@ function PerfilForm({ usuario, onSave }) {
 
       <Button type="submit">
         Salvar alterações
+      </Button>
+
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={handleCancel}
+      >
+        Cancelar
       </Button>
     </FormContainer>
   );
