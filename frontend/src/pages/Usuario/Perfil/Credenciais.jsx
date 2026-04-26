@@ -96,7 +96,6 @@ function Credenciais({ usuario, handleLogin }) {
   const iniciarEdicao = (index) => {
     setEditIndex(index);
 
-    // 🔥 NÃO USA cred.user (criptografado)
     setEditCredencial({
       user: "",
       pass: "",
@@ -165,7 +164,6 @@ function Credenciais({ usuario, handleLogin }) {
         }}
       >
         ⚠️ Informe o <strong>login e senha da sua conta FIFA</strong>.
-        Esses dados serão usados para entrega automática.
       </div>
 
       {/* FORM */}
@@ -202,7 +200,7 @@ function Credenciais({ usuario, handleLogin }) {
           }}
         >
           {editIndex === index ? (
-            <>
+            <FormContainer>
               <Input
                 placeholder="Novo login"
                 value={editCredencial.user}
@@ -223,16 +221,14 @@ function Credenciais({ usuario, handleLogin }) {
               <Button onClick={() => setEditIndex(-1)}>
                 Cancelar
               </Button>
-            </>
+            </FormContainer>
           ) : (
             <>
               <InfoItem>
                 <strong>Conta salva</strong>
               </InfoItem>
 
-              <InfoItem>
-                Login: ********
-              </InfoItem>
+              <InfoItem>Login: ********</InfoItem>
 
               <EditButton onClick={() => iniciarEdicao(index)}>
                 Editar
