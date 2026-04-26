@@ -199,7 +199,7 @@ function Credenciais({ usuario, handleLogin }) {
                 <strong>Conta salva</strong>
               </InfoItem>
 
-              <InfoItem>Login: ********</InfoItem>
+              <InfoItem>Login:{}</InfoItem>
 
               <EditButton onClick={() => iniciarEdicao(index)}>
                 Editar

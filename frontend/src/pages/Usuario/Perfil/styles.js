@@ -29,6 +29,10 @@ export const Mainperfil = styled.div`
   padding: 2rem 1rem;
   gap: 2rem;
   width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+  }
 `;
 
 /* ===============================
@@ -37,26 +41,41 @@ export const Mainperfil = styled.div`
 
 export const Container = styled.div`
   width: 60%;
-  max-width: 90%;
+  max-width: 800px;
   padding: 20px;
-  background: #f9f9f9;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  transition: all 0.2s ease;
+
+  @media (max-width: 1024px) {
+    width: 80%;
+  }
+
+  @media (max-width: 768px) {
+    width: 95%;
+    padding: 16px;
+  }
 `;
 
 export const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+
+  h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
 `;
 
 export const InfoItem = styled.p`
-  font-size: 16px;
-  margin-bottom: 8px;
+  font-size: 14px;
+  color: #333;
 `;
 
 /* ===============================
@@ -66,38 +85,52 @@ export const InfoItem = styled.p`
 export const FormContainer = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 `;
 
 export const Input = styled.input`
-  padding: 8px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #dcdcdc;
   font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+
+  &:focus {
+    border-color: #00b050;
+    box-shadow: 0 0 0 2px rgba(0,176,80,0.15);
+  }
 `;
 
 export const Button = styled.button`
-  background-color: #00b050;
+  background: linear-gradient(135deg, #00b050, #009e48);
   color: white;
   border: none;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
+  transition: all 0.2s ease;
 
   &:hover {
-    background-color: #009e48;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,176,80,0.3);
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 
   &:disabled {
-    background-color: #7fc77f;
+    background: #a5d6a7;
     cursor: not-allowed;
+    box-shadow: none;
   }
 `;
 
 export const Select = styled.select`
-  padding: 8px;
-  border-radius: 6px;
+  padding: 10px;
+  border-radius: 8px;
   border: 1px solid #ccc;
   background-color: white;
   cursor: pointer;
@@ -113,11 +146,17 @@ export const EditButton = styled.button`
   border: none;
   cursor: pointer;
   font-weight: 500;
-  background: #e0e0e0;
-  color: #000;
+  background: #f0f0f0;
+  color: #333;
+  transition: 0.2s;
 
   &:hover {
-    opacity: 0.9;
+    background: #e0e0e0;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 `;
 
@@ -126,13 +165,15 @@ export const CompleteProfileButton = styled.button`
   padding: 0.75rem 1.5rem;
   border-radius: 24px;
   border: none;
-  background: #1a73e8;
+  background: linear-gradient(135deg, #1a73e8, #1558b0);
   color: #fff;
   font-weight: 500;
   cursor: pointer;
+  transition: 0.2s;
 
   &:hover {
-    background: #1558b0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26,115,232,0.3);
   }
 `;
 
@@ -164,6 +205,11 @@ export const ProgressStep = styled.span`
   margin-right: 1rem;
   color: ${({ $active }) => ($active ? "#1a73e8" : "#9e9e9e")};
   font-weight: ${({ $active }) => ($active ? "600" : "400")};
+
+  @media (max-width: 768px) {
+    display: block;
+    margin-bottom: 4px;
+  }
 `;
 
 /* ===============================
