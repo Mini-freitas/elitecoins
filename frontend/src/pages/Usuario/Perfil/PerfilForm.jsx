@@ -2,22 +2,20 @@ import { useState, useEffect } from "react";
 import { FormContainer, Input, Button, DeleteButton } from "./styles";
 
 function PerfilForm({ usuario, onSave }) {
-  const [nome, setNome] = useState(usuario.nome || "");
-  const [telefone, setTelefone] = useState(usuario.telefone || "");
-  const [dataNascimento, setDataNascimento] = useState(
-    usuario.dataNascimento ? usuario.dataNascimento.split("T")[0] : ""
-  );
+  const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
 
-  // 🔥 guarda estado original para reset
+  // 🔥 snapshot do estado original
   const [original, setOriginal] = useState({
-    nome: usuario.nome || "",
-    telefone: usuario.telefone || "",
-    dataNascimento: usuario.dataNascimento
-      ? usuario.dataNascimento.split("T")[0]
-      : "",
+    nome: "",
+    telefone: "",
+    dataNascimento: "",
   });
 
-  // se trocar usuário, sincroniza
+  // ===============================
+  // SINCRONIZA COM USUÁRIO
+  // ===============================
   useEffect(() => {
     const base = {
       nome: usuario.nome || "",
@@ -31,27 +29,38 @@ function PerfilForm({ usuario, onSave }) {
     setTelefone(base.telefone);
     setDataNascimento(base.dataNascimento);
     setOriginal(base);
-  }, [usuario]);
+  }, [usuario.id]);
 
+  // ===============================
+  // SALVAR
+  // ===============================
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    onSave({
+    const dados = {
       nome,
       telefone,
       dataNascimento,
-    });
+    };
 
-    setOriginal({ nome, telefone, dataNascimento });
+    onSave(dados);
+
+    // 🔥 atualiza snapshot após salvar
+    setOriginal(dados);
   };
 
-  // 🔴 CANCELAR ALTERAÇÃO
+  // ===============================
+  // CANCELAR
+  // ===============================
   const handleCancel = () => {
     setNome(original.nome);
     setTelefone(original.telefone);
     setDataNascimento(original.dataNascimento);
   };
 
+  // ===============================
+  // RENDER
+  // ===============================
   return (
     <FormContainer onSubmit={handleSubmit}>
       <Input
@@ -81,7 +90,6 @@ function PerfilForm({ usuario, onSave }) {
 
       <DeleteButton
         type="button"
-        variant="ghost"
         onClick={handleCancel}
       >
         Cancelar
