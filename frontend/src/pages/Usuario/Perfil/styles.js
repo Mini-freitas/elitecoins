@@ -147,11 +147,11 @@ const buttonVariants = {
   `,
 
   secondary: css`
-    background: #e53935;
+    background: #1976d2;
     color: white;
 
     &:hover {
-      background:  #b71c1c;
+      background: #125aa0;
     }
   `,
 
@@ -190,7 +190,24 @@ export const Button = styled.button`
 `;
 
 export const EditButton = styled(Button)`
-  ${buttonVariants.secondary}
+  ${({ $cancel }) =>
+    $cancel
+      ? css`
+          background: #e53935;
+          color: white;
+
+          &:hover {
+            background: #b71c1c;
+          }
+        `
+      : css`
+          background: #1976d2;
+          color: white;
+
+          &:hover {
+            background: #125aa0;
+          }
+        `}
 `;
 
 export const DeleteButton = styled(Button)`

@@ -51,8 +51,6 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
   }, [usuario, loading, navigate]);
 
   // ===============================
-  // NORMALIZAÇÃO (SAFE)
-  // ===============================
   const usuarioNormalizado = useMemo(() => {
     if (!usuario) return null;
 
@@ -71,8 +69,6 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
     };
   }, [usuario]);
 
-  // ===============================
-  // PROGRESSO
   // ===============================
   const progresso = useMemo(() => {
     if (!usuarioNormalizado) {
@@ -94,11 +90,8 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
     };
   }, [usuarioNormalizado]);
 
-  // 🔥 AGORA SIM PODE RETORNAR
   if (loading || !usuarioNormalizado) return null;
 
-  // ===============================
-  // SALVAR PERFIL
   // ===============================
   const handleSave = async (dadosAtualizados) => {
     try {
@@ -110,9 +103,14 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
       handleLogin(res.data);
       setEditando(false);
     } catch (err) {
-      console.error("Erro ao salvar perfil:", err);
+      console.error(err);
       alert("Erro ao salvar perfil");
     }
+  };
+
+  // ===============================
+  const handleCancelEdit = () => {
+    setEditando(false);
   };
 
   const vouchersDisponiveis = usuarioNormalizado.voucherAtivo
@@ -132,8 +130,14 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
             <h2>Meu Perfil</h2>
 
             <EditButton
-              $incomplete={!progresso.perfil}
-              onClick={() => setEditando(!editando)}
+              $cancel={editando}
+              onClick={() => {
+                if (editando) {
+                  handleCancelEdit();
+                } else {
+                  setEditando(true);
+                }
+              }}
             >
               {editando ? "Cancelar" : "Editar Perfil"}
             </EditButton>
@@ -166,12 +170,9 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
 
           {!progresso.perfil && (
             <CtaBox>
-              <p>
-                Complete seu perfil e ganhe vouchers 🎁
-              </p>
-              <CompleteProfileButton
-                onClick={() => setEditando(true)}
-              >
+              <p>Complete seu perfil e ganhe vouchers 🎁</p>
+
+              <CompleteProfileButton onClick={() => setEditando(true)}>
                 Completar perfil
               </CompleteProfileButton>
             </CtaBox>
@@ -200,13 +201,11 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
               )}
 
               <InfoItem>
-                <strong>Nome:</strong>{" "}
-                {usuarioNormalizado.nome || "—"}
+                <strong>Nome:</strong> {usuarioNormalizado.nome || "—"}
               </InfoItem>
 
               <InfoItem>
-                <strong>Email:</strong>{" "}
-                {usuarioNormalizado.email}
+                <strong>Email:</strong> {usuarioNormalizado.email}
               </InfoItem>
 
               <InfoItem>
@@ -217,16 +216,13 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
               <InfoItem>
                 <strong>Data nascimento:</strong>{" "}
                 {usuarioNormalizado.dataNascimento
-                  ? new Date(
-                      usuarioNormalizado.dataNascimento
-                    ).toLocaleDateString()
+                  ? new Date(usuarioNormalizado.dataNascimento).toLocaleDateString()
                   : "Não informada"}
               </InfoItem>
             </>
           )}
         </Container>
 
-        {/* 🔥 CREDENCIAIS ATIVAS */}
         <Credenciais
           usuario={usuarioNormalizado}
           handleLogin={handleLogin}
