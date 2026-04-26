@@ -33,7 +33,7 @@ function Credenciais({ usuario, handleLogin }) {
       const res = await api.get(`/credenciais/${usuario.id}`);
       setCredenciais(res.data);
     } catch (err) {
-      console.error("Erro ao buscar credenciais:", err);
+      console.error(err);
     }
   };
 
@@ -79,15 +79,13 @@ function Credenciais({ usuario, handleLogin }) {
 
       setNovaCredencial({ user: "", pass: "" });
 
-      // 🔥 evita erro se handleLogin não existir
-      if (handleLogin && res.data.usuario) {
+      if (res.data.usuario) {
         handleLogin(res.data.usuario);
       } else {
         buscarCredenciais();
       }
-
     } catch (err) {
-      console.error("Erro ao salvar credencial:", err);
+      console.error(err);
       alert("Erro ao salvar credencial");
     }
   };
@@ -98,7 +96,7 @@ function Credenciais({ usuario, handleLogin }) {
   const iniciarEdicao = (index) => {
     setEditIndex(index);
 
-    // 🔥 nunca usar valor criptografado
+    // 🔥 NÃO USA cred.user (criptografado)
     setEditCredencial({
       user: "",
       pass: "",
@@ -124,9 +122,8 @@ function Credenciais({ usuario, handleLogin }) {
       setEditCredencial({ user: "", pass: "" });
 
       buscarCredenciais();
-
     } catch (err) {
-      console.error("Erro ao atualizar:", err);
+      console.error(err);
       alert("Erro ao atualizar");
     }
   };
@@ -140,14 +137,13 @@ function Credenciais({ usuario, handleLogin }) {
     try {
       const res = await api.delete(`/credenciais/${id}`);
 
-      if (handleLogin && res.data.usuario) {
+      if (res.data.usuario) {
         handleLogin(res.data.usuario);
       } else {
         buscarCredenciais();
       }
-
     } catch (err) {
-      console.error("Erro ao excluir:", err);
+      console.error(err);
       alert("Erro ao excluir");
     }
   };
@@ -207,28 +203,26 @@ function Credenciais({ usuario, handleLogin }) {
         >
           {editIndex === index ? (
             <>
-              <FormContainer>
-                <Input
-                  placeholder="Login da conta FIFA"
-                  value={editCredencial.user}
-                  onChange={(e) => handleChangeEdit(e, "user")}
-                />
+              <Input
+                placeholder="Novo login"
+                value={editCredencial.user}
+                onChange={(e) => handleChangeEdit(e, "user")}
+              />
 
-                <Input
-                  type="password"
-                  placeholder="Senha da conta FIFA"
-                  value={editCredencial.pass}
-                  onChange={(e) => handleChangeEdit(e, "pass")}
-                />
+              <Input
+                type="password"
+                placeholder="Nova senha"
+                value={editCredencial.pass}
+                onChange={(e) => handleChangeEdit(e, "pass")}
+              />
 
-                <Button onClick={() => atualizar(cred.id)}>
-                  Salvar
-                </Button>
+              <Button onClick={() => atualizar(cred.id)}>
+                Salvar
+              </Button>
 
-                <Button onClick={() => setEditIndex(-1)}>
-                  Cancelar
-                </Button>
-              </FormContainer>
+              <Button onClick={() => setEditIndex(-1)}>
+                Cancelar
+              </Button>
             </>
           ) : (
             <>
