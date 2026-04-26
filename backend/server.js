@@ -647,14 +647,17 @@ app.get("/api/credenciais/:usuarioId", async (req, res) => {
 
     const credenciais = await prisma.credencial.findMany({
       where: { usuarioId },
-      orderBy: { createdAt: "desc" },
-      take: 3,
+      select: {
+        id: true,
+        createdAt: true,
+        // ❌ NÃO RETORNAR user e pass
+      },
     });
 
-    return res.json(credenciais);
+    res.json(credenciais);
   } catch (err) {
-    console.error("❌ Erro ao buscar credenciais:", err);
-    return res.status(500).json({ error: "Erro ao buscar credenciais" });
+    console.error(err);
+    res.status(500).json({ error: "Erro ao buscar credenciais" });
   }
 });
 
