@@ -147,11 +147,11 @@ const buttonVariants = {
   `,
 
   secondary: css`
-    background: #1976d2;
+    background: #e53935;
     color: white;
 
     &:hover {
-      background: #125aa0;
+      background:  #b71c1c;
     }
   `,
 

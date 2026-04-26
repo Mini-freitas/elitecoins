@@ -93,7 +93,7 @@ function PerfilForm({ usuario, onSave, onCancel }) {
         type="button"
         onClick={handleCancel}
       >
-        Cancelar
+        Voltar
       </DeleteButton>
     </FormContainer>
   );
