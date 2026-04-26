@@ -114,7 +114,7 @@ export const Button = styled.button`
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0,176,80,0.3);
+    box-shadow: 0 4px 12px  #1558b0;
   }
 
   &:active {
@@ -146,12 +146,12 @@ export const EditButton = styled.button`
   border: none;
   cursor: pointer;
   font-weight: 500;
-  background: #f0f0f0;
+  background:  #1a73e8;
   color: #333;
   transition: 0.2s;
 
   &:hover {
-    background: #e0e0e0;
+    background: #1558b0;
     transform: translateY(-1px);
   }
 
