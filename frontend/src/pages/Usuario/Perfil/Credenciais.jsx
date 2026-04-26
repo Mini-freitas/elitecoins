@@ -6,9 +6,13 @@ import {
   Header,
   InfoItem,
   EditButton,
+  DeleteButton,
   FormContainer,
   Input,
   Button,
+  Card,
+  ActionsRow,
+  WarningBox
 } from "./styles";
 
 function Credenciais({ usuario, handleLogin }) {
@@ -128,17 +132,9 @@ function Credenciais({ usuario, handleLogin }) {
         <h3>Conta FIFA</h3>
       </Header>
 
-      <div
-        style={{
-          background: "#fff3cd",
-          padding: 12,
-          borderRadius: 8,
-          marginBottom: 16,
-          fontSize: 14,
-        }}
-      >
+      <WarningBox>
         ⚠️ Informe o <strong>login e senha da sua conta FIFA</strong>.
-      </div>
+      </WarningBox>
 
       {credenciais.length < 1 && (
         <FormContainer>
@@ -162,14 +158,7 @@ function Credenciais({ usuario, handleLogin }) {
       )}
 
       {credenciais.map((cred, index) => (
-        <div
-          key={cred.id}
-          style={{
-            padding: 12,
-            background: "#f0f0f0",
-            borderRadius: 8,
-          }}
-        >
+        <Card key={cred.id}>
           {editIndex === index ? (
             <>
               <Input
@@ -189,9 +178,9 @@ function Credenciais({ usuario, handleLogin }) {
                 Salvar
               </Button>
 
-              <Button onClick={() => setEditIndex(-1)}>
+              <DeleteButton onClick={() => setEditIndex(-1)}>
                 Cancelar
-              </Button>
+              </DeleteButton>
             </>
           ) : (
             <>
@@ -199,18 +188,20 @@ function Credenciais({ usuario, handleLogin }) {
                 <strong>Conta salva</strong>
               </InfoItem>
 
-              <InfoItem>Login:{}</InfoItem>
+              <InfoItem>Login: ********</InfoItem>
 
-              <EditButton onClick={() => iniciarEdicao(index)}>
-                Editar
-              </EditButton>
+              <ActionsRow>
+                <EditButton onClick={() => iniciarEdicao(index)}>
+                  Editar
+                </EditButton>
 
-              <EditButton onClick={() => excluir(cred.id)}>
-                Remover
-              </EditButton>
+                <DeleteButton onClick={() => excluir(cred.id)}>
+                  Remover
+                </DeleteButton>
+              </ActionsRow>
             </>
           )}
-        </div>
+        </Card>
       ))}
     </Container>
   );

@@ -29,10 +29,6 @@ export const Mainperfil = styled.div`
   padding: 2rem 1rem;
   gap: 2rem;
   width: 100%;
-
-  @media (max-width: 768px) {
-    padding: 1.5rem 1rem;
-  }
 `;
 
 /* ===============================
@@ -41,15 +37,14 @@ export const Mainperfil = styled.div`
 
 export const Container = styled.div`
   width: 60%;
-  max-width: 800px;
+  max-width: 90%;
   padding: 20px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  background: #f9f9f9;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: all 0.2s ease;
 
   @media (max-width: 1024px) {
     width: 80%;
@@ -65,16 +60,17 @@ export const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 
   h3 {
-    font-size: 1.2rem;
+    font-size: 20px;
     font-weight: 600;
   }
 `;
 
 export const InfoItem = styled.p`
-  font-size: 14px;
+  font-size: 15px;
+  margin-bottom: 6px;
   color: #333;
 `;
 
@@ -89,16 +85,16 @@ export const FormContainer = styled.form`
 `;
 
 export const Input = styled.input`
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #dcdcdc;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
   font-size: 14px;
-  outline: none;
   transition: 0.2s;
 
   &:focus {
     border-color: #00b050;
-    box-shadow: 0 0 0 2px rgba(0,176,80,0.15);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0,176,80,0.2);
   }
 `;
 
@@ -109,31 +105,18 @@ export const Button = styled.button`
   padding: 12px;
   border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
+  font-weight: bold;
+  transition: 0.2s;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px  #1558b0;
-  }
-
-  &:active {
-    transform: scale(0.98);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   }
 
   &:disabled {
-    background: #a5d6a7;
+    background-color: #7fc77f;
     cursor: not-allowed;
-    box-shadow: none;
   }
-`;
-
-export const Select = styled.select`
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background-color: white;
-  cursor: pointer;
 `;
 
 /* ===============================
@@ -146,92 +129,62 @@ export const EditButton = styled.button`
   border: none;
   cursor: pointer;
   font-weight: 500;
-  background:  #1a73e8;
-  color: #333;
   transition: 0.2s;
 
-  &:hover {
-    background: #1558b0;
-    transform: translateY(-1px);
-  }
-
-  &:active {
-    transform: scale(0.97);
-  }
-`;
-
-export const CompleteProfileButton = styled.button`
-  margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 24px;
-  border: none;
-  background: linear-gradient(135deg, #1a73e8, #1558b0);
-  color: #fff;
-  font-weight: 500;
-  cursor: pointer;
-  transition: 0.2s;
+  background: #1976d2;
+  color: white;
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(26,115,232,0.3);
+    background: #125aa0;
   }
 `;
 
-/* ===============================
-   PROGRESSO
-=============================== */
-
-export const ProgressWrapper = styled.div`
-  margin: 1.5rem 0;
-`;
-
-export const ProgressBar = styled.div`
-  height: 8px;
-  background: #e0e0e0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 0.75rem;
-
-  span {
-    display: block;
-    height: 100%;
-    background: #1a73e8;
-    transition: width 0.3s ease;
-  }
-`;
-
-export const ProgressStep = styled.span`
-  font-size: 0.8rem;
-  margin-right: 1rem;
-  color: ${({ $active }) => ($active ? "#1a73e8" : "#9e9e9e")};
-  font-weight: ${({ $active }) => ($active ? "600" : "400")};
-
-  @media (max-width: 768px) {
-    display: block;
-    margin-bottom: 4px;
-  }
-`;
-
-/* ===============================
-   CTA / VOUCHER
-=============================== */
-
-export const VoucherBox = styled.div`
-  margin: 1rem 0;
-  padding: 0.75rem 1rem;
-  background: #f1f3f4;
+export const DeleteButton = styled.button`
+  padding: 0.5rem 1rem;
   border-radius: 8px;
-  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+
+  background: #e53935;
+  color: white;
+
+  &:hover {
+    background: #b71c1c;
+  }
 `;
 
-export const CtaBox = styled.div`
-  margin: 1.5rem 0;
-  padding: 1.25rem;
-  background: #e8f0fe;
-  border-radius: 12px;
+/* ===============================
+   CARD DE CREDENCIAL
+=============================== */
 
-  p {
-    margin: 0;
-    font-size: 0.9rem;
-  }
+export const Card = styled.div`
+  padding: 14px;
+  background: #f0f0f0;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+/* ===============================
+   AÇÕES (botões lado a lado)
+=============================== */
+
+export const ActionsRow = styled.div`
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+`;
+
+/* ===============================
+   RESPONSIVO EXTRA
+=============================== */
+
+export const WarningBox = styled.div`
+  background: #fff3cd;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
 `;
