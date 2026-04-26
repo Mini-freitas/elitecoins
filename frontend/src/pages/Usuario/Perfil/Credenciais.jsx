@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
 
-import {
-  Container,
-  Header,
-  InfoItem,
-  EditButton,
-  FormContainer,
-  Input,
-  Button,
-} from "./styles";
-
 function Credenciais({ usuario, handleLogin }) {
   const [credenciais, setCredenciais] = useState([]);
   const [editIndex, setEditIndex] = useState(-1);
@@ -42,7 +32,7 @@ function Credenciais({ usuario, handleLogin }) {
   }, [usuario]);
 
   // ===============================
-  // INPUT NOVO
+  // INPUTS
   // ===============================
   const handleChangeNova = (e, campo) => {
     setNovaCredencial((prev) => ({
@@ -51,9 +41,6 @@ function Credenciais({ usuario, handleLogin }) {
     }));
   };
 
-  // ===============================
-  // INPUT EDIT
-  // ===============================
   const handleChangeEdit = (e, campo) => {
     setEditCredencial((prev) => ({
       ...prev,
@@ -91,20 +78,13 @@ function Credenciais({ usuario, handleLogin }) {
   };
 
   // ===============================
-  // INICIAR EDIÇÃO
+  // EDIT
   // ===============================
   const iniciarEdicao = (index) => {
     setEditIndex(index);
-
-    setEditCredencial({
-      user: "",
-      pass: "",
-    });
+    setEditCredencial({ user: "", pass: "" });
   };
 
-  // ===============================
-  // UPDATE
-  // ===============================
   const atualizar = async (id) => {
     if (!editCredencial.user || !editCredencial.pass) {
       alert("Preencha usuário e senha");
@@ -147,13 +127,54 @@ function Credenciais({ usuario, handleLogin }) {
     }
   };
 
-  return (
-    <Container>
-      <Header>
-        <h3>Conta FIFA</h3>
-      </Header>
+  // ===============================
+  // STYLES INLINE
+  // ===============================
+  const container = {
+    width: "60%",
+    maxWidth: "90%",
+    padding: 20,
+    background: "#f9f9f9",
+    borderRadius: 12,
+    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+  };
 
-      {/* AVISO */}
+  const input = {
+    padding: 8,
+    borderRadius: 8,
+    border: "1px solid #ccc",
+    fontSize: 14,
+  };
+
+  const button = {
+    backgroundColor: "#00b050",
+    color: "#fff",
+    border: "none",
+    padding: 12,
+    borderRadius: 8,
+    cursor: "pointer",
+    fontWeight: "bold",
+  };
+
+  const editButton = {
+    padding: "6px 12px",
+    borderRadius: 8,
+    border: "none",
+    cursor: "pointer",
+    background: "#e0e0e0",
+    marginRight: 8,
+  };
+
+  // ===============================
+  // RENDER
+  // ===============================
+  return (
+    <div style={container}>
+      <h3>Conta FIFA</h3>
+
       <div
         style={{
           background: "#fff3cd",
@@ -168,24 +189,26 @@ function Credenciais({ usuario, handleLogin }) {
 
       {/* FORM */}
       {credenciais.length < 1 && (
-        <FormContainer onSubmit={(e) => e.preventDefault()}>
-          <Input
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <input
+            style={input}
             placeholder="Login da conta FIFA"
             value={novaCredencial.user}
             onChange={(e) => handleChangeNova(e, "user")}
           />
 
-          <Input
+          <input
+            style={input}
             type="password"
             placeholder="Senha da conta FIFA"
             value={novaCredencial.pass}
             onChange={(e) => handleChangeNova(e, "pass")}
           />
 
-          <Button type="button" onClick={adicionar}>
+          <button style={button} onClick={adicionar}>
             Salvar conta
-          </Button>
-        </FormContainer>
+          </button>
+        </div>
       )}
 
       {/* LISTA */}
@@ -196,52 +219,50 @@ function Credenciais({ usuario, handleLogin }) {
             padding: 12,
             background: "#f0f0f0",
             borderRadius: 8,
-            marginBottom: 10,
           }}
         >
           {editIndex === index ? (
-            <FormContainer>
-              <Input
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <input
+                style={input}
                 placeholder="Novo login"
                 value={editCredencial.user}
                 onChange={(e) => handleChangeEdit(e, "user")}
               />
 
-              <Input
+              <input
+                style={input}
                 type="password"
                 placeholder="Nova senha"
                 value={editCredencial.pass}
                 onChange={(e) => handleChangeEdit(e, "pass")}
               />
 
-              <Button onClick={() => atualizar(cred.id)}>
+              <button style={button} onClick={() => atualizar(cred.id)}>
                 Salvar
-              </Button>
+              </button>
 
-              <Button onClick={() => setEditIndex(-1)}>
+              <button style={button} onClick={() => setEditIndex(-1)}>
                 Cancelar
-              </Button>
-            </FormContainer>
+              </button>
+            </div>
           ) : (
             <>
-              <InfoItem>
-                <strong>Conta salva</strong>
-              </InfoItem>
+              <p><strong>Conta salva</strong></p>
+              <p>Login: ********</p>
 
-              <InfoItem>Login: ********</InfoItem>
-
-              <EditButton onClick={() => iniciarEdicao(index)}>
+              <button style={editButton} onClick={() => iniciarEdicao(index)}>
                 Editar
-              </EditButton>
+              </button>
 
-              <EditButton onClick={() => excluir(cred.id)}>
+              <button style={editButton} onClick={() => excluir(cred.id)}>
                 Remover
-              </EditButton>
+              </button>
             </>
           )}
         </div>
       ))}
-    </Container>
+    </div>
   );
 }
 
