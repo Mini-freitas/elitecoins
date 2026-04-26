@@ -29,6 +29,11 @@ function Credenciais({ usuario, handleLogin }) {
     pass: "",
   });
 
+  const [originalEdit, setOriginalEdit] = useState({
+    user: "",
+    pass: "",
+  });
+
   // ===============================
   // BUSCAR
   // ===============================
@@ -95,13 +100,14 @@ function Credenciais({ usuario, handleLogin }) {
   // EDITAR
   // ===============================
   const iniciarEdicao = (index) => {
-    setEditIndex(index);
-
-    // 🔥 preenche com dados reais
-    setEditCredencial({
+    const data = {
       user: credenciais[index].user || "",
       pass: credenciais[index].pass || "",
-    });
+    };
+
+    setEditIndex(index);
+    setEditCredencial(data);
+    setOriginalEdit(data);
   };
 
   const atualizar = async (id) => {
@@ -117,13 +123,19 @@ function Credenciais({ usuario, handleLogin }) {
       });
 
       setEditIndex(-1);
-      setEditCredencial({ user: "", pass: "" });
-
       buscarCredenciais();
     } catch (err) {
       console.error(err);
       alert("Erro ao atualizar");
     }
+  };
+
+  // ===============================
+  // CANCELAR (SEM WARNING)
+  // ===============================
+  const cancelarEdicao = () => {
+    setEditCredencial(originalEdit);
+    setEditIndex(-1);
   };
 
   // ===============================
@@ -145,29 +157,6 @@ function Credenciais({ usuario, handleLogin }) {
       alert("Erro ao excluir");
     }
   };
-
-  const formatarLogin = (login) => {
-  if (!login) return "";
-
-  // Se for email
-  if (login.includes("@")) {
-    const [nome, dominio] = login.split("@");
-
-    const nomeMask =
-      nome.length <= 3
-        ? nome[0] + "*".repeat(nome.length - 1)
-        : nome.slice(0, 3) + "*".repeat(nome.length - 3);
-
-    return `${nomeMask}@${dominio}`;
-  }
-
-  // Se for username normal
-  if (login.length <= 4) {
-    return login[0] + "*".repeat(login.length - 1);
-  }
-
-  return login.slice(0, 4) + "*".repeat(login.length - 4);
-};
 
   // ===============================
   // RENDER
@@ -208,8 +197,7 @@ function Credenciais({ usuario, handleLogin }) {
       {credenciais.map((cred, index) => (
         <Card key={cred.id}>
           {editIndex === index ? (
-            <>
-              {/* INPUTS EM COLUNA */}
+            <div>
               <FormContainer>
                 <Input
                   placeholder="Novo login"
@@ -224,31 +212,47 @@ function Credenciais({ usuario, handleLogin }) {
                   onChange={(e) => handleChangeEdit(e, "pass")}
                 />
 
-                <Button onClick={() => atualizar(cred.id)}>
+                <Button
+                  type="button"
+                  onClick={() => atualizar(cred.id)}
+                >
                   Salvar alterações
                 </Button>
 
-                <DeleteButton onClick={() => setEditIndex(-1)}>
+                <DeleteButton
+                  type="button"
+                  onClick={cancelarEdicao}
+                >
                   Cancelar
                 </DeleteButton>
               </FormContainer>
-            </>
+            </div>
           ) : (
             <>
               <InfoItem>
                 <strong>Conta salva</strong>
               </InfoItem>
 
-              {/* 🔒 segurança visual */}
-              <InfoItem>Login: {cred.userMasked || cred.user}</InfoItem>
-              <InfoItem>Senha: ••••••••</InfoItem>
+              <InfoItem>
+                Login: {cred.userMasked || cred.user}
+              </InfoItem>
+
+              <InfoItem>
+                Senha: ••••••••
+              </InfoItem>
 
               <ActionsRow>
-                <EditButton onClick={() => iniciarEdicao(index)}>
+                <EditButton
+                  type="button"
+                  onClick={() => iniciarEdicao(index)}
+                >
                   Editar
                 </EditButton>
 
-                <DeleteButton onClick={() => excluir(cred.id)}>
+                <DeleteButton
+                  type="button"
+                  onClick={() => excluir(cred.id)}
+                >
                   Remover
                 </DeleteButton>
               </ActionsRow>

@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { FormContainer, Input, Button, DeleteButton } from "./styles";
 
-function PerfilForm({ usuario, onSave }) {
+function PerfilForm({ usuario, onSave, onCancel }) {
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
   const [dataNascimento, setDataNascimento] = useState("");
 
-  // 🔥 snapshot do estado original
   const [original, setOriginal] = useState({
     nome: "",
     telefone: "",
@@ -45,17 +44,19 @@ function PerfilForm({ usuario, onSave }) {
 
     onSave(dados);
 
-    // 🔥 atualiza snapshot após salvar
     setOriginal(dados);
   };
 
   // ===============================
-  // CANCELAR
+  // CANCELAR (FECHA FORM)
   // ===============================
   const handleCancel = () => {
     setNome(original.nome);
     setTelefone(original.telefone);
     setDataNascimento(original.dataNascimento);
+
+    // 🔥 fecha o form no componente pai
+    if (onCancel) onCancel();
   };
 
   // ===============================
