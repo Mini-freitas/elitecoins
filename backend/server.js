@@ -32,6 +32,7 @@ app.use(
 app.use(express.json());
 
 // ======================= CRYPTO CONFIG =======================
+// ======================= CRYPTO CONFIG =======================
 const ALGORITHM = "aes-256-cbc";
 
 const SECRET_KEY = crypto
@@ -39,22 +40,53 @@ const SECRET_KEY = crypto
   .update(String(process.env.CRYPTO_SECRET))
   .digest();
 
-const IV = Buffer.alloc(16, 0);
-
-// 🔐 CRIPTOGRAFAR
+// 🔐 CRIPTOGRAFAR (COM IV DINÂMICO)
 function encrypt(text) {
-  const cipher = crypto.createCipheriv(ALGORITHM, SECRET_KEY, IV);
+  const iv = crypto.randomBytes(16);
+
+  const cipher = crypto.createCipheriv(ALGORITHM, SECRET_KEY, iv);
+
   let encrypted = cipher.update(text, "utf8", "hex");
   encrypted += cipher.final("hex");
-  return encrypted;
+
+  return iv.toString("hex") + ":" + encrypted;
 }
 
 // 🔓 DESCRIPTOGRAFAR
 function decrypt(text) {
-  const decipher = crypto.createDecipheriv(ALGORITHM, SECRET_KEY, IV);
-  let decrypted = decipher.update(text, "hex", "utf8");
+  const [ivHex, encrypted] = text.split(":");
+
+  const iv = Buffer.from(ivHex, "hex");
+
+  const decipher = crypto.createDecipheriv(ALGORITHM, SECRET_KEY, iv);
+
+  let decrypted = decipher.update(encrypted, "hex", "utf8");
   decrypted += decipher.final("utf8");
+
   return decrypted;
+}
+
+function maskUser(login) {
+  if (!login) return "";
+
+  // Email
+  if (login.includes("@")) {
+    const [nome, dominio] = login.split("@");
+
+    const nomeMask =
+      nome.length <= 3
+        ? nome[0] + "*".repeat(nome.length - 1)
+        : nome.slice(0, 3) + "*".repeat(nome.length - 3);
+
+    return `${nomeMask}@${dominio}`;
+  }
+
+  // Username normal
+  if (login.length <= 4) {
+    return login[0] + "*".repeat(login.length - 1);
+  }
+
+  return login.slice(0, 4) + "*".repeat(login.length - 4);
 }
 
 // ======================= EMAIL CONFIG =======================
@@ -647,20 +679,26 @@ app.get("/api/credenciais/:usuarioId", async (req, res) => {
 
     const credenciais = await prisma.credencial.findMany({
       where: { usuarioId },
-      select: {
-        id: true,
-        createdAt: true,
-        // ❌ NÃO RETORNAR user e pass
-      },
+      orderBy: { createdAt: "desc" },
     });
 
-    res.json(credenciais);
+    const formatadas = credenciais.map((c) => {
+      const userDescriptografado = decrypt(c.user);
+
+      return {
+        id: c.id,
+        user: userDescriptografado, // 🔥 valor REAL (para edição)
+        userMasked: maskUser(userDescriptografado), // 🔒 valor para exibição
+        createdAt: c.createdAt,
+      };
+    });
+
+    res.json(formatadas);
   } catch (err) {
-    console.error(err);
+    console.error("Erro ao buscar credenciais:", err);
     res.status(500).json({ error: "Erro ao buscar credenciais" });
   }
 });
-
 
 // ===============================
 // CRIAR CREDENCIAL
@@ -704,16 +742,19 @@ app.post("/api/credenciais", async (req, res) => {
     });
 
     res.json({
-      credencial: novaCredencial,
+      credencial: {
+        id: novaCredencial.id,
+        user,
+        userMasked: maskUser(user),
+      },
       usuario: atualizado,
     });
 
   } catch (err) {
-    console.error("❌ ERRO AO CRIAR CREDENCIAL:", err);
+    console.error("Erro ao criar credencial:", err);
     res.status(500).json({ error: "Erro ao criar credencial" });
   }
 });
-
 
 // ===============================
 // ATUALIZAR CREDENCIAL
@@ -723,32 +764,38 @@ app.put("/api/credenciais/:id", async (req, res) => {
     const { id } = req.params;
     const { user, pass } = req.body;
 
-    const credencialExistente = await prisma.credencial.findUnique({
+    const existente = await prisma.credencial.findUnique({
       where: { id },
     });
 
-    if (!credencialExistente) {
+    if (!existente) {
       return res.status(404).json({
         error: "Credencial não encontrada",
       });
     }
 
-    const credencialAtualizada = await prisma.credencial.update({
+    const atualizado = await prisma.credencial.update({
       where: { id },
       data: {
-        user: user ? encrypt(user) : credencialExistente.user,
-        pass: pass ? encrypt(pass) : credencialExistente.pass,
+        user: user ? encrypt(user) : existente.user,
+        pass: pass ? encrypt(pass) : existente.pass,
       },
     });
 
-    return res.json({
+    const userFinal = user || decrypt(existente.user);
+
+    res.json({
       success: true,
-      credencial: credencialAtualizada,
+      credencial: {
+        id: atualizado.id,
+        user: userFinal,
+        userMasked: maskUser(userFinal),
+      },
     });
 
   } catch (err) {
-    console.error("❌ Erro ao atualizar credencial:", err);
-    return res.status(500).json({ error: "Erro ao atualizar credencial" });
+    console.error("Erro ao atualizar credencial:", err);
+    res.status(500).json({ error: "Erro ao atualizar credencial" });
   }
 });
 
@@ -769,48 +816,40 @@ app.delete("/api/credenciais/:id", async (req, res) => {
       });
     }
 
-    const usuarioId = credencial.usuarioId;
-
     await prisma.credencial.delete({
       where: { id },
     });
 
-    const credenciaisRestantes = await prisma.credencial.count({
-      where: { usuarioId },
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: credencial.usuarioId },
+      include: { credenciais: true },
     });
 
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: usuarioId },
-    });
+    let etapa = 1;
 
     const perfilCompleto =
-      Boolean(usuario.nome) &&
-      Boolean(usuario.dataNascimento) &&
-      Boolean(usuario.telefone);
+      usuario.nome &&
+      usuario.telefone &&
+      usuario.dataNascimento;
 
-    let novaEtapa = 1;
-    if (perfilCompleto) novaEtapa = 2;
-    if (credenciaisRestantes > 0) novaEtapa = 3;
+    if (perfilCompleto) etapa = 2;
+    if (usuario.credenciais.length > 0) etapa = 3;
 
-    const usuarioAtualizado = await prisma.usuario.update({
-      where: { id: usuarioId },
-      data: { perfilEtapa: novaEtapa },
+    const atualizado = await prisma.usuario.update({
+      where: { id: credencial.usuarioId },
+      data: { perfilEtapa: etapa },
     });
 
-    return res.json({
+    res.json({
       success: true,
-      usuario: usuarioAtualizado,
-      credenciaisRestantes,
+      usuario: atualizado,
     });
+
   } catch (err) {
-    console.error("❌ Erro ao excluir credencial:", err);
-    return res.status(500).json({
-      error: "Erro interno ao excluir credencial",
-    });
+    console.error("Erro ao excluir:", err);
+    res.status(500).json({ error: "Erro ao excluir" });
   }
 });
-
-
 // ======================= PERFIL DO USUÁRIO =======================
 
 /**

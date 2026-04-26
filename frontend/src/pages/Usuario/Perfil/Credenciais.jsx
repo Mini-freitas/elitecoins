@@ -240,7 +240,7 @@ function Credenciais({ usuario, handleLogin }) {
               </InfoItem>
 
               {/* 🔒 segurança visual */}
-              <InfoItem>Login: {formatarLogin(cred.user)}</InfoItem>
+              <InfoItem>Login: {cred.userMasked}</InfoItem>
               <InfoItem>Senha: ••••••••</InfoItem>
 
               <ActionsRow>
