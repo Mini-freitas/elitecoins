@@ -232,6 +232,7 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
       <Footer
         usuario={usuarioNormalizado}
         handleLogout={handleLogout}
+        scrollToTop={scrollToTop}
       />
     </Perfilsec>
   );

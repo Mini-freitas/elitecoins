@@ -13,7 +13,7 @@ const Compra = ({ usuario, handleLogout }) => {
       <MyGlobalStyle />
       <HeaderPrincipal usuario={usuario} handleLogout={handleLogout} />
       <MainCompra usuario={usuario} />
-      <FooterCompra usuario={usuario} handleLogout={handleLogout} />
+      <FooterCompra usuario={usuario} handleLogout={handleLogout} scrollToTop={scrollToTop} />
     </>
   );
 }

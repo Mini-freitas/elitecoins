@@ -223,7 +223,7 @@ function Compras({ usuario, handleLogout }) {
         </GridCompras>
       </MainCompras>
 
-      <Footer usuario={usuario} handleLogout={handleLogout} />
+      <Footer usuario={usuario} handleLogout={handleLogout} scrollToTop={scrollToTop} />
     </Comprassec>
   );
 }

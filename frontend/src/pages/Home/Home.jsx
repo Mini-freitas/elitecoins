@@ -39,7 +39,7 @@ function Home({ usuario, handleLogout }) {
       <MyGlobalStyle />
       <HeaderPrincipal usuario={usuario} handleLogout={handleLogout} />
       <MainPrincipal />
-      <Footer usuario={usuario} handleLogout={handleLogout} />
+      <Footer usuario={usuario} handleLogout={handleLogout} scrollToTop={scrollToTop}/>
     </>
   );
 }
