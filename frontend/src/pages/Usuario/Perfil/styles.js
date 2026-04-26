@@ -188,3 +188,34 @@ export const WarningBox = styled.div`
   border-radius: 8px;
   font-size: 14px;
 `;
+
+/* ===============================
+   PROGRESSO (OBRIGATÓRIO PARA PERFIL)
+=============================== */
+
+export const ProgressWrapper = styled.div`
+  width: 100%;
+  margin: 1.5rem 0;
+`;
+
+export const ProgressBar = styled.div`
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+
+  span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #00b050, #00d65f);
+    transition: width 0.4s ease;
+  }
+`;
+
+export const ProgressStep = styled.span`
+  font-size: 0.8rem;
+  margin-right: 1rem;
+  color: ${({ $active }) => ($active ? "#00b050" : "#9e9e9e")};
+  font-weight: ${({ $active }) => ($active ? "600" : "400")};
+`;
