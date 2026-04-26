@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FormContainer, Input, Button } from "./styles";
+import { FormContainer, Input, Button, DeleteButton } from "./styles";
 
 function PerfilForm({ usuario, onSave }) {
   const [nome, setNome] = useState(usuario.nome || "");
@@ -79,13 +79,13 @@ function PerfilForm({ usuario, onSave }) {
         Salvar alterações
       </Button>
 
-      <Button
+      <DeleteButton
         type="button"
         variant="ghost"
         onClick={handleCancel}
       >
         Cancelar
-      </Button>
+      </DeleteButton>
     </FormContainer>
   );
 }
