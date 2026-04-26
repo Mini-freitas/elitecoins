@@ -29,6 +29,9 @@ function Credenciais({ usuario, handleLogin }) {
     pass: "",
   });
 
+  // ===============================
+  // BUSCAR
+  // ===============================
   const buscarCredenciais = async () => {
     try {
       const res = await api.get(`/credenciais/${usuario.id}`);
@@ -42,6 +45,9 @@ function Credenciais({ usuario, handleLogin }) {
     if (usuario?.id) buscarCredenciais();
   }, [usuario]);
 
+  // ===============================
+  // HANDLES
+  // ===============================
   const handleChangeNova = (e, campo) => {
     setNovaCredencial((prev) => ({
       ...prev,
@@ -56,6 +62,9 @@ function Credenciais({ usuario, handleLogin }) {
     }));
   };
 
+  // ===============================
+  // ADICIONAR
+  // ===============================
   const adicionar = async () => {
     if (!novaCredencial.user || !novaCredencial.pass) {
       alert("Preencha usuário e senha");
@@ -82,9 +91,17 @@ function Credenciais({ usuario, handleLogin }) {
     }
   };
 
+  // ===============================
+  // EDITAR
+  // ===============================
   const iniciarEdicao = (index) => {
     setEditIndex(index);
-    setEditCredencial({ user: "", pass: "" });
+
+    // 🔥 preenche com dados reais
+    setEditCredencial({
+      user: credenciais[index].user || "",
+      pass: credenciais[index].pass || "",
+    });
   };
 
   const atualizar = async (id) => {
@@ -109,6 +126,9 @@ function Credenciais({ usuario, handleLogin }) {
     }
   };
 
+  // ===============================
+  // EXCLUIR
+  // ===============================
   const excluir = async (id) => {
     if (!window.confirm("Excluir credencial?")) return;
 
@@ -126,6 +146,9 @@ function Credenciais({ usuario, handleLogin }) {
     }
   };
 
+  // ===============================
+  // RENDER
+  // ===============================
   return (
     <Container>
       <Header>
@@ -136,6 +159,7 @@ function Credenciais({ usuario, handleLogin }) {
         ⚠️ Informe o <strong>login e senha da sua conta FIFA</strong>.
       </WarningBox>
 
+      {/* FORM NOVA */}
       {credenciais.length < 1 && (
         <FormContainer>
           <Input
@@ -157,30 +181,34 @@ function Credenciais({ usuario, handleLogin }) {
         </FormContainer>
       )}
 
+      {/* LISTA */}
       {credenciais.map((cred, index) => (
         <Card key={cred.id}>
           {editIndex === index ? (
             <>
-              <Input
-                placeholder="Novo login"
-                value={editCredencial.user}
-                onChange={(e) => handleChangeEdit(e, "user")}
-              />
+              {/* INPUTS EM COLUNA */}
+              <FormContainer>
+                <Input
+                  placeholder="Novo login"
+                  value={editCredencial.user}
+                  onChange={(e) => handleChangeEdit(e, "user")}
+                />
 
-              <Input
-                type="password"
-                placeholder="Nova senha"
-                value={editCredencial.pass}
-                onChange={(e) => handleChangeEdit(e, "pass")}
-              />
+                <Input
+                  type="password"
+                  placeholder="Nova senha"
+                  value={editCredencial.pass}
+                  onChange={(e) => handleChangeEdit(e, "pass")}
+                />
 
-              <Button onClick={() => atualizar(cred.id)}>
-                Salvar
-              </Button>
+                <Button onClick={() => atualizar(cred.id)}>
+                  Salvar alterações
+                </Button>
 
-              <DeleteButton onClick={() => setEditIndex(-1)}>
-                Cancelar
-              </DeleteButton>
+                <DeleteButton onClick={() => setEditIndex(-1)}>
+                  Cancelar
+                </DeleteButton>
+              </FormContainer>
             </>
           ) : (
             <>
@@ -188,7 +216,9 @@ function Credenciais({ usuario, handleLogin }) {
                 <strong>Conta salva</strong>
               </InfoItem>
 
-              <InfoItem>Login: ********</InfoItem>
+              {/* 🔒 segurança visual */}
+              <InfoItem>Login: {cred.user}</InfoItem>
+              <InfoItem>Senha: ••••••••</InfoItem>
 
               <ActionsRow>
                 <EditButton onClick={() => iniciarEdicao(index)}>
