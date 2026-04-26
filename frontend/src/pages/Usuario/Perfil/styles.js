@@ -16,23 +16,17 @@ export const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
-
-  h3 {
-    margin: 0;
-  }
+  margin-bottom: 20px;
 `;
 
 export const InfoItem = styled.p`
-  font-size: 14px;
-  margin: 4px 0;
+  font-size: 16px;
 `;
 
 export const FormContainer = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 12px;
 `;
 
 export const Input = styled.input`
@@ -40,18 +34,13 @@ export const Input = styled.input`
   border-radius: 8px;
   border: 1px solid #ccc;
   font-size: 14px;
-  outline: none;
-
-  &:focus {
-    border-color: #00b050;
-  }
 `;
 
 export const Button = styled.button`
   background-color: #00b050;
   color: white;
   border: none;
-  padding: 10px;
+  padding: 12px;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
@@ -62,15 +51,15 @@ export const Button = styled.button`
 `;
 
 export const EditButton = styled.button`
-  margin-right: 8px;
   margin-top: 8px;
-  padding: 6px 10px;
-  border-radius: 6px;
+  margin-right: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
   background: #e0e0e0;
 
   &:hover {
-    opacity: 0.8;
+    opacity: 0.9;
   }
 `;
