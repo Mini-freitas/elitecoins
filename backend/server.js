@@ -683,20 +683,27 @@ app.get("/api/credenciais/:usuarioId", async (req, res) => {
     });
 
     const formatadas = credenciais.map((c) => {
-      const userDescriptografado = decrypt(c.user);
+      let userDescriptografado = "";
+
+      try {
+        userDescriptografado = decrypt(c.user);
+      } catch (err) {
+        console.log("❌ erro decrypt:", err);
+        userDescriptografado = "erro";
+      }
 
       return {
         id: c.id,
-        user: userDescriptografado, // 🔥 valor REAL (para edição)
-        userMasked: maskUser(userDescriptografado), // 🔒 valor para exibição
+        user: userDescriptografado,
+        userMasked: maskUser(userDescriptografado),
         createdAt: c.createdAt,
       };
     });
 
-    res.json(formatadas);
+    return res.json(formatadas);
   } catch (err) {
     console.error("Erro ao buscar credenciais:", err);
-    res.status(500).json({ error: "Erro ao buscar credenciais" });
+    return res.status(500).json({ error: "Erro ao buscar credenciais" });
   }
 });
 
