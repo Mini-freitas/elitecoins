@@ -146,6 +146,29 @@ function Credenciais({ usuario, handleLogin }) {
     }
   };
 
+  const formatarLogin = (login) => {
+  if (!login) return "";
+
+  // Se for email
+  if (login.includes("@")) {
+    const [nome, dominio] = login.split("@");
+
+    const nomeMask =
+      nome.length <= 3
+        ? nome[0] + "*".repeat(nome.length - 1)
+        : nome.slice(0, 3) + "*".repeat(nome.length - 3);
+
+    return `${nomeMask}@${dominio}`;
+  }
+
+  // Se for username normal
+  if (login.length <= 4) {
+    return login[0] + "*".repeat(login.length - 1);
+  }
+
+  return login.slice(0, 4) + "*".repeat(login.length - 4);
+};
+
   // ===============================
   // RENDER
   // ===============================
@@ -217,7 +240,7 @@ function Credenciais({ usuario, handleLogin }) {
               </InfoItem>
 
               {/* 🔒 segurança visual */}
-              <InfoItem>Login: {cred.user}</InfoItem>
+              <InfoItem>Login: {formatarLogin(cred.user)}</InfoItem>
               <InfoItem>Senha: ••••••••</InfoItem>
 
               <ActionsRow>
