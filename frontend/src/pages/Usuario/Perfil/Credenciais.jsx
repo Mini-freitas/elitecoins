@@ -173,11 +173,15 @@ function Credenciais({ usuario, handleLogin }) {
 
       {/* FORM NOVA */}
       {credenciais.length < 1 && (
-        <FormContainer>
+        <FormContainer
+          autoComplete="off"
+        >
           <Input
             placeholder="Login da conta FIFA"
             value={novaCredencial.user}
             onChange={(e) => handleChangeNova(e, "user")}
+            autoComplete="new-username"
+            name="fifa-user"
           />
 
           <Input
@@ -185,6 +189,8 @@ function Credenciais({ usuario, handleLogin }) {
             placeholder="Senha da conta FIFA"
             value={novaCredencial.pass}
             onChange={(e) => handleChangeNova(e, "pass")}
+            autoComplete="new-password"
+            name="fifa-pass"
           />
 
           <Button type="button" onClick={adicionar}>
