@@ -32,26 +32,23 @@ app.use(
 app.use(express.json());
 
 function calcularVouchers(usuario) {
-  let vouchers = 0;
+  let vouchers = 1; // conta criada sempre = 1
 
   const perfilCompleto =
     usuario.nome &&
     usuario.telefone &&
     usuario.dataNascimento;
 
-  const temCredencial = usuario.credenciais?.length > 0;
-
-  // 1. criação de conta/perfil
-  vouchers += 1;
-
-  // 2. perfil completo
   if (perfilCompleto) vouchers += 1;
 
-  // 3. credenciais
-  if (temCredencial) vouchers += 1;
+  if ((usuario.credenciais?.length || 0) > 0) {
+    vouchers += 1;
+  }
 
   return vouchers;
-}// ======================= CRYPTO CONFIG =======================
+}
+
+// ======================= CRYPTO CONFIG =======================
 const ALGORITHM = "aes-256-cbc";
 
 const SECRET_KEY = crypto
@@ -1356,30 +1353,11 @@ app.get("/api/me", async (req, res) => {
       return res.status(401).json({ error: "Sessão inválida" });
     }
 
-    // ===============================
-    // REGRA DE PERFIL COMPLETO
-    // ===============================
-    const perfilCompleto =
-      Boolean(usuario.nome) &&
-      Boolean(usuario.telefone) &&
-      Boolean(usuario.dataNascimento);
-
-    const temCredenciais = usuario.credenciais.length > 0;
-
-    // ===============================
-    // VOUCHERS (FONTE DA VERDADE)
-    // ===============================
-    const vouchersDisponiveis =
-      1 + // conta criada
-      (perfilCompleto ? 1 : 0) +
-      (temCredenciais ? 1 : 0);
+    const vouchersDisponiveis = calcularVouchers(usuario);
 
     return res.json({
       ...usuario,
-      credenciais: usuario.credenciais,
       vouchersDisponiveis,
-      perfilCompleto,
-      temCredenciais,
     });
 
   } catch (err) {
