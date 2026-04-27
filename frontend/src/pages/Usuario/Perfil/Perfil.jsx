@@ -21,6 +21,7 @@ import PerfilForm from "./PerfilForm";
 import HeaderPrincipal from "../../../components/Header/HeaderPrincipal";
 import Footer from "../../../components/Footer/Footer";
 import Credenciais from "./Credenciais";
+import VoucherStatus from "./VoucherStatus";
 
 function Perfil({ usuario, handleLogout, handleLogin }) {
   const [editando, setEditando] = useState(false);
@@ -52,22 +53,39 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
 
   // ===============================
   const usuarioNormalizado = useMemo(() => {
-    if (!usuario) return null;
+  if (!usuario) return null;
 
-    return {
-      id: usuario.id,
-      nome: usuario.nome || "",
-      email: usuario.email || "",
-      avatar: usuario.avatar || null,
-      dataNascimento: usuario.dataNascimento || "",
-      telefone: usuario.telefone || "",
-      tipo: usuario.tipo || "COMUM",
-      voucherAtivo: usuario.voucherAtivo,
-      voucherUsos: usuario.voucherUsos,
-      voucherMaxUsos: usuario.voucherMaxUsos,
-      perfilEtapa: usuario.perfilEtapa ?? 1,
-    };
-  }, [usuario]);
+  const perfilCompleto =
+    usuario.nome &&
+    usuario.telefone &&
+    usuario.dataNascimento;
+
+  const credenciaisCount = usuario.credenciais?.length || 0;
+
+  let vouchers = 0;
+
+  // 1 voucher base ao criar conta/perfil
+  vouchers = 1;
+
+  // +1 se perfil completo
+  if (perfilCompleto) vouchers += 1;
+
+  // +1 se tem credencial
+  if (credenciaisCount > 0) vouchers += 1;
+
+  return {
+    id: usuario.id,
+    nome: usuario.nome || "",
+    email: usuario.email || "",
+    avatar: usuario.avatar || null,
+    dataNascimento: usuario.dataNascimento || "",
+    telefone: usuario.telefone || "",
+    tipo: usuario.tipo || "COMUM",
+    perfilEtapa: usuario.perfilEtapa ?? 1,
+    credenciaisCount,
+    vouchersDisponiveis: vouchers,
+  };
+}, [usuario]);
 
   // ===============================
   const progresso = useMemo(() => {
@@ -160,8 +178,7 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
 
           {/* VOUCHERS */}
           <VoucherBox>
-            <strong>Vouchers disponíveis:</strong>{" "}
-            {vouchersDisponiveis}
+            <VoucherStatus usuario={usuarioNormalizado} />
           </VoucherBox>
 
           {!progresso.perfil && (

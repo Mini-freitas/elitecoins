@@ -1,6 +1,11 @@
+import React from "react";
+
 function VoucherStatus({ usuario }) {
-  const disponiveis =
-    usuario.perfilEtapa - (usuario.voucherUsos || 0);
+  if (!usuario) return null;
+
+  const vouchers =
+    usuario.vouchersDisponiveis ??
+    0;
 
   return (
     <div
@@ -15,8 +20,8 @@ function VoucherStatus({ usuario }) {
       <strong>Seus vouchers 🎁</strong>
 
       <p>
-        {disponiveis > 0
-          ? `Você tem ${disponiveis} voucher(s) disponível(is)`
+        {vouchers > 0
+          ? `Você tem ${vouchers} voucher(s) disponível(is)`
           : "Nenhum voucher disponível"}
       </p>
     </div>
