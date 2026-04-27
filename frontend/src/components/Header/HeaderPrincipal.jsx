@@ -5,7 +5,7 @@ import Ferramentas from '../Ferramentas/Ferramentas';
 
 const HeaderPrincipal = ({ usuario, handleLogout }) => {
     return (
-        <HeaderContainer>
+        <HeaderContainer id="titulo_menu">
             <Logo />
             <Ferramentas usuario={usuario} handleLogout={handleLogout} />
         </HeaderContainer>

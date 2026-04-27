@@ -8,23 +8,13 @@ import HeaderPrincipal from '../../components/Header/HeaderPrincipal';
 
 const Compra = ({ usuario, handleLogout }) => {
 
-  // ===============================
-  // SCROLL TO TOP (FALTAVA ISSO)
-  // ===============================
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
 
   return (
     <>
       <MyGlobalStyle />
       <HeaderPrincipal usuario={usuario} handleLogout={handleLogout} />
       <MainCompra usuario={usuario} />
-      <FooterCompra usuario={usuario} handleLogout={handleLogout} scrollToTop={scrollToTop} />
+      <FooterCompra usuario={usuario} handleLogout={handleLogout} />
     </>
   );
 }

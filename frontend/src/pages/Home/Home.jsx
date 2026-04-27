@@ -11,16 +11,6 @@ function Home({ usuario, handleLogout }) {
   const location = useLocation();
 
   // ===============================
-  // SCROLL TO TOP (FALTAVA ISSO)
-  // ===============================
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-  // ===============================
   // STATUS DO PAGAMENTO
   // ===============================
   useEffect(() => {
@@ -61,7 +51,6 @@ function Home({ usuario, handleLogout }) {
       <Footer
         usuario={usuario}
         handleLogout={handleLogout}
-        scrollToTop={scrollToTop}
       />
     </>
   );

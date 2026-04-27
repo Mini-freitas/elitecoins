@@ -29,16 +29,6 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
   const navigate = useNavigate();
 
   // ===============================
-  // SCROLL TO TOP (FALTAVA ISSO)
-  // ===============================
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-  // ===============================
   // LOAD USUARIO
   // ===============================
   useEffect(() => {
@@ -240,7 +230,6 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
       <Footer
         usuario={usuarioNormalizado}
         handleLogout={handleLogout}
-        scrollToTop={scrollToTop}
       />
     </Perfilsec>
   );

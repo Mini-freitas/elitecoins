@@ -48,7 +48,7 @@ const Slider = () => {
   }
 
   return (
-    <SliderContainer id="titulo_menu">
+    <SliderContainer>
       <Slides>
         {banners.map((banner, index) => (
           <Slide key={banner.id} style={{ display: activeSlide === index ? "block" : "none" }} >
