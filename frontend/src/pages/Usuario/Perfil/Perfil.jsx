@@ -172,6 +172,7 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
           {/* VOUCHERS (FONTE REAL = BACKEND) */}
           <VoucherBox>
             <VoucherStatus usuario={usuarioNormalizado} />
+            <PerfilProgresso etapa={usuarioNormalizado.perfilEtapa} />
           </VoucherBox>
 
           {/* CTA */}

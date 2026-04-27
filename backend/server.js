@@ -31,23 +31,9 @@ app.use(
 );
 app.use(express.json());
 
-function calcularVouchers(usuario) {
-  let vouchers = 1; // conta criada sempre = 1
-
-  const perfilCompleto =
-    usuario.nome &&
-    usuario.telefone &&
-    usuario.dataNascimento;
-
-  if (perfilCompleto) vouchers += 1;
-
-  if ((usuario.credenciais?.length || 0) > 0) {
-    vouchers += 1;
-  }
-
-  return vouchers;
+function calcularVouchersPorEtapa(etapa) {
+  return etapa || 1;
 }
-
 // ======================= CRYPTO CONFIG =======================
 const ALGORITHM = "aes-256-cbc";
 
@@ -1338,34 +1324,26 @@ app.get("/api/me", async (req, res) => {
   try {
     const userId = req.headers["x-user-id"];
 
-    if (!userId) {
-      return res.status(401).json({ error: "Não autenticado" });
-    }
-
     const usuario = await prisma.usuario.findUnique({
       where: { id: userId },
-      include: {
-        credenciais: true,
-      },
     });
 
     if (!usuario) {
-      return res.status(401).json({ error: "Sessão inválida" });
+      return res.status(401).json({ error: "Não autenticado" });
     }
 
-    const vouchersDisponiveis = calcularVouchers(usuario);
+    const etapa = usuario.perfilEtapa ?? 1;
 
     return res.json({
       ...usuario,
-      vouchersDisponiveis,
+      vouchersDisponiveis: calcularVouchersPorEtapa(etapa),
     });
 
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Erro ao validar sessão" });
+    return res.status(500).json({ error: "Erro" });
   }
 });
-
 // =========================
 // RETOMAR PAGAMENTO
 // =========================
