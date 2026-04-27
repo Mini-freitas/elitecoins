@@ -31,9 +31,23 @@ app.use(
 );
 app.use(express.json());
 
-function calcularVouchersPorEtapa(etapa) {
-  return etapa || 1;
+function calcularVouchers(usuario) {
+  const perfilCompleto =
+    usuario.nome &&
+    usuario.telefone &&
+    usuario.dataNascimento;
+
+  const temCredenciais =
+    (usuario.credenciais?.length || 0) > 0;
+
+  let vouchers = 1;
+
+  if (perfilCompleto) vouchers += 1;
+  if (temCredenciais) vouchers += 1;
+
+  return vouchers;
 }
+
 // ======================= CRYPTO CONFIG =======================
 const ALGORITHM = "aes-256-cbc";
 
@@ -1324,19 +1338,26 @@ app.get("/api/me", async (req, res) => {
   try {
     const userId = req.headers["x-user-id"];
 
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: userId },
-    });
-
-    if (!usuario) {
+    if (!userId) {
       return res.status(401).json({ error: "Não autenticado" });
     }
 
-    const etapa = usuario.perfilEtapa ?? 1;
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: userId },
+      include: {
+        credenciais: true, // 🔥 IMPORTANTE
+      },
+    });
+
+    if (!usuario) {
+      return res.status(401).json({ error: "Sessão inválida" });
+    }
+
+    const vouchersDisponiveis = calcularVouchers(usuario);
 
     return res.json({
       ...usuario,
-      vouchersDisponiveis: calcularVouchersPorEtapa(etapa),
+      vouchersDisponiveis,
     });
 
   } catch (err) {

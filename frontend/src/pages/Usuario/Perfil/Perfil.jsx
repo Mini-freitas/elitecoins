@@ -22,6 +22,7 @@ import HeaderPrincipal from "../../../components/Header/HeaderPrincipal";
 import Footer from "../../../components/Footer/Footer";
 import Credenciais from "./Credenciais";
 import VoucherStatus from "./VoucherStatus";
+import PerfilProgresso from "./PerfilProgresso";
 
 function Perfil({ usuario, handleLogout, handleLogin }) {
   const [editando, setEditando] = useState(false);
@@ -30,7 +31,7 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
   const navigate = useNavigate();
 
   // ===============================
-  // LOAD USUÁRIO LOCAL
+  // LOAD LOCAL
   // ===============================
   useEffect(() => {
     const usuarioSalvo = localStorage.getItem("usuario");
@@ -43,7 +44,7 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
   }, []);
 
   // ===============================
-  // PROTEÇÃO DE ROTA
+  // PROTEÇÃO
   // ===============================
   useEffect(() => {
     if (!loading && !usuario) {
@@ -52,29 +53,48 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
   }, [usuario, loading, navigate]);
 
   // ===============================
-  // NORMALIZAÇÃO DO USUÁRIO
+  // NORMALIZAÇÃO SEGURA
   // ===============================
   const usuarioNormalizado = useMemo(() => {
-  if (!usuario) return null;
+    if (!usuario) return null;
 
-  return {
-    id: usuario.id,
-    nome: usuario.nome || "",
-    email: usuario.email || "",
-    avatar: usuario.avatar || null,
-    telefone: usuario.telefone || "",
-    dataNascimento: usuario.dataNascimento || "",
-    tipo: usuario.tipo || "COMUM",
+    return {
+      ...usuario,
 
-    perfilEtapa: usuario.perfilEtapa ?? 1,
+      nome: usuario.nome || "",
+      email: usuario.email || "",
+      avatar: usuario.avatar || null,
+      telefone: usuario.telefone || "",
+      dataNascimento: usuario.dataNascimento || "",
+      tipo: usuario.tipo || "COMUM",
 
-    // 🔥 IMPORTANTE: vem do backend pronto
-    vouchersDisponiveis: usuario.vouchersDisponiveis ?? 1,
-  };
-}, [usuario]);
+      perfilEtapa: usuario.perfilEtapa ?? 1,
+
+      credenciais: usuario.credenciais || [],
+    };
+  }, [usuario]);
 
   // ===============================
-  // PROGRESSO (SÓ VISUAL, NÃO REGRA)
+  // VOUCHERS (REGRA ÚNICA E CONSISTENTE)
+  // ===============================
+  const vouchersDisponiveis = useMemo(() => {
+    if (!usuarioNormalizado) return 0;
+
+    let vouchers = 1; // conta criada
+
+    if (usuarioNormalizado.perfilEtapa >= 2) {
+      vouchers += 1; // perfil completo
+    }
+
+    if (usuarioNormalizado.perfilEtapa >= 3) {
+      vouchers += 1; // credenciais
+    }
+
+    return vouchers;
+  }, [usuarioNormalizado]);
+
+  // ===============================
+  // PROGRESSO UI
   // ===============================
   const progresso = useMemo(() => {
     if (!usuarioNormalizado) {
@@ -91,24 +111,24 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
       usuarioNormalizado.telefone &&
       usuarioNormalizado.dataNascimento;
 
-    const temCredenciais = usuarioNormalizado.credenciais.length > 0;
+    const temCredenciais = usuarioNormalizado.credenciais?.length > 0;
+
+    const etapas = [true, perfilCompleto, temCredenciais];
+
+    const completadas = etapas.filter(Boolean).length;
 
     return {
       conta: true,
       perfil: perfilCompleto,
       credenciais: temCredenciais,
-      percentual:
-        (1 +
-          (perfilCompleto ? 1 : 0) +
-          (temCredenciais ? 1 : 0)) *
-        33.3,
+      percentual: (completadas / 3) * 100,
     };
   }, [usuarioNormalizado]);
 
   if (loading || !usuarioNormalizado) return null;
 
   // ===============================
-  // SALVAR PERFIL
+  // SALVAR
   // ===============================
   const handleSave = async (dadosAtualizados) => {
     try {
@@ -125,10 +145,6 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
     }
   };
 
-  const handleCancelEdit = () => {
-    setEditando(false);
-  };
-
   return (
     <Perfilsec>
       <HeaderPrincipal
@@ -138,22 +154,20 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
 
       <Mainperfil>
         <Container>
-
-          {/* HEADER */}
           <Header>
             <h2>Meu Perfil</h2>
 
             <EditButton
               $cancel={editando}
               onClick={() =>
-                editando ? handleCancelEdit() : setEditando(true)
+                editando ? setEditando(false) : setEditando(true)
               }
             >
               {editando ? "Cancelar" : "Editar Perfil"}
             </EditButton>
           </Header>
 
-          {/* PROGRESSO VISUAL */}
+          {/* PROGRESSO */}
           <ProgressWrapper>
             <ProgressBar>
               <span style={{ width: `${progresso.percentual}%` }} />
@@ -172,9 +186,15 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
             </ProgressStep>
           </ProgressWrapper>
 
-          {/* VOUCHERS (FONTE REAL = BACKEND) */}
+          {/* VOUCHERS */}
           <VoucherBox>
-            <VoucherStatus usuario={usuarioNormalizado} />
+            <VoucherStatus
+              usuario={{
+                ...usuarioNormalizado,
+                vouchersDisponiveis,
+              }}
+            />
+
             <PerfilProgresso etapa={usuarioNormalizado.perfilEtapa} />
           </VoucherBox>
 
@@ -191,10 +211,7 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
 
           {/* CONTEÚDO */}
           {editando ? (
-            <PerfilForm
-              usuario={usuarioNormalizado}
-              onSave={handleSave}
-            />
+            <PerfilForm usuario={usuarioNormalizado} onSave={handleSave} />
           ) : (
             <>
               {usuarioNormalizado.avatar && (
@@ -240,10 +257,7 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
         />
       </Mainperfil>
 
-      <Footer
-        usuario={usuarioNormalizado}
-        handleLogout={handleLogout}
-      />
+      <Footer usuario={usuarioNormalizado} handleLogout={handleLogout} />
     </Perfilsec>
   );
 }
