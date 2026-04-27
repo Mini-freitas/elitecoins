@@ -55,20 +55,23 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
   // NORMALIZAÇÃO DO USUÁRIO
   // ===============================
   const usuarioNormalizado = useMemo(() => {
-    if (!usuario) return null;
+  if (!usuario) return null;
 
-    return {
-      id: usuario.id,
-      nome: usuario.nome || "",
-      email: usuario.email || "",
-      avatar: usuario.avatar || null,
-      dataNascimento: usuario.dataNascimento || "",
-      telefone: usuario.telefone || "",
-      tipo: usuario.tipo || "COMUM",
-      credenciais: usuario.credenciais || [],
-      vouchersDisponiveis: usuario.vouchersDisponiveis || 0,
-    };
-  }, [usuario]);
+  return {
+    id: usuario.id,
+    nome: usuario.nome || "",
+    email: usuario.email || "",
+    avatar: usuario.avatar || null,
+    telefone: usuario.telefone || "",
+    dataNascimento: usuario.dataNascimento || "",
+    tipo: usuario.tipo || "COMUM",
+
+    perfilEtapa: usuario.perfilEtapa ?? 1,
+
+    // 🔥 IMPORTANTE: vem do backend pronto
+    vouchersDisponiveis: usuario.vouchersDisponiveis ?? 1,
+  };
+}, [usuario]);
 
   // ===============================
   // PROGRESSO (SÓ VISUAL, NÃO REGRA)
