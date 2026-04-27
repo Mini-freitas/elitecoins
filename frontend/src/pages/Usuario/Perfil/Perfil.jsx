@@ -9,9 +9,6 @@ import {
   Header,
   InfoItem,
   EditButton,
-  ProgressWrapper,
-  ProgressBar,
-  ProgressStep,
   VoucherBox,
   CtaBox,
   CompleteProfileButton,
@@ -60,7 +57,6 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
 
     return {
       ...usuario,
-
       nome: usuario.nome || "",
       email: usuario.email || "",
       avatar: usuario.avatar || null,
@@ -68,42 +64,18 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
       dataNascimento: usuario.dataNascimento || "",
       tipo: usuario.tipo || "COMUM",
 
-      perfilEtapa: usuario.perfilEtapa ?? 1,
+      perfilEtapa: Number(usuario.perfilEtapa || 1),
 
       credenciais: usuario.credenciais || [],
     };
   }, [usuario]);
 
   // ===============================
-  // VOUCHERS (REGRA ÚNICA E CONSISTENTE)
-  // ===============================
-  const vouchersDisponiveis = useMemo(() => {
-    if (!usuarioNormalizado) return 0;
-
-    let vouchers = 1; // conta criada
-
-    if (usuarioNormalizado.perfilEtapa >= 2) {
-      vouchers += 1; // perfil completo
-    }
-
-    if (usuarioNormalizado.perfilEtapa >= 3) {
-      vouchers += 1; // credenciais
-    }
-
-    return vouchers;
-  }, [usuarioNormalizado]);
-
-  // ===============================
   // PROGRESSO UI
   // ===============================
   const progresso = useMemo(() => {
     if (!usuarioNormalizado) {
-      return {
-        conta: false,
-        perfil: false,
-        credenciais: false,
-        percentual: 0,
-      };
+      return { perfil: false };
     }
 
     const perfilCompleto =
@@ -111,24 +83,32 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
       usuarioNormalizado.telefone &&
       usuarioNormalizado.dataNascimento;
 
-    const temCredenciais = usuarioNormalizado.credenciais?.length > 0;
-
-    const etapas = [true, perfilCompleto, temCredenciais];
-
-    const completadas = etapas.filter(Boolean).length;
+    const temCredenciais = usuarioNormalizado.credenciais.length > 0;
 
     return {
-      conta: true,
       perfil: perfilCompleto,
       credenciais: temCredenciais,
-      percentual: (completadas / 3) * 100,
     };
+  }, [usuarioNormalizado]);
+
+  // ===============================
+  // VOUCHERS (REGRA ÚNICA)
+  // ===============================
+  const vouchersDisponiveis = useMemo(() => {
+    if (!usuarioNormalizado) return 0;
+
+    let vouchers = 1; // conta criada
+
+    if (usuarioNormalizado.perfilEtapa >= 2) vouchers += 1;
+    if (usuarioNormalizado.perfilEtapa >= 3) vouchers += 1;
+
+    return vouchers;
   }, [usuarioNormalizado]);
 
   if (loading || !usuarioNormalizado) return null;
 
   // ===============================
-  // SALVAR
+  // SALVAR PERFIL
   // ===============================
   const handleSave = async (dadosAtualizados) => {
     try {
@@ -154,37 +134,21 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
 
       <Mainperfil>
         <Container>
+
+          {/* HEADER */}
           <Header>
             <h2>Meu Perfil</h2>
 
             <EditButton
               $cancel={editando}
-              onClick={() =>
-                editando ? setEditando(false) : setEditando(true)
-              }
+              onClick={() => setEditando(!editando)}
             >
               {editando ? "Cancelar" : "Editar Perfil"}
             </EditButton>
           </Header>
 
-          {/* PROGRESSO */}
-          <ProgressWrapper>
-            <ProgressBar>
-              <span style={{ width: `${progresso.percentual}%` }} />
-            </ProgressBar>
-
-            <ProgressStep $active={progresso.conta}>
-              Conta criada
-            </ProgressStep>
-
-            <ProgressStep $active={progresso.perfil}>
-              Perfil completo
-            </ProgressStep>
-
-            <ProgressStep $active={progresso.credenciais}>
-              Credenciais
-            </ProgressStep>
-          </ProgressWrapper>
+          {/* PROGRESSO (ÚNICO) */}
+          <PerfilProgresso etapa={usuarioNormalizado.perfilEtapa} />
 
           {/* VOUCHERS */}
           <VoucherBox>
@@ -194,8 +158,6 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
                 vouchersDisponiveis,
               }}
             />
-
-            <PerfilProgresso etapa={usuarioNormalizado.perfilEtapa} />
           </VoucherBox>
 
           {/* CTA */}
@@ -211,7 +173,10 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
 
           {/* CONTEÚDO */}
           {editando ? (
-            <PerfilForm usuario={usuarioNormalizado} onSave={handleSave} />
+            <PerfilForm
+              usuario={usuarioNormalizado}
+              onSave={handleSave}
+            />
           ) : (
             <>
               {usuarioNormalizado.avatar && (
@@ -257,7 +222,10 @@ function Perfil({ usuario, handleLogout, handleLogin }) {
         />
       </Mainperfil>
 
-      <Footer usuario={usuarioNormalizado} handleLogout={handleLogout} />
+      <Footer
+        usuario={usuarioNormalizado}
+        handleLogout={handleLogout}
+      />
     </Perfilsec>
   );
 }
